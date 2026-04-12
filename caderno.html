@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Caderno — MedQuest Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#0d1117;--surface:#161b22;--border:#21262d;--accent:#3b82f6;--text:#e6edf3;--muted:#7d8590;--success:#3fb950;--danger:#f85149;--warning:#d29922}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);margin-left:16rem}
+        @media(max-width:768px){body{margin-left:0}}
+        .main{padding:2.5rem;max-width:900px}
+        .page-header{margin-bottom:2rem}
+        .page-header h1{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:700}
+        .page-header p{color:var(--muted);margin-top:.3rem}
+        .loading{text-align:center;padding:3rem;color:var(--muted)}
+        .questao-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem;margin-bottom:1.5rem}
+        .questao-meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+        .badge{padding:.25rem .65rem;border-radius:20px;font-size:.75rem;font-weight:500}
+        .badge-tema{background:rgba(59,130,246,.15);color:var(--accent)}
+        .badge-facil{background:rgba(63,185,80,.15);color:var(--success)}
+        .badge-media{background:rgba(210,153,34,.15);color:#d29922}
+        .badge-dificil{background:rgba(248,81,73,.15);color:var(--danger)}
+        .questao-pergunta{font-size:1rem;line-height:1.7;margin-bottom:1.25rem;font-weight:500}
+        .opcao{display:flex;align-items:flex-start;gap:.75rem;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem;cursor:pointer;transition:all .15s}
+        .opcao:hover{border-color:#444}
+        .opcao.correta{border-color:var(--success);background:rgba(63,185,80,.08)}
+        .opcao.errada{border-color:var(--danger);background:rgba(248,81,73,.08)}
+        .opcao-letra{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;flex-shrink:0;margin-top:1px}
+        .opcao.correta .opcao-letra{background:var(--success);border-color:var(--success);color:#000}
+        .opcao.errada .opcao-letra{background:var(--danger);border-color:var(--danger);color:#fff}
+        .gabarito-box{margin-top:1.25rem;padding:1rem 1.25rem;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:10px;font-size:.9rem;line-height:1.7;display:none}
+        .gabarito-box strong{color:var(--accent);display:block;margin-bottom:.4rem}
+        .questao-actions{display:flex;gap:.75rem;margin-top:1.25rem}
+        .btn-remover{padding:.45rem .9rem;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.85rem;cursor:pointer;transition:all .15s}
+        .btn-remover:hover{border-color:var(--danger);color:var(--danger)}
+        .vazio{text-align:center;padding:4rem 2rem;color:var(--muted)}
+        .vazio a{color:var(--accent);text-decoration:none}
+    </style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+<script src="js/auth.js"></script>
+<main class="main">
+    <div class="page-header">
+        <h1>Meu Caderno ★</h1>
+        <p id="subtitulo">Suas questões favoritadas.</p>
+    </div>
+    <div id="lista"></div>
+</main>
+<script>
+let sessaoAtual = null;
+
+window.addEventListener('load', async () => {
+    const session = await exigirLogin();
+    if (!session) return;
+    sessaoAtual = session;
+
+    const sb = window.supabaseClient;
+    const uid = session.user.id;
+
+    const { data: favs } = await sb
+        .from('favoritos')
+        .select('questao_id, questoes(*)')
+        .eq('user_id', uid)
+        .order('criado_em', { ascending: false });
+
+    const lista = document.getElementById('lista');
+
+    if (!favs || favs.length === 0) {
+        lista.innerHTML = '<div class="vazio">Você ainda não favoritou nenhuma questão.<br><br><a href="questoes.html">Ir para as questões →</a></div>';
+        return;
+    }
+
+    document.getElementById('subtitulo').textContent = `${favs.length} questão${favs.length > 1 ? 'ões' : ''} salva${favs.length > 1 ? 's' : ''}.`;
+    lista.innerHTML = favs.map(f => renderQuestao(f.questoes)).join('');
+});
+
+function renderQuestao(q) {
+    if (!q) return '';
+    let opcoes = q.opcoes;
+    if (typeof opcoes === 'string') { try { opcoes = JSON.parse(opcoes); } catch { opcoes = opcoes.split(',').map(s => s.trim()); } }
+    const letras = ['A','B','C','D','E'];
+    const difClass = { facil:'badge-facil', media:'badge-media', dificil:'badge-dificil' }[q.dificuldade] || 'badge-media';
+
+    const opcoesHTML = opcoes.map((op, i) => `
+        <div class="opcao" id="op-${q.id}-${i}" onclick="responder(${q.id}, ${i}, ${q.resposta}, this)">
+            <div class="opcao-letra">${letras[i]}</div><div>${op}</div>
+        </div>`).join('');
+
+    return `
+        <div class="questao-card" id="card-${q.id}">
+            <div class="questao-meta">
+                ${q.tema ? `<span class="badge badge-tema">${q.tema}</span>` : ''}
+                <span class="badge ${difClass}">${q.dificuldade || 'Média'}</span>
+                ${q.banca ? `<span class="badge" style="background:var(--border);color:var(--muted)">${q.banca} ${q.ano||''}</span>` : ''}
+            </div>
+            <div class="questao-pergunta">${q.pergunta}</div>
+            <div id="opcoes-${q.id}">${opcoesHTML}</div>
+            ${q.comentario ? `<div class="gabarito-box" id="gabarito-${q.id}"><strong>Gabarito comentado</strong>${q.comentario}</div>` : ''}
+            <div class="questao-actions">
+                <button class="btn-remover" onclick="removerFavorito(${q.id}, this)">✕ Remover do caderno</button>
+            </div>
+        </div>`;
+}
+
+function responder(qId, opcaoIdx, respostaCorreta, el) {
+    const card = document.getElementById(`card-${qId}`);
+    if (card.classList.contains('respondida')) return;
+    card.classList.add('respondida');
+    const opcoes = card.querySelectorAll('.opcao');
+    opcoes.forEach((op, i) => {
+        op.style.pointerEvents = 'none';
+        if (i === respostaCorreta) op.classList.add('correta');
+        else if (i === opcaoIdx && opcaoIdx !== respostaCorreta) op.classList.add('errada');
+    });
+    const gabarito = document.getElementById(`gabarito-${qId}`);
+    if (gabarito) gabarito.style.display = 'block';
+}
+
+async function removerFavorito(qId, btn) {
+    const sb = window.supabaseClient;
+    await sb.from('favoritos').delete().eq('user_id', sessaoAtual.user.id).eq('questao_id', qId);
+    const card = document.getElementById(`card-${qId}`);
+    card.style.opacity = '0'; card.style.transition = 'opacity .3s';
+    setTimeout(() => card.remove(), 300);
+}
+</script>
+</body>
+</html>

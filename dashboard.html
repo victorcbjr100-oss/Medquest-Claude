@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — MedQuest Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --bg:#0d1117;--surface:#161b22;--border:#21262d;--accent:#3b82f6;--text:#e6edf3;--muted:#7d8590;--success:#3fb950; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); margin-left:16rem; }
+        @media(max-width:768px){body{margin-left:0}}
+        .main{padding:2.5rem;max-width:1000px}
+        .page-header{margin-bottom:2.5rem}
+        .page-header h1{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:700}
+        .page-header p{color:var(--muted);margin-top:.3rem}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+        @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem}
+        .stat-card .label{font-size:.78rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+        .stat-card .value{font-family:'Sora',sans-serif;font-size:2rem;font-weight:700}
+        .stat-card .value.blue{color:var(--accent)}.stat-card .value.green{color:var(--success)}
+        .cards-row{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:2rem}
+        @media(max-width:768px){.cards-row{grid-template-columns:1fr}}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.75rem}
+        .card h3{font-family:'Sora',sans-serif;font-size:1rem;font-weight:600;margin-bottom:1.25rem}
+        .tema-row{margin-bottom:1rem}
+        .tema-header{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.35rem}
+        .tema-header span:last-child{color:var(--muted)}
+        .progress-bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+        .progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .5s ease}
+        .quick-actions{display:grid;gap:.75rem}
+        .quick-btn{display:flex;align-items:center;gap:.75rem;padding:.9rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s}
+        .quick-btn:hover{border-color:var(--accent);color:var(--accent)}
+    </style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+<script src="js/auth.js"></script>
+<main class="main">
+    <div class="page-header">
+        <h1 id="saudacao">Olá! 👋</h1>
+        <p>Acompanhe seu progresso e continue estudando.</p>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="label">Banco de questões</div><div class="value" id="stat-banco">—</div></div>
+        <div class="stat-card"><div class="label">Respondidas</div><div class="value blue" id="stat-respondidas">0</div></div>
+        <div class="stat-card"><div class="label">Taxa de acerto</div><div class="value green" id="stat-taxa">0%</div></div>
+        <div class="stat-card"><div class="label">Acertos totais</div><div class="value green" id="stat-acertos">0</div></div>
+    </div>
+    <div class="cards-row">
+        <div class="card">
+            <h3>Desempenho por tema</h3>
+            <div id="temas-container"><p style="color:var(--muted);font-size:.9rem">Responda questões para ver seu progresso por tema.</p></div>
+        </div>
+        <div class="card">
+            <h3>Acesso rápido</h3>
+            <div class="quick-actions">
+                <a href="questoes.html" class="quick-btn"><span>✎</span> Praticar questões</a>
+                <a href="simulado.html" class="quick-btn"><span>⏱</span> Iniciar simulado</a>
+                <a href="caderno.html" class="quick-btn"><span>★</span> Meu caderno</a>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+window.addEventListener('load', async () => {
+    const session = await exigirLogin();
+    if (!session) return;
+    const sb = window.supabaseClient;
+    const uid = session.user.id;
+    const nome = session.user.user_metadata?.nome || session.user.email.split('@')[0];
+    document.getElementById('saudacao').textContent = `Olá, ${nome}! 👋`;
+
+    const { count: total } = await sb.from('questoes').select('*', { count:'exact', head:true });
+    document.getElementById('stat-banco').textContent = (total||0).toLocaleString('pt-BR');
+
+    const { data: detalhado } = await sb.from('respostas').select('acertou, questoes(tema)').eq('user_id', uid);
+    if (detalhado && detalhado.length > 0) {
+        const acertos = detalhado.filter(r => r.acertou).length;
+        document.getElementById('stat-respondidas').textContent = detalhado.length;
+        document.getElementById('stat-taxa').textContent = Math.round((acertos/detalhado.length)*100) + '%';
+        document.getElementById('stat-acertos').textContent = acertos;
+
+        const porTema = {};
+        detalhado.forEach(r => {
+            const tema = r.questoes?.tema || 'Outros';
+            if (!porTema[tema]) porTema[tema] = { total:0, acertos:0 };
+            porTema[tema].total++;
+            if (r.acertou) porTema[tema].acertos++;
+        });
+        const container = document.getElementById('temas-container');
+        container.innerHTML = '';
+        Object.entries(porTema).sort((a,b) => b[1].total - a[1].total).slice(0,6).forEach(([tema, d]) => {
+            const pct = Math.round((d.acertos/d.total)*100);
+            container.innerHTML += `<div class="tema-row"><div class="tema-header"><span>${tema}</span><span>${pct}% (${d.acertos}/${d.total})</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
+        });
+    }
+});
+</script>
+</body>
+</html>
