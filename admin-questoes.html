@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gerenciar Questões — Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:1.5rem;gap:0}
+    .admin-tab{padding:.65rem 1.25rem;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+    .admin-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+    .form-full{grid-column:1/-1}
+    .opcao-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.25rem}
+    .opcao-row{display:flex;gap:.5rem;align-items:center}
+    .opcao-letter{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;color:var(--text-secondary)}
+    /* Lista */
+    .q-row{display:flex;align-items:flex-start;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--border-light)}
+    .q-row:last-child{border-bottom:none}
+    .q-row-main{flex:1}
+    .q-row-enunciado{font-size:.875rem;line-height:1.5;color:var(--text);margin-bottom:.3rem}
+    .q-row-meta{font-size:.75rem;color:var(--text-muted)}
+    .q-row-actions{display:flex;gap:.4rem;flex-shrink:0}
+    .btn-edit{padding:.3rem .65rem;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:.78rem;cursor:pointer;transition:all .12s;font-family:'Inter',sans-serif}
+    .btn-edit:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-del{padding:.3rem .65rem;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:.78rem;cursor:pointer;transition:all .12s;font-family:'Inter',sans-serif}
+    .btn-del:hover{border-color:var(--red);color:var(--red);background:var(--red-light)}
+    .search-bar{display:flex;gap:.75rem;margin-bottom:1.25rem}
+    .search-bar input{flex:1;padding:.6rem .9rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:.875rem;outline:none}
+    .search-bar input:focus{border-color:var(--accent)}
+    .acesso-negado{text-align:center;padding:4rem;color:var(--text-secondary)}
+    .acesso-negado h2{color:var(--red);font-size:1.5rem;margin-bottom:.75rem}
+  </style>
+</head>
+<body>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+<main class="main-content" id="main" style="display:none">
+  <div class="page-header"><h1>Gerenciar Questões</h1><p>Adicione, edite e organize o banco de questões</p></div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="trocar('add',this)">+ Adicionar questão</button>
+    <button class="admin-tab" onclick="trocar('list',this)" id="tab-list">📋 Ver questões (<span id="total-q">0</span>)</button>
+  </div>
+
+  <!-- Formulário -->
+  <div id="aba-add">
+    <div class="card">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:1.5rem" id="form-titulo">Nova questão</h3>
+      <input type="hidden" id="edit-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group form-full" style="grid-column:1/-1"><label class="form-label">Enunciado da questão *</label><textarea class="form-textarea" id="f-pergunta" rows="5" placeholder="Digite o enunciado completo da questão..."></textarea></div>
+        <div class="form-group form-full" style="grid-column:1/-1">
+          <label class="form-label">Opções de resposta *</label>
+          <div class="opcao-grid">
+            <div class="opcao-row"><div class="opcao-letter">A</div><input class="form-input" id="op-0" placeholder="Opção A"></div>
+            <div class="opcao-row"><div class="opcao-letter">B</div><input class="form-input" id="op-1" placeholder="Opção B"></div>
+            <div class="opcao-row"><div class="opcao-letter">C</div><input class="form-input" id="op-2" placeholder="Opção C"></div>
+            <div class="opcao-row"><div class="opcao-letter">D</div><input class="form-input" id="op-3" placeholder="Opção D"></div>
+            <div class="opcao-row"><div class="opcao-letter">E</div><input class="form-input" id="op-4" placeholder="Opção E (opcional)"></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Resposta correta *</label>
+          <select class="form-select" id="f-resposta"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option><option value="4">E</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Dificuldade</label>
+          <select class="form-select" id="f-dif"><option value="facil">Fácil</option><option value="media" selected>Média</option><option value="dificil">Difícil</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Tema / Especialidade *</label><input class="form-input" id="f-tema" placeholder="ex: Cardiologia"></div>
+        <div class="form-group"><label class="form-label">Subtema</label><input class="form-input" id="f-subtema" placeholder="ex: Hipertensão Arterial"></div>
+        <div class="form-group"><label class="form-label">Banca</label><input class="form-input" id="f-banca" placeholder="ex: USP, FMUSP"></div>
+        <div class="form-group"><label class="form-label">Ano da prova</label><input class="form-input" type="number" id="f-ano" placeholder="ex: 2023"></div>
+        <div class="form-group form-full" style="grid-column:1/-1"><label class="form-label">Gabarito comentado</label><textarea class="form-textarea" id="f-coment" rows="4" placeholder="Explique a resposta correta de forma didática..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-top:.5rem">
+        <button class="btn btn-primary" style="padding:.7rem 2rem" id="btn-salvar" onclick="salvarQ()">Salvar questão</button>
+        <button class="btn btn-outline" id="btn-cancelar" style="display:none" onclick="cancelarEdit()">Cancelar</button>
+      </div>
+      <div class="alert" id="msg-form"></div>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <div id="aba-list" style="display:none">
+    <div class="search-bar">
+      <input type="text" id="busca" placeholder="Buscar por tema, banca ou trecho da questão..." oninput="buscar()">
+      <select class="form-select" style="width:auto" id="filtro-tema-list" onchange="buscar()"><option value="">Todos os temas</option></select>
+    </div>
+    <div class="card"><div id="lista-admin"><p style="color:var(--text-muted)">Carregando...</p></div></div>
+  </div>
+</main>
+<div id="acesso-negado" style="display:none;padding:2.5rem">
+  <div class="acesso-negado"><h2>Acesso negado</h2><p>Você precisa ser administrador para acessar esta página.</p></div>
+</div>
+
+<script>
+let todasQAdmin=[], filtroTemaAdmin='', buscaTexto='';
+
+window.addEventListener('load', async()=>{
+  const session=await exigirLogin(); if(!session) return;
+  const perfil=await getPerfil(session.user.id);
+  if(!perfil||perfil.role!=='admin'){document.getElementById('acesso-negado').style.display='block';return;}
+  document.getElementById('main').style.display='block';
+  await carregarQuestoes();
+});
+
+async function carregarQuestoes(){
+  const sb=window.supabaseClient;
+  const {data,count}=await sb.from('questoes').select('*',{count:'exact'}).order('id',{ascending:false});
+  todasQAdmin=data||[];
+  document.getElementById('total-q').textContent=count||0;
+  // Preenche filtro tema
+  const temas=[...new Set(todasQAdmin.map(q=>q.tema).filter(Boolean))].sort();
+  const sel=document.getElementById('filtro-tema-list');
+  sel.innerHTML='<option value="">Todos os temas</option>';
+  temas.forEach(t=>{const o=document.createElement('option');o.value=o.textContent=t;sel.appendChild(o);});
+  renderLista(todasQAdmin);
+}
+
+function buscar(){
+  buscaTexto=document.getElementById('busca').value.toLowerCase();
+  filtroTemaAdmin=document.getElementById('filtro-tema-list').value;
+  const filtradas=todasQAdmin.filter(q=>
+    (!filtroTemaAdmin||q.tema===filtroTemaAdmin)&&
+    (!buscaTexto||(q.pergunta?.toLowerCase().includes(buscaTexto)||q.tema?.toLowerCase().includes(buscaTexto)||q.banca?.toLowerCase().includes(buscaTexto)))
+  );
+  renderLista(filtradas);
+}
+
+function renderLista(qs){
+  const lista=document.getElementById('lista-admin');
+  if(!qs.length){lista.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:2rem">Nenhuma questão encontrada.</p>';return;}
+  lista.innerHTML=qs.map(q=>`<div class="q-row" id="qr-${q.id}">
+    <div class="q-row-main">
+      <div class="q-row-enunciado">${q.pergunta.substring(0,150)}${q.pergunta.length>150?'...':''}</div>
+      <div class="q-row-meta">${[q.tema,q.subtema,q.banca,q.ano,q.dificuldade].filter(Boolean).join(' · ')}</div>
+    </div>
+    <div class="q-row-actions">
+      <button class="btn-edit" onclick="editarQ(${q.id})">Editar</button>
+      <button class="btn-del" onclick="excluirQ(${q.id})">Excluir</button>
+    </div>
+  </div>`).join('');
+}
+
+function trocar(aba,btn){
+  document.getElementById('aba-add').style.display=aba==='add'?'block':'none';
+  document.getElementById('aba-list').style.display=aba==='list'?'block':'none';
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(aba==='list') renderLista(todasQAdmin);
+}
+
+async function salvarQ(){
+  const sb=window.supabaseClient;
+  const editId=document.getElementById('edit-id').value;
+  const pergunta=document.getElementById('f-pergunta').value.trim();
+  const tema=document.getElementById('f-tema').value.trim();
+  const opcoes=[0,1,2,3,4].map(i=>document.getElementById(`op-${i}`).value.trim()).filter(v=>v);
+  if(!pergunta||!tema||opcoes.length<2){showMsg('Preencha enunciado, tema e ao menos 2 opções.','error');return;}
+  const resposta=parseInt(document.getElementById('f-resposta').value);
+  if(resposta>=opcoes.length){showMsg('A resposta deve corresponder a uma opção preenchida.','error');return;}
+  const payload={pergunta,tema,opcoes,resposta,dificuldade:document.getElementById('f-dif').value,subtema:document.getElementById('f-subtema').value.trim()||null,banca:document.getElementById('f-banca').value.trim()||null,ano:parseInt(document.getElementById('f-ano').value)||null,comentario:document.getElementById('f-coment').value.trim()||null};
+  const btn=document.getElementById('btn-salvar');
+  btn.disabled=true;btn.textContent='Salvando...';
+  let err;
+  if(editId){const r=await sb.from('questoes').update(payload).eq('id',editId);err=r.error;}
+  else{const r=await sb.from('questoes').insert(payload);err=r.error;}
+  btn.disabled=false;btn.textContent='Salvar questão';
+  if(err){showMsg('Erro: '+err.message,'error');return;}
+  showMsg(editId?'Questão atualizada!':'Questão salva com sucesso!','success');
+  limparForm();
+  await carregarQuestoes();
+}
+
+function editarQ(id){
+  const q=todasQAdmin.find(q=>q.id===id); if(!q) return;
+  const ops=parseOpcoes(q.opcoes);
+  document.getElementById('edit-id').value=id;
+  document.getElementById('f-pergunta').value=q.pergunta||'';
+  document.getElementById('f-tema').value=q.tema||'';
+  document.getElementById('f-subtema').value=q.subtema||'';
+  document.getElementById('f-dif').value=q.dificuldade||'media';
+  document.getElementById('f-banca').value=q.banca||'';
+  document.getElementById('f-ano').value=q.ano||'';
+  document.getElementById('f-coment').value=q.comentario||'';
+  document.getElementById('f-resposta').value=q.resposta||0;
+  [0,1,2,3,4].forEach(i=>document.getElementById(`op-${i}`).value=ops[i]||'');
+  document.getElementById('form-titulo').textContent='Editar questão';
+  document.getElementById('btn-cancelar').style.display='inline-flex';
+  document.getElementById('aba-list').style.display='none';
+  document.getElementById('aba-add').style.display='block';
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.admin-tab').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function cancelarEdit(){limparForm();}
+
+function limparForm(){
+  document.getElementById('edit-id').value='';
+  ['f-pergunta','f-tema','f-subtema','f-banca','f-ano','f-coment',...[0,1,2,3,4].map(i=>`op-${i}`)].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-dif').value='media';
+  document.getElementById('f-resposta').value='0';
+  document.getElementById('form-titulo').textContent='Nova questão';
+  document.getElementById('btn-cancelar').style.display='none';
+}
+
+async function excluirQ(id){
+  if(!confirm('Excluir esta questão permanentemente?')) return;
+  const sb=window.supabaseClient;
+  await sb.from('questoes').delete().eq('id',id);
+  todasQAdmin=todasQAdmin.filter(q=>q.id!==id);
+  document.getElementById(`qr-${id}`)?.remove();
+  document.getElementById('total-q').textContent=todasQAdmin.length;
+}
+
+function showMsg(txt,tipo){
+  const el=document.getElementById('msg-form');
+  el.textContent=txt;el.className='alert show alert-'+tipo;
+  setTimeout(()=>el.className='alert',4000);
+}
+</script>
+</body>
+</html>

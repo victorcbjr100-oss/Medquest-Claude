@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Favoritas — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .questao-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+    .questao-meta{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+    .questao-enunciado{font-size:.95rem;line-height:1.75;color:var(--text);margin-bottom:1.1rem;font-weight:500}
+    .gabarito-box{margin-top:1rem;padding:1rem 1.25rem;background:var(--accent-light);border-left:4px solid var(--accent);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:.875rem;line-height:1.7;display:none}
+    .gabarito-box.show{display:block}
+    .gabarito-title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+    .questao-actions{display:flex;gap:.6rem;margin-top:1rem}
+    .btn-remover{padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text-secondary);font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;font-weight:500}
+    .btn-remover:hover{border-color:var(--red);color:var(--red);background:var(--red-light)}
+    .empty-state{text-align:center;padding:3rem;color:var(--text-muted)}
+  </style>
+</head>
+<body>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+<main class="main-content" id="main" style="display:none">
+  <div class="page-header"><h1>Favoritas ⭐</h1><p id="sub-fav">Suas questões favoritadas</p></div>
+  <div id="lista-favs"></div>
+</main>
+<script>
+let sessao=null;
+const LETRAS=['A','B','C','D','E'];
+window.addEventListener('load', async()=>{
+  sessao=await exigirLogin(); if(!sessao) return;
+  document.getElementById('main').style.display='block';
+  const sb=window.supabaseClient, uid=sessao.user.id;
+  const {data}=await sb.from('favoritos').select('questao_id,criado_em,questoes(*)').eq('user_id',uid).order('criado_em',{ascending:false});
+  const lista=document.getElementById('lista-favs');
+  if(!data||data.length===0){lista.innerHTML='<div class="empty-state">⭐<p>Nenhuma questão favoritada ainda.<br><a href="questoes.html" style="color:var(--accent)">Ir para as questões →</a></p></div>';return;}
+  document.getElementById('sub-fav').textContent=`${data.length} questão${data.length!==1?'ões':''} salva${data.length!==1?'s':''}`;
+  lista.innerHTML=data.map(f=>{
+    const q=f.questoes; if(!q) return '';
+    const ops=parseOpcoes(q.opcoes);
+    const difClass={facil:'badge-green',media:'badge-yellow',dificil:'badge-red'}[q.dificuldade]||'badge-gray';
+    const difLabel={facil:'Fácil',media:'Média',dificil:'Difícil'}[q.dificuldade]||'—';
+    return `<div class="questao-card" id="fc-${q.id}">
+      <div class="questao-meta">
+        ${q.tema?`<span class="badge badge-blue">${q.tema}</span>`:''}
+        ${q.subtema?`<span class="badge badge-gray">${q.subtema}</span>`:''}
+        <span class="badge ${difClass}">${difLabel}</span>
+      </div>
+      <div class="questao-enunciado">${q.pergunta}</div>
+      ${ops.map((op,i)=>`<div class="opcao-item" id="fop-${q.id}-${i}" onclick="resp(${q.id},${i},${q.resposta})"><div class="opcao-letra">${LETRAS[i]}</div><div style="font-size:.875rem;line-height:1.6">${op}</div></div>`).join('')}
+      ${q.comentario?`<div class="gabarito-box" id="fgab-${q.id}"><div class="gabarito-title">💡 Gabarito comentado</div>${q.comentario}</div>`:''}
+      <div class="questao-actions">
+        <button class="btn-remover" onclick="remover(${q.id},this)">✕ Remover dos favoritos</button>
+      </div>
+    </div>`;
+  }).join('');
+});
+function resp(qId,op,correta){
+  const card=document.getElementById(`fc-${qId}`);
+  if(card.dataset.r) return; card.dataset.r='1';
+  const acertou=op===correta;
+  document.querySelectorAll(`[id^="fop-${qId}-"]`).forEach((el,i)=>{
+    el.style.pointerEvents='none';
+    if(i===correta) el.classList.add('correta');
+    else if(i===op&&!acertou) el.classList.add('errada');
+  });
+  const g=document.getElementById(`fgab-${qId}`); if(g) g.classList.add('show');
+}
+async function remover(qId,btn){
+  const sb=window.supabaseClient;
+  await sb.from('favoritos').delete().eq('user_id',sessao.user.id).eq('questao_id',qId);
+  const c=document.getElementById(`fc-${qId}`);
+  c.style.opacity='0';c.style.transition='opacity .3s';
+  setTimeout(()=>c.remove(),300);
+}
+</script>
+</body>
+</html>

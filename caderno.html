@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Meu Caderno — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .caderno-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:1.5rem;gap:0}
+    .caderno-tab{padding:.65rem 1.25rem;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+    .caderno-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+    .questao-saved{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow);transition:box-shadow .15s}
+    .questao-saved:hover{box-shadow:var(--shadow-md)}
+    .qs-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
+    .qs-texto{font-size:.9rem;line-height:1.7;color:var(--text);margin-bottom:.75rem;cursor:pointer}
+    .qs-footer{display:flex;justify-content:space-between;align-items:center}
+    .qs-data{font-size:.75rem;color:var(--text-muted)}
+    .btn-remover{background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:.3rem;border-radius:4px;transition:color .12s;line-height:1}
+    .btn-remover:hover{color:var(--red)}
+    /* Anotações */
+    .nota-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+    .nota-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem}
+    .nota-titulo{font-weight:600;font-size:.95rem}
+    .nota-texto{font-size:.875rem;line-height:1.7;color:var(--text-secondary);white-space:pre-wrap}
+    .nota-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+    .nota-form h3{font-size:.95rem;font-weight:700;margin-bottom:1rem}
+    .empty-state{text-align:center;padding:3rem;color:var(--text-muted)}
+    .empty-state p{margin-top:.5rem;font-size:.9rem}
+  </style>
+</head>
+<body>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+
+<main class="main-content" id="main" style="display:none">
+  <div class="page-header" style="display:flex;align-items:center;gap:.75rem">
+    <span style="font-size:1.5rem">📓</span>
+    <div><h1>Meu Caderno</h1><p>Questões salvas e anotações pessoais</p></div>
+  </div>
+
+  <div class="caderno-tabs">
+    <button class="caderno-tab active" onclick="trocarAba('questoes',this)">📚 Questões Salvas (<span id="count-q">0</span>)</button>
+    <button class="caderno-tab" onclick="trocarAba('notas',this)">📝 Anotações (<span id="count-n">0</span>)</button>
+  </div>
+
+  <!-- Questões salvas -->
+  <div id="aba-questoes">
+    <div id="lista-salvas"><div class="empty-state">⏳<p>Carregando...</p></div></div>
+  </div>
+
+  <!-- Anotações -->
+  <div id="aba-notas" style="display:none">
+    <div class="nota-form">
+      <h3>Nova anotação</h3>
+      <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="nota-titulo" placeholder="Ex: Revisão de Cardiologia"></div>
+      <div class="form-group"><label class="form-label">Conteúdo</label><textarea class="form-textarea" id="nota-texto" placeholder="Escreva sua anotação..."></textarea></div>
+      <button class="btn btn-primary" onclick="salvarNota()">Salvar anotação</button>
+      <div class="alert" id="msg-nota"></div>
+    </div>
+    <div id="lista-notas"></div>
+  </div>
+</main>
+
+<script>
+let sessao=null;
+
+window.addEventListener('load', async()=>{
+  sessao=await exigirLogin(); if(!sessao) return;
+  document.getElementById('main').style.display='block';
+  carregarQuestoes();
+  carregarNotas();
+});
+
+function trocarAba(aba, btn){
+  document.getElementById('aba-questoes').style.display=aba==='questoes'?'block':'none';
+  document.getElementById('aba-notas').style.display=aba==='notas'?'block':'none';
+  document.querySelectorAll('.caderno-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function carregarQuestoes(){
+  const sb=window.supabaseClient, uid=sessao.user.id;
+  const {data}=await sb.from('favoritos').select('criado_em, questoes(id,pergunta,tema,subtema,banca,ano)').eq('user_id',uid).order('criado_em',{ascending:false});
+  const lista=document.getElementById('lista-salvas');
+  document.getElementById('count-q').textContent=data?.length||0;
+  if(!data||data.length===0){lista.innerHTML='<div class="empty-state">⭐<p>Você ainda não salvou nenhuma questão.<br>Clique em "Favoritar" nas questões para adicioná-las aqui.</p></div>';return;}
+  lista.innerHTML=data.map(f=>{
+    const q=f.questoes; if(!q) return '';
+    const trecho=q.pergunta.length>250?q.pergunta.substring(0,250)+'...':q.pergunta;
+    return `<div class="questao-saved">
+      <div class="qs-badges">
+        ${q.tema?`<span class="badge badge-blue">${q.tema}</span>`:''}
+        ${q.subtema?`<span class="badge badge-gray">${q.subtema}</span>`:''}
+        ${q.banca?`<span class="badge badge-gray">${q.banca}${q.ano?' '+q.ano:''}</span>`:''}
+      </div>
+      <div class="qs-texto" onclick="window.location.href='questoes.html?tema=${encodeURIComponent(q.tema||'')}&busca=${q.id}'">${trecho}</div>
+      <div class="qs-footer">
+        <span class="qs-data">Adicionada em ${new Date(f.criado_em).toLocaleDateString('pt-BR')}</span>
+        <button class="btn-remover" onclick="removerFav(${q.id},this)" title="Remover">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function removerFav(qId, btn){
+  const sb=window.supabaseClient;
+  await sb.from('favoritos').delete().eq('user_id',sessao.user.id).eq('questao_id',qId);
+  const card=btn.closest('.questao-saved');
+  card.style.opacity='0'; card.style.transition='opacity .3s';
+  setTimeout(()=>{card.remove();const c=document.getElementById('count-q');c.textContent=parseInt(c.textContent)-1;},300);
+}
+
+async function carregarNotas(){
+  const sb=window.supabaseClient, uid=sessao.user.id;
+  const {data}=await sb.from('anotacoes').select('*').eq('user_id',uid).order('criado_em',{ascending:false});
+  document.getElementById('count-n').textContent=data?.length||0;
+  const lista=document.getElementById('lista-notas');
+  if(!data||data.length===0){lista.innerHTML='<div class="empty-state">📝<p>Nenhuma anotação ainda. Crie uma acima!</p></div>';return;}
+  lista.innerHTML=data.map(n=>`<div class="nota-card" id="nota-${n.id}">
+    <div class="nota-header">
+      <div class="nota-titulo">${n.titulo||'Sem título'}</div>
+      <button class="btn-remover" onclick="excluirNota(${n.id})" title="Excluir">🗑️</button>
+    </div>
+    <div class="nota-texto">${n.texto}</div>
+    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.75rem">${new Date(n.criado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+  </div>`).join('');
+}
+
+async function salvarNota(){
+  const sb=window.supabaseClient;
+  const titulo=document.getElementById('nota-titulo').value.trim();
+  const texto=document.getElementById('nota-texto').value.trim();
+  if(!texto){const el=document.getElementById('msg-nota');el.textContent='Escreva o conteúdo da anotação.';el.className='alert show alert-error';return;}
+  await sb.from('anotacoes').insert({user_id:sessao.user.id,titulo,texto});
+  document.getElementById('nota-titulo').value='';
+  document.getElementById('nota-texto').value='';
+  const el=document.getElementById('msg-nota');el.textContent='Anotação salva!';el.className='alert show alert-success';
+  setTimeout(()=>el.className='alert',2000);
+  carregarNotas();
+}
+
+async function excluirNota(id){
+  const sb=window.supabaseClient;
+  await sb.from('anotacoes').delete().eq('id',id);
+  const el=document.getElementById(`nota-${id}`);
+  el.style.opacity='0';el.style.transition='opacity .3s';
+  setTimeout(()=>{el.remove();const c=document.getElementById('count-n');c.textContent=parseInt(c.textContent)-1;},300);
+}
+</script>
+</body>
+</html>

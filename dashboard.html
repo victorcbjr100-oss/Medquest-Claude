@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Página Inicial — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+
+<main class="main-content" id="main" style="display:none">
+  <div class="page-header">
+    <h1 id="saudacao">Olá! 👋</h1>
+    <p>Continue seus estudos médicos e acompanhe seu progresso</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div><div class="stat-card-label">Total de Questões</div><div class="stat-card-value" id="s-total">—</div></div>
+      <div class="stat-card-icon icon-blue">📚</div>
+    </div>
+    <div class="stat-card">
+      <div><div class="stat-card-label">Respondidas</div><div class="stat-card-value" id="s-respondidas">0</div></div>
+      <div class="stat-card-icon icon-green">🎯</div>
+    </div>
+    <div class="stat-card">
+      <div><div class="stat-card-label">Taxa de Acerto</div><div class="stat-card-value" id="s-taxa" style="color:var(--accent)">0%</div></div>
+      <div class="stat-card-icon icon-blue">📈</div>
+    </div>
+    <div class="stat-card">
+      <div><div class="stat-card-label">Favoritas</div><div class="stat-card-value" id="s-favs">0</div></div>
+      <div class="stat-card-icon icon-yellow">⭐</div>
+    </div>
+  </div>
+
+  <!-- Action cards -->
+  <div class="action-cards">
+    <a href="temas.html" class="action-card blue">
+      <div>
+        <div class="action-card-title">Estudar por Temas</div>
+        <div class="action-card-sub">Pratique por especialidade</div>
+        <div class="action-card-link">Começar agora →</div>
+      </div>
+      <div class="action-card-icon-wrap">📖</div>
+    </a>
+    <a href="simulado.html" class="action-card green">
+      <div>
+        <div class="action-card-title">Fazer Simulado</div>
+        <div class="action-card-sub">Teste cronometrado</div>
+        <div class="action-card-link">Iniciar simulado →</div>
+      </div>
+      <div class="action-card-icon-wrap">⏱️</div>
+    </a>
+    <a href="estatisticas.html" class="action-card purple">
+      <div>
+        <div class="action-card-title">Ver Estatísticas</div>
+        <div class="action-card-sub">Acompanhe seu progresso</div>
+        <div class="action-card-link">Ver →</div>
+      </div>
+      <div class="action-card-icon-wrap">📊</div>
+    </a>
+  </div>
+
+  <!-- Resumo da Performance -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem">
+      <span style="font-size:1.1rem">🏅</span>
+      <h2 style="font-size:1rem;font-weight:700">Resumo da Performance</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-bottom:1.25rem">
+      <div style="text-align:center">
+        <div style="font-size:2rem;font-weight:800" id="r-taxa">0%</div>
+        <div style="font-size:.8rem;color:var(--text-secondary)">Taxa de Acerto Geral</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:2rem;font-weight:800" id="r-resp">0</div>
+        <div style="font-size:.8rem;color:var(--text-secondary)">Questões Respondidas</div>
+        <div style="font-size:.78rem;color:var(--text-muted)" id="r-pct">0% do total</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:2rem;font-weight:800" id="r-favs">0</div>
+        <div style="font-size:.8rem;color:var(--text-secondary)">Questões Favoritas</div>
+        <a href="favoritas.html" style="font-size:.78rem;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:.3rem">⭐ Ver Favoritas</a>
+      </div>
+    </div>
+    <div style="margin-top:.5rem">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-secondary);margin-bottom:.4rem">
+        <span>Progresso geral</span><span id="r-pct2">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-green" id="bar-prog" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Desempenho por tema -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <h2 style="font-size:1rem;font-weight:700">Desempenho por Tema</h2>
+      <a href="estatisticas.html" style="font-size:.82rem;color:var(--accent);text-decoration:none">Ver tudo →</a>
+    </div>
+    <div id="temas-perf"><p style="color:var(--text-muted);font-size:.875rem">Responda questões para ver seu desempenho por tema.</p></div>
+  </div>
+</main>
+
+<script>
+window.addEventListener('load', async () => {
+  const session = await exigirLogin(); if(!session) return;
+  document.getElementById('main').style.display='block';
+  const sb = window.supabaseClient, uid = session.user.id;
+  const nome = session.user.user_metadata?.nome || session.user.email.split('@')[0];
+  document.getElementById('saudacao').textContent = `Olá, ${nome}! 👋`;
+
+  // Total banco
+  const {count:total} = await sb.from('questoes').select('*',{count:'exact',head:true});
+  document.getElementById('s-total').textContent = (total||0).toLocaleString('pt-BR');
+
+  // Total favoritos
+  const {count:favTotal} = await sb.from('favoritos').select('*',{count:'exact',head:true}).eq('user_id',uid);
+  document.getElementById('s-favs').textContent = favTotal||0;
+  document.getElementById('r-favs').textContent = favTotal||0;
+
+  // Respostas com tema
+  const {data:resps} = await sb.from('respostas').select('acertou, questoes(tema)').eq('user_id',uid);
+  if (resps && resps.length>0) {
+    const acertos = resps.filter(r=>r.acertou).length;
+    const taxa = Math.round((acertos/resps.length)*100);
+    document.getElementById('s-respondidas').textContent = resps.length;
+    document.getElementById('s-taxa').textContent = taxa+'%';
+    document.getElementById('r-taxa').textContent = taxa+'%';
+    document.getElementById('r-resp').textContent = resps.length;
+    const pct = total ? Math.round((resps.length/total)*100) : 0;
+    document.getElementById('r-pct').textContent = pct+'% do total';
+    document.getElementById('r-pct2').textContent = pct+'%';
+    document.getElementById('bar-prog').style.width = pct+'%';
+
+    // Por tema
+    const porTema = {};
+    resps.forEach(r => {
+      const t = r.questoes?.tema||'Outros';
+      if(!porTema[t]) porTema[t]={total:0,acertos:0};
+      porTema[t].total++; if(r.acertou) porTema[t].acertos++;
+    });
+    const container = document.getElementById('temas-perf');
+    container.innerHTML = Object.entries(porTema).sort((a,b)=>b[1].total-a[1].total).slice(0,5).map(([tema,d])=>{
+      const p = Math.round((d.acertos/d.total)*100);
+      const cor = p>=70?'fill-green':p>=50?'fill-blue':'fill-red';
+      return `<div style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.4rem">
+          <span style="font-weight:500">${tema}</span>
+          <span style="color:var(--text-secondary)">${p}% (${d.acertos}/${d.total})</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${cor}" style="width:${p}%"></div></div>
+      </div>`;
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

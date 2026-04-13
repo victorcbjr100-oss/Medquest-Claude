@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Meu Perfil — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .perfil-grid{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start}
+    @media(max-width:900px){.perfil-grid{grid-template-columns:1fr}}
+    .perfil-card-left{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;box-shadow:var(--shadow);text-align:center}
+    .perfil-avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;margin:0 auto 1rem}
+    .perfil-nome{font-size:1.1rem;font-weight:700;color:var(--text)}
+    .perfil-email{font-size:.82rem;color:var(--text-secondary);margin-top:.2rem;word-break:break-all}
+    .danger-zone{background:var(--red-light);border:1.5px solid #fca5a5;border-radius:var(--radius);padding:1.5rem;margin-top:1rem}
+    .danger-zone h3{color:var(--red);font-size:.95rem;font-weight:700;margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+    .danger-zone p{font-size:.82rem;color:#7f1d1d;line-height:1.6;margin-bottom:1rem}
+  </style>
+</head>
+<body>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+<main class="main-content" id="main" style="display:none">
+  <div class="page-header"><h1>Meu Perfil</h1><p>Gerencie suas informações pessoais e acadêmicas</p></div>
+  <div class="perfil-grid">
+    <div>
+      <div class="perfil-card-left">
+        <div class="perfil-avatar" id="pf-av">?</div>
+        <div class="perfil-nome" id="pf-nome">—</div>
+        <div class="perfil-email" id="pf-email">—</div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem">
+          <span>🎓</span><h2 style="font-size:1rem;font-weight:700">Dados Acadêmicos</h2>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Idade</label><input class="form-input" type="number" id="pf-idade" placeholder="Digite sua idade"></div>
+          <div class="form-group"><label class="form-label">Nível de Formação</label>
+            <select class="form-select" id="pf-nivel">
+              <option value="">Selecione seu nível</option>
+              <option>Estudante de Medicina</option>
+              <option>Interno/Residente</option>
+              <option>Médico Formado</option>
+              <option>Especialista</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Universidade/Instituição</label><input class="form-input" id="pf-univ" placeholder="Ex: USP, UFRJ, UFMG..."></div>
+        <div class="form-group"><label class="form-label">Ano de Formatura (ou previsão)</label><input class="form-input" type="number" id="pf-form" placeholder="2025"></div>
+        <button class="btn btn-primary" style="width:100%;padding:.75rem" onclick="salvarPerfil()">💾 Salvar Perfil</button>
+        <div class="alert" id="msg-pf"></div>
+      </div>
+
+      <div class="danger-zone">
+        <h3>⚠️ Zona de Perigo</h3>
+        <p>Uma vez excluída, sua conta não pode ser recuperada. Todos os seus dados, incluindo respostas, pontos e estatísticas serão permanentemente removidos.</p>
+        <button class="btn btn-danger" style="width:100%;padding:.75rem" onclick="excluirConta()">🗑️ Excluir Minha Conta</button>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+window.addEventListener('load', async()=>{
+  const session=await exigirLogin(); if(!session) return;
+  document.getElementById('main').style.display='block';
+  const sb=window.supabaseClient, uid=session.user.id;
+  const nome=session.user.user_metadata?.nome||session.user.email.split('@')[0];
+  document.getElementById('pf-av').textContent=nome.charAt(0).toUpperCase();
+  document.getElementById('pf-nome').textContent=nome;
+  document.getElementById('pf-email').textContent=session.user.email;
+  const {data:pf}=await sb.from('perfis').select('*').eq('id',uid).single();
+  if(pf){
+    if(pf.idade) document.getElementById('pf-idade').value=pf.idade;
+    if(pf.nivel) document.getElementById('pf-nivel').value=pf.nivel;
+    if(pf.universidade) document.getElementById('pf-univ').value=pf.universidade;
+    if(pf.ano_formatura) document.getElementById('pf-form').value=pf.ano_formatura;
+  }
+});
+async function salvarPerfil(){
+  const sb=window.supabaseClient;
+  const {data:{session}}=await sb.auth.getSession();
+  const uid=session.user.id;
+  await sb.from('perfis').upsert({
+    id:uid,
+    idade:parseInt(document.getElementById('pf-idade').value)||null,
+    nivel:document.getElementById('pf-nivel').value||null,
+    universidade:document.getElementById('pf-univ').value.trim()||null,
+    ano_formatura:parseInt(document.getElementById('pf-form').value)||null,
+  });
+  const el=document.getElementById('msg-pf');
+  el.textContent='Perfil salvo com sucesso!';el.className='alert show alert-success';
+  setTimeout(()=>el.className='alert',3000);
+}
+async function excluirConta(){
+  if(!confirm('Tem certeza? Esta ação é irreversível.')) return;
+  if(!confirm('Confirme novamente: sua conta e todos os dados serão excluídos permanentemente.')) return;
+  const sb=window.supabaseClient;
+  const {data:{session}}=await sb.auth.getSession();
+  // Deleta dados do usuário (perfis tem cascade)
+  await sb.from('perfis').delete().eq('id',session.user.id);
+  await sb.auth.signOut();
+  window.location.href='index.html';
+}
+</script>
+</body>
+</html>
