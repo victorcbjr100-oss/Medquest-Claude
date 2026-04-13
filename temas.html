@@ -1,35 +1,179 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Temas — MedQuest Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Especialidades — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .temas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem}
-    .tema-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
-    .tema-header{padding:1.25rem 1.5rem;display:flex;align-items:center;gap:.9rem;cursor:pointer;transition:background .15s;border-bottom:1px solid transparent}
-    .tema-header:hover{background:var(--bg)}
-    .tema-header.open{border-bottom-color:var(--border)}
-    .tema-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
-    .tema-info{flex:1}
-    .tema-name{font-weight:700;font-size:.95rem;color:var(--text)}
-    .tema-count{font-size:.78rem;color:var(--text-muted);margin-top:2px}
-    .tema-progress-wrap{margin-top:.4rem}
-    .tema-pct{font-size:.72rem;color:var(--text-secondary);margin-bottom:3px}
-    .tema-arrow{font-size:.8rem;color:var(--text-muted);transition:transform .2s;flex-shrink:0}
-    .tema-arrow.open{transform:rotate(90deg)}
-    .subtemas{display:none;padding:.5rem .5rem}
-    .subtemas.open{display:block}
-    .subtema-btn{display:flex;justify-content:space-between;align-items:center;width:100%;padding:.65rem 1rem;margin-bottom:2px;background:transparent;border:none;border-radius:var(--radius-sm);cursor:pointer;text-align:left;font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);transition:background .12s}
-    .subtema-btn:hover{background:var(--bg)}
-    .subtema-nome{font-weight:500}
-    .subtema-meta{display:flex;align-items:center;gap:.5rem}
-    .subtema-q{font-size:.75rem;color:var(--text-muted)}
-    .subtema-pct{font-size:.75rem;font-weight:600;padding:.15rem .5rem;border-radius:99px}
-    .loading-msg{text-align:center;padding:3rem;color:var(--text-muted)}
+    :root {
+      --bg-body: #f8fafc;
+      --surface: #ffffff;
+      --primary: #2563eb;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    }
+
+    body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    /* Grid Layout */
+    .temas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Card Design */
+    .tema-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .tema-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+      border-color: #cbd5e1;
+    }
+
+    /* Header do Tema */
+    .tema-header {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+    }
+
+    .tema-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);
+    }
+
+    .tema-info { flex: 1; }
+    .tema-name { font-weight: 800; font-size: 1rem; color: var(--text-main); margin-bottom: 2px; }
+    .tema-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    /* Progresso */
+    .tema-progress-wrap { margin-top: 0.75rem; }
+    .tema-pct { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    
+    .progress-outer { height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+    .progress-inner { height: 100%; border-radius: 10px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    .fill-blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+    .fill-green { background: linear-gradient(90deg, #10b981, #059669); }
+    .fill-red { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+
+    .tema-arrow {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #f8fafc;
+      color: var(--text-muted);
+      transition: all 0.3s;
+      font-size: 0.7rem;
+    }
+    .tema-arrow.open { transform: rotate(90deg); background: var(--primary); color: #fff; }
+
+    /* Subtemas (Lista interna) */
+    .subtemas {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: #fafafa;
+      border-top: 0 solid var(--border);
+    }
+    .subtemas.open { max-height: 1000px; border-top-width: 1px; padding: 0.75rem; }
+
+    .subtema-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      margin-bottom: 4px;
+      background: #fff;
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .subtema-btn:hover {
+      background: #fff;
+      border-color: var(--primary);
+      transform: translateX(4px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .subtema-nome { font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+    .subtema-meta { display: flex; align-items: center; gap: 0.75rem; }
+    .subtema-q { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    
+    .subtema-pct-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      min-width: 35px;
+      text-align: center;
+    }
+
+    .loading-msg { text-align: center; padding: 5rem; color: var(--text-muted); font-weight: 500; }
+    
+    /* Tabs de Filtro */
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        background: #f1f5f9;
+        padding: 0.4rem;
+        border-radius: 12px;
+        width: fit-content;
+    }
+    
+    .filter-tab {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: transparent;
+        color: var(--text-muted);
+    }
+    
+    .filter-tab.active {
+        background: #fff;
+        color: var(--primary);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
   </style>
 </head>
 <body>
@@ -37,24 +181,27 @@
 <script src="js/sidebar.js"></script>
 
 <main class="main-content" id="main" style="display:none">
-  <div class="page-header">
-    <h1>Temas</h1>
-    <p>Selecione uma especialidade para praticar questões</p>
+  <div class="page-header" style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">Especialidades</h1>
+    <p style="color: var(--text-muted); margin-top: 0.5rem;">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
   </div>
 
   <div class="filter-tabs" id="filtros">
-    <button class="filter-tab active" data-filtro="">Todos</button>
-    <button class="filter-tab" data-filtro="facil">Fácil</button>
-    <button class="filter-tab" data-filtro="media">Média</button>
-    <button class="filter-tab" data-filtro="dificil">Difícil</button>
+    <button class="filter-tab active" data-filtro="">Todas Questões</button>
+    <button class="filter-tab" data-filtro="facil">Fáceis</button>
+    <button class="filter-tab" data-filtro="media">Médias</button>
+    <button class="filter-tab" data-filtro="dificil">Difíceis</button>
   </div>
 
-  <div id="loading" class="loading-msg">Carregando especialidades...</div>
+  <div id="loading" class="loading-msg">
+    <div style="font-size: 2rem; margin-bottom: 1rem;">⚡</div>
+    Organizando especialidades...
+  </div>
+  
   <div class="temas-grid" id="temas-grid" style="display:none"></div>
 </main>
 
 <script>
-/* Paleta de cores por tema */
 const CORES = [
   {bg:'#eff6ff',icon:'#2563eb',emoji:'❤️'},
   {bg:'#ecfdf5',icon:'#059669',emoji:'🧠'},
@@ -70,39 +217,37 @@ const CORES = [
 
 let temasData = {};
 let filtroAtivo = '';
-let statsUsuario = {};
 
 window.addEventListener('load', async () => {
   const session = await exigirLogin(); if(!session) return;
   document.getElementById('main').style.display='block';
   const sb = window.supabaseClient, uid = session.user.id;
 
-  // Carrega questões agrupadas por tema/subtema
-  const {data:questoes} = await sb.from('questoes').select('id,tema,subtema,dificuldade');
-  const {data:resps} = await sb.from('respostas').select('questao_id,acertou,questoes(tema,subtema)').eq('user_id',uid);
+  const {data:questoes} = await sb.from('questoes').select('id,tema,subtema');
+  const {data:resps} = await sb.from('respostas').select('questao_id,acertou').eq('user_id',uid);
 
-  // Agrupa stats por questão
   const statsQ = {};
   if(resps) resps.forEach(r=>{ statsQ[r.questao_id]={acertou:r.acertou}; });
 
-  // Monta estrutura: tema → subtema → {total, acertos}
   const estrutura = {};
   if(questoes) questoes.forEach(q=>{
     const t = q.tema||'Outros', s = q.subtema||'Geral';
     if(!estrutura[t]) estrutura[t]={subtemas:{},total:0,acertos:0};
-    if(!estrutura[t].subtemas[s]) estrutura[t].subtemas[s]={total:0,acertos:0,ids:[]};
+    if(!estrutura[t].subtemas[s]) estrutura[t].subtemas[s]={total:0,acertos:0};
     estrutura[t].subtemas[s].total++;
     estrutura[t].total++;
-    estrutura[t].subtemas[s].ids.push(q.id);
-    if(statsQ[q.id]?.acertou){ estrutura[t].subtemas[s].acertos++; estrutura[t].acertos++; }
+    if(statsQ[q.id]?.acertou){ 
+        estrutura[t].subtemas[s].acertos++; 
+        estrutura[t].acertos++; 
+    }
   });
+  
   temasData = estrutura;
-
   renderTemas(estrutura);
+  
   document.getElementById('loading').style.display='none';
   document.getElementById('temas-grid').style.display='grid';
 
-  // Filtros
   document.getElementById('filtros').addEventListener('click', e=>{
     const btn = e.target.closest('.filter-tab'); if(!btn) return;
     document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
@@ -115,24 +260,27 @@ window.addEventListener('load', async () => {
 function renderTemas(estrutura) {
   const grid = document.getElementById('temas-grid');
   grid.innerHTML = '';
+  
   Object.entries(estrutura).forEach(([tema, dados], idx)=>{
     const cor = CORES[idx % CORES.length];
-    const pct = dados.total>0 ? Math.round((dados.acertos/dados.total)*100) : 0;
+    const pct = dados.total > 0 ? Math.round((dados.acertos/dados.total)*100) : 0;
     const card = document.createElement('div');
     card.className = 'tema-card';
 
-    const subtemasBtns = Object.entries(dados.subtemas).map(([sub, sd])=>{
-      const sp = sd.total>0 ? Math.round((sd.acertos/sd.total)*100) : null;
-      const corPct = sp===null?'#9ca3af':sp>=70?'#059669':sp>=50?'#2563eb':'#dc2626';
-      const bgPct = sp===null?'#f3f4f6':sp>=70?'#ecfdf5':sp>=50?'#eff6ff':'#fef2f2';
-      const label = sp===null?'—':sp+'%';
-      return `<button class="subtema-btn" onclick="irParaQuestoes('${encodeURIComponent(tema)}','${encodeURIComponent(sub)}')">
-        <span class="subtema-nome">${sub}</span>
-        <span class="subtema-meta">
-          <span class="subtema-q">${sd.total} questões</span>
-          <span class="subtema-pct" style="color:${corPct};background:${bgPct}">${label}</span>
-        </span>
-      </button>`;
+    const subtemasHtml = Object.entries(dados.subtemas).map(([sub, sd])=>{
+      const sp = sd.total > 0 ? Math.round((sd.acertos/sd.total)*100) : null;
+      const corCls = sp === null ? 'background:#f1f5f9;color:#64748b' : 
+                     sp >= 70 ? 'background:#dcfce7;color:#15803d' : 
+                     sp >= 40 ? 'background:#eff6ff;color:#1d4ed8' : 'background:#fee2e2;color:#b91c1c';
+      
+      return `
+        <button class="subtema-btn" onclick="irParaQuestoes('${encodeURIComponent(tema)}','${encodeURIComponent(sub)}')">
+          <span class="subtema-nome">${sub}</span>
+          <div class="subtema-meta">
+            <span class="subtema-q">${sd.total} questões</span>
+            <span class="subtema-pct-badge" style="${corCls}">${sp === null ? '—' : sp+'%'}</span>
+          </div>
+        </button>`;
     }).join('');
 
     card.innerHTML = `
@@ -140,20 +288,26 @@ function renderTemas(estrutura) {
         <div class="tema-icon" style="background:${cor.bg}">${cor.emoji}</div>
         <div class="tema-info">
           <div class="tema-name">${tema}</div>
-          <div class="tema-count">${dados.total} questões · ${Object.keys(dados.subtemas).length} subtemas</div>
+          <div class="tema-count">${dados.total} questões disponíveis</div>
           <div class="tema-progress-wrap">
-            <div class="tema-pct">${pct}% concluído</div>
-            <div class="progress-bar" style="height:4px"><div class="progress-fill ${pct>=70?'fill-green':pct>=50?'fill-blue':'fill-red'}" style="width:${pct}%"></div></div>
+            <div class="tema-pct">
+                <span>Progresso</span>
+                <span>${pct}%</span>
+            </div>
+            <div class="progress-outer">
+                <div class="progress-inner ${pct>=70?'fill-green':pct>=40?'fill-blue':'fill-red'}" style="width:${pct}%"></div>
+            </div>
           </div>
         </div>
-        <span class="tema-arrow">▶</span>
+        <div class="tema-arrow">▶</div>
       </div>
       <div class="subtemas">
-        <button class="subtema-btn" style="font-weight:700;color:var(--accent)" onclick="irParaQuestoes('${encodeURIComponent(tema)}','')">
-          <span class="subtema-nome">📚 Todas as questões de ${tema}</span>
-          <span class="subtema-q">${dados.total}</span>
+        <div style="padding: 0.5rem; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Subtemas</div>
+        <button class="subtema-btn" style="background:var(--primary); border:none; margin-bottom: 0.75rem;" onclick="irParaQuestoes('${encodeURIComponent(tema)}','')">
+          <span class="subtema-nome" style="color:#fff">📚 Estudar todo o tema: ${tema}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
-        ${subtemasBtns}
+        ${subtemasHtml}
       </div>`;
     grid.appendChild(card);
   });
@@ -162,9 +316,8 @@ function renderTemas(estrutura) {
 function toggleTema(header) {
   const arrow = header.querySelector('.tema-arrow');
   const subtemas = header.nextElementSibling;
-  const open = subtemas.classList.toggle('open');
-  header.classList.toggle('open', open);
-  arrow.classList.toggle('open', open);
+  const isOpen = subtemas.classList.toggle('open');
+  arrow.classList.toggle('open', isOpen);
 }
 
 function irParaQuestoes(tema, subtema) {
