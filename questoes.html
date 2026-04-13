@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -19,14 +20,8 @@ body{
   color:#111;
 }
 
-/* CONTAINER */
-.container{
-  max-width:900px;
-  margin:0 auto;
-  padding:28px;
-}
+.container{ max-width:900px; margin:0 auto; padding:28px; }
 
-/* CARD */
 .card{
   background:#fff;
   border:1px solid #e8e8e8;
@@ -35,41 +30,20 @@ body{
   box-shadow:0 8px 24px rgba(0,0,0,.05);
 }
 
-/* QUESTÃO */
-.question{
-  font-size:18px;
-  font-weight:600;
-  margin-bottom:16px;
-}
+.question{ font-size:18px; font-weight:600; margin-bottom:16px; }
 
-/* OPTIONS */
 .option{
   padding:12px;
   border:1px solid #e5e7eb;
   border-radius:12px;
   margin-top:10px;
   cursor:pointer;
-  transition:.2s;
 }
 
-.option:hover{ background:#f9fafb; }
+.option.selected{ border:2px solid #2563eb; background:#eff6ff; }
+.correct{ border:2px solid #16a34a !important; background:#f0fdf4 !important; }
+.wrong{ border:2px solid #dc2626 !important; background:#fef2f2 !important; }
 
-.option.selected{
-  border:2px solid #2563eb;
-  background:#eff6ff;
-}
-
-.correct{
-  border:2px solid #16a34a !important;
-  background:#f0fdf4 !important;
-}
-
-.wrong{
-  border:2px solid #dc2626 !important;
-  background:#fef2f2 !important;
-}
-
-/* BOTÕES */
 .actions{
   display:flex;
   justify-content:center;
@@ -89,18 +63,9 @@ button{
 .primary{ background:#2563eb; color:#fff; }
 .secondary{ background:#fff; border:1px solid #e5e7eb; }
 
-/* FEEDBACK */
-#feedback{
-  margin-top:20px;
-  display:none;
-}
+#feedback{ margin-top:20px; display:none; }
 
-/* COMENTÁRIOS */
-.comment-box{
-  margin-top:16px;
-  border-top:1px solid #eee;
-  padding-top:16px;
-}
+.comment-box{ margin-top:16px; }
 
 .comment{
   padding:12px 0;
@@ -130,7 +95,7 @@ button{
   margin-left:42px;
   border-left:2px solid #eee;
   padding-left:10px;
-  margin-top:8px;
+  margin-top:6px;
 }
 
 textarea{
@@ -141,22 +106,6 @@ textarea{
   border:1px solid #e5e7eb;
   font-family:Inter;
   resize:none;
-}
-
-.tab{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid #ddd;
-  font-size:12px;
-  cursor:pointer;
-  margin-right:6px;
-}
-
-.tab.active{
-  background:#2563eb;
-  color:#fff;
-  border-color:#2563eb;
 }
 
 .small-btn{
@@ -172,15 +121,11 @@ textarea{
 
 <body>
 
-<!-- 🔥 SUA SIDEBAR ORIGINAL (NÃO ALTERADA) -->
-<script src="js/sidebar.js"></script>
-
 <div class="container" id="app" style="display:none">
 
   <div class="card">
 
     <div class="question" id="question"></div>
-
     <div id="options"></div>
 
     <div class="actions">
@@ -189,24 +134,23 @@ textarea{
       <button class="primary" onclick="confirmAnswer()">Responder</button>
     </div>
 
-    <!-- RESPOSTA / EXPLICAÇÃO -->
     <div id="feedback">
 
-      <div style="margin-top:14px; font-size:14px; color:#374151">
-        <strong>Comentário da questão:</strong>
-        <div id="explicacao"></div>
+      <div id="explicacao" style="margin-top:14px"></div>
+
+      <div class="comment-box">
+
+        <h4>Comentários</h4>
+
+        <div id="comments"></div>
+
+        <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
+
+        <button class="primary" onclick="sendComment()" style="margin-top:8px">
+          Enviar comentário
+        </button>
+
       </div>
-
-      <div style="margin-top:14px">
-        <div class="tab active" onclick="loadComments()">Comentários</div>
-      </div>
-
-      <div class="comment-box" id="comments"></div>
-
-      <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
-      <button class="primary" style="margin-top:8px" onclick="sendComment()">
-        Enviar comentário
-      </button>
 
     </div>
 
@@ -220,6 +164,7 @@ let questions = [];
 let index = 0;
 let selected = null;
 let answered = false;
+let replyTo = null;
 
 /* INIT */
 window.addEventListener("load", async () => {
@@ -238,6 +183,7 @@ window.addEventListener("load", async () => {
 function render(){
   answered = false;
   selected = null;
+  replyTo = null;
 
   const q = questions[index];
 
@@ -253,32 +199,27 @@ function render(){
   document.getElementById("feedback").style.display = "none";
 }
 
-/* SELECT OPTION */
 function selectOption(letter, el){
   selected = letter;
-
   document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
   el.classList.add("selected");
 }
 
-/* CONFIRM ANSWER */
+/* RESPONDER QUESTÃO */
 async function confirmAnswer(){
 
   if(!selected || answered) return;
-
   answered = true;
 
   const q = questions[index];
   const correct = selected === q.correta;
 
   document.getElementById("feedback").style.display = "block";
-
-  // explicação da questão
-  document.getElementById("explicacao").innerText = q.comentario || "Sem explicação.";
+  document.getElementById("explicacao").innerHTML =
+    "<b>Comentário da questão:</b><br>" + (q.comentario || "Sem comentário.");
 
   document.querySelectorAll(".option").forEach(o=>{
     const l = o.innerText.trim()[0].toLowerCase();
-
     if(l === q.correta) o.classList.add("correct");
     if(l === selected && !correct) o.classList.add("wrong");
   });
@@ -314,24 +255,14 @@ function renderComments(comments){
 
   const box = document.getElementById("comments");
 
-  if(!comments.length){
-    box.innerHTML = "<p style='color:#888'>Sem comentários ainda</p>";
-    return;
-  }
-
   box.innerHTML = comments.map(c => `
     <div class="comment">
 
       <div class="comment-header">
-        <div class="avatar">${(c.nome || "U").charAt(0).toUpperCase()}</div>
-
+        <div class="avatar">${(c.nome||"U")[0].toUpperCase()}</div>
         <div>
-          <div style="font-weight:600;font-size:13px">
-            ${c.nome || "Usuário"}
-          </div>
-          <div style="font-size:11px;color:#888">
-            ${new Date(c.created_at).toLocaleString()}
-          </div>
+          <b>${c.nome || "Usuário"}</b><br>
+          <small>${new Date(c.created_at).toLocaleString()}</small>
         </div>
       </div>
 
@@ -339,11 +270,13 @@ function renderComments(comments){
         ${c.conteudo}
       </div>
 
-      <button class="small-btn" onclick="reply(${c.id})">Responder</button>
+      <button class="small-btn" onclick="startReply('${c.id}')">
+        Responder
+      </button>
 
       ${c.respostas ? c.respostas.map(r=>`
         <div class="reply">
-          <strong>${r.nome}</strong>: ${r.conteudo}
+          <b>${r.nome}</b>: ${r.conteudo}
         </div>
       `).join("") : ""}
 
@@ -351,36 +284,39 @@ function renderComments(comments){
   `).join("");
 }
 
-/* SEND COMMENT */
+/* ENVIAR COMENTÁRIO */
 async function sendComment(){
 
   const text = document.getElementById("commentInput").value.trim();
   if(!text) return;
 
   const q = questions[index];
-
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
   await db.from("comentarios_questao").insert({
     questao_id: q.id,
     user_id: user.id,
-    conteudo: text,
     nome: user.email.split("@")[0],
-    tipo: "aluno"
+    conteudo: text,
+    parent_id: replyTo
   });
 
   document.getElementById("commentInput").value = "";
+  replyTo = null;
+
   loadComments();
+}
+
+/* RESPOSTA COMMENT */
+function startReply(id){
+  replyTo = id;
+  document.getElementById("commentInput").focus();
 }
 
 /* NAV */
 function prev(){ if(index>0){ index--; render(); } }
 function next(){ if(index<questions.length-1){ index++; render(); } }
-
-function reply(id){
-  alert("Função de resposta (thread) - próximo upgrade podemos deixar estilo YouTube completo com backend estruturado");
-}
 
 </script>
 
