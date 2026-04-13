@@ -1,33 +1,195 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Meu Caderno — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .caderno-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:1.5rem;gap:0}
-    .caderno-tab{padding:.65rem 1.25rem;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
-    .caderno-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-    .questao-saved{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow);transition:box-shadow .15s}
-    .questao-saved:hover{box-shadow:var(--shadow-md)}
-    .qs-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.75rem}
-    .qs-texto{font-size:.9rem;line-height:1.7;color:var(--text);margin-bottom:.75rem;cursor:pointer}
-    .qs-footer{display:flex;justify-content:space-between;align-items:center}
-    .qs-data{font-size:.75rem;color:var(--text-muted)}
-    .btn-remover{background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:.3rem;border-radius:4px;transition:color .12s;line-height:1}
-    .btn-remover:hover{color:var(--red)}
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --danger: #ef4444;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+    }
+
+    .main-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* Tabs Estilizadas */
+    .caderno-tabs {
+      display: flex;
+      gap: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .caderno-tab {
+      padding: 0.75rem 0.5rem;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .caderno-tab span {
+      font-size: 0.8rem;
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-left: 4px;
+    }
+
+    .caderno-tab.active {
+      color: var(--primary);
+    }
+
+    .caderno-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 99px;
+    }
+
+    /* Questões Salvas */
+    .questao-saved {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .questao-saved:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+
+    .qs-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    
+    .qs-texto {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      margin-bottom: 1.25rem;
+      cursor: pointer;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .qs-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .qs-data { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
+
     /* Anotações */
-    .nota-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
-    .nota-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem}
-    .nota-titulo{font-weight:600;font-size:.95rem}
-    .nota-texto{font-size:.875rem;line-height:1.7;color:var(--text-secondary);white-space:pre-wrap}
-    .nota-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
-    .nota-form h3{font-size:.95rem;font-weight:700;margin-bottom:1rem}
-    .empty-state{text-align:center;padding:3rem;color:var(--text-muted)}
-    .empty-state p{margin-top:.5rem;font-size:.9rem}
+    .nota-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .nota-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .nota-titulo { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+    .nota-texto { font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
+
+    /* Formulário de Notas */
+    .nota-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-family: inherit;
+      margin-bottom: 1rem;
+      background: #f8fafc;
+      box-sizing: border-box;
+    }
+
+    .form-textarea { min-height: 120px; resize: vertical; }
+
+    .btn-remover {
+      background: #fee2e2;
+      border: none;
+      color: #ef4444;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-remover:hover { background: #ef4444; color: #fff; }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 2px dashed var(--border-color);
+    }
+
+    .empty-state p { margin-top: 1rem; font-size: 0.95rem; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -35,28 +197,42 @@
 <script src="js/sidebar.js"></script>
 
 <main class="main-content" id="main" style="display:none">
-  <div class="page-header" style="display:flex;align-items:center;gap:.75rem">
-    <span style="font-size:1.5rem">📓</span>
-    <div><h1>Meu Caderno</h1><p>Questões salvas e anotações pessoais</p></div>
+  <div class="page-header" style="margin-bottom: 2.5rem;">
+    <div style="display:flex; align-items:center; gap:0.75rem">
+        <span style="font-size:2rem">📓</span>
+        <div>
+            <h1 style="font-size:1.75rem; font-weight:800; margin:0">Meu Caderno</h1>
+            <p style="color:var(--text-secondary); margin-top:0.25rem">Sua biblioteca pessoal de questões e insights acadêmicos.</p>
+        </div>
+    </div>
   </div>
 
   <div class="caderno-tabs">
-    <button class="caderno-tab active" onclick="trocarAba('questoes',this)">📚 Questões Salvas (<span id="count-q">0</span>)</button>
-    <button class="caderno-tab" onclick="trocarAba('notas',this)">📝 Anotações (<span id="count-n">0</span>)</button>
+    <button class="caderno-tab active" onclick="trocarAba('questoes',this)">📚 Questões Salvas <span id="count-q">0</span></button>
+    <button class="caderno-tab" onclick="trocarAba('notas',this)">📝 Anotações <span id="count-n">0</span></button>
   </div>
 
-  <!-- Questões salvas -->
   <div id="aba-questoes">
-    <div id="lista-salvas"><div class="empty-state">⏳<p>Carregando...</p></div></div>
+    <div id="lista-salvas">
+        <div class="empty-state">
+            <div style="font-size: 2.5rem">⌛</div>
+            <p>Sincronizando seus dados...</p>
+        </div>
+    </div>
   </div>
 
-  <!-- Anotações -->
   <div id="aba-notas" style="display:none">
     <div class="nota-form">
-      <h3>Nova anotação</h3>
-      <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="nota-titulo" placeholder="Ex: Revisão de Cardiologia"></div>
-      <div class="form-group"><label class="form-label">Conteúdo</label><textarea class="form-textarea" id="nota-texto" placeholder="Escreva sua anotação..."></textarea></div>
-      <button class="btn btn-primary" onclick="salvarNota()">Salvar anotação</button>
+      <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1.25rem">Nova Anotação</h3>
+      <div class="form-group">
+        <label class="form-label">Título do Assunto</label>
+        <input class="form-input" id="nota-titulo" placeholder="Ex: Macetes de Semiologia Cardiovascular">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Conteúdo</label>
+        <textarea class="form-textarea" id="nota-texto" placeholder="Resuma os pontos principais ou anote sua dúvida..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%; padding: 0.85rem;" onclick="salvarNota()">💾 Salvar no Caderno</button>
       <div class="alert" id="msg-nota"></div>
     </div>
     <div id="lista-notas"></div>
@@ -85,31 +261,43 @@ async function carregarQuestoes(){
   const {data}=await sb.from('favoritos').select('criado_em, questoes(id,pergunta,tema,subtema,banca,ano)').eq('user_id',uid).order('criado_em',{ascending:false});
   const lista=document.getElementById('lista-salvas');
   document.getElementById('count-q').textContent=data?.length||0;
-  if(!data||data.length===0){lista.innerHTML='<div class="empty-state">⭐<p>Você ainda não salvou nenhuma questão.<br>Clique em "Favoritar" nas questões para adicioná-las aqui.</p></div>';return;}
+  
+  if(!data||data.length===0){
+    lista.innerHTML='<div class="empty-state"><div style="font-size:2.5rem">⭐</div><p>Você ainda não favoritou questões.<br>Salve questões difíceis para revisar aqui depois.</p></div>';
+    return;
+  }
+  
   lista.innerHTML=data.map(f=>{
     const q=f.questoes; if(!q) return '';
-    const trecho=q.pergunta.length>250?q.pergunta.substring(0,250)+'...':q.pergunta;
     return `<div class="questao-saved">
       <div class="qs-badges">
         ${q.tema?`<span class="badge badge-blue">${q.tema}</span>`:''}
         ${q.subtema?`<span class="badge badge-gray">${q.subtema}</span>`:''}
-        ${q.banca?`<span class="badge badge-gray">${q.banca}${q.ano?' '+q.ano:''}</span>`:''}
+        <span class="badge badge-gray" style="background:#f1f5f9; color:var(--text-secondary)">${q.banca||'Geral'} ${q.ano||''}</span>
       </div>
-      <div class="qs-texto" onclick="window.location.href='questoes.html?tema=${encodeURIComponent(q.tema||'')}&busca=${q.id}'">${trecho}</div>
+      <div class="qs-texto" onclick="window.location.href='questoes.html?tema=${encodeURIComponent(q.tema||'')}&busca=${q.id}'">${q.pergunta}</div>
       <div class="qs-footer">
-        <span class="qs-data">Adicionada em ${new Date(f.criado_em).toLocaleDateString('pt-BR')}</span>
-        <button class="btn-remover" onclick="removerFav(${q.id},this)" title="Remover">🗑️</button>
+        <span class="qs-data">📁 Salvo em ${new Date(f.criado_em).toLocaleDateString('pt-BR')}</span>
+        <button class="btn-remover" onclick="removerFav(${q.id},this)" title="Remover">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
       </div>
     </div>`;
   }).join('');
 }
 
 async function removerFav(qId, btn){
+  if(!confirm('Remover esta questão do seu caderno?')) return;
   const sb=window.supabaseClient;
   await sb.from('favoritos').delete().eq('user_id',sessao.user.id).eq('questao_id',qId);
   const card=btn.closest('.questao-saved');
-  card.style.opacity='0'; card.style.transition='opacity .3s';
-  setTimeout(()=>{card.remove();const c=document.getElementById('count-q');c.textContent=parseInt(c.textContent)-1;},300);
+  card.style.opacity='0'; card.style.transform='scale(0.95)';
+  setTimeout(()=>{
+    card.remove();
+    const c=document.getElementById('count-q');
+    c.textContent=parseInt(c.textContent)-1;
+    if(parseInt(c.textContent) === 0) carregarQuestoes();
+  },300);
 }
 
 async function carregarNotas(){
@@ -117,14 +305,24 @@ async function carregarNotas(){
   const {data}=await sb.from('anotacoes').select('*').eq('user_id',uid).order('criado_em',{ascending:false});
   document.getElementById('count-n').textContent=data?.length||0;
   const lista=document.getElementById('lista-notas');
-  if(!data||data.length===0){lista.innerHTML='<div class="empty-state">📝<p>Nenhuma anotação ainda. Crie uma acima!</p></div>';return;}
+  
+  if(!data||data.length===0){
+    lista.innerHTML='<div class="empty-state"><div style="font-size:2.5rem">📝</div><p>Seu caderno de notas está vazio.<br>Use o formulário acima para registrar insights.</p></div>';
+    return;
+  }
+  
   lista.innerHTML=data.map(n=>`<div class="nota-card" id="nota-${n.id}">
     <div class="nota-header">
-      <div class="nota-titulo">${n.titulo||'Sem título'}</div>
-      <button class="btn-remover" onclick="excluirNota(${n.id})" title="Excluir">🗑️</button>
+      <div class="nota-titulo">${n.titulo||'Anotação sem título'}</div>
+      <button class="btn-remover" onclick="excluirNota(${n.id})" title="Excluir">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
     </div>
     <div class="nota-texto">${n.texto}</div>
-    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.75rem">${new Date(n.criado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+    <div style="font-size:.75rem; color:var(--text-secondary); margin-top:1.25rem; font-weight:600; display:flex; align-items:center; gap:0.4rem">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${new Date(n.criado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}
+    </div>
   </div>`).join('');
 }
 
@@ -132,21 +330,39 @@ async function salvarNota(){
   const sb=window.supabaseClient;
   const titulo=document.getElementById('nota-titulo').value.trim();
   const texto=document.getElementById('nota-texto').value.trim();
-  if(!texto){const el=document.getElementById('msg-nota');el.textContent='Escreva o conteúdo da anotação.';el.className='alert show alert-error';return;}
-  await sb.from('anotacoes').insert({user_id:sessao.user.id,titulo,texto});
-  document.getElementById('nota-titulo').value='';
-  document.getElementById('nota-texto').value='';
-  const el=document.getElementById('msg-nota');el.textContent='Anotação salva!';el.className='alert show alert-success';
-  setTimeout(()=>el.className='alert',2000);
-  carregarNotas();
+  
+  if(!texto){
+    const el=document.getElementById('msg-nota');
+    el.textContent='O conteúdo da nota não pode estar vazio.';
+    el.className='alert show alert-error';
+    return;
+  }
+
+  const { error } = await sb.from('anotacoes').insert({user_id:sessao.user.id, titulo, texto});
+  
+  if(!error) {
+    document.getElementById('nota-titulo').value='';
+    document.getElementById('nota-texto').value='';
+    const el=document.getElementById('msg-nota');
+    el.textContent='Anotação salva com sucesso!';
+    el.className='alert show alert-success';
+    setTimeout(()=>el.className='alert',2000);
+    carregarNotas();
+  }
 }
 
 async function excluirNota(id){
+  if(!confirm('Excluir esta anotação permanentemente?')) return;
   const sb=window.supabaseClient;
   await sb.from('anotacoes').delete().eq('id',id);
   const el=document.getElementById(`nota-${id}`);
-  el.style.opacity='0';el.style.transition='opacity .3s';
-  setTimeout(()=>{el.remove();const c=document.getElementById('count-n');c.textContent=parseInt(c.textContent)-1;},300);
+  el.style.opacity='0'; el.style.transform='scale(0.95)';
+  setTimeout(()=>{
+    el.remove();
+    const c=document.getElementById('count-n');
+    c.textContent=parseInt(c.textContent)-1;
+    if(parseInt(c.textContent) === 0) carregarNotas();
+  },300);
 }
 </script>
 </body>
