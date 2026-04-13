@@ -3,14 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — Elite</title>
+<title>MedQuest — UWorld Elite</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
-
-<!-- 🔥 SIDEBAR ORIGINAL (OBRIGATÓRIO) -->
-<script src="js/sidebar.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -22,14 +19,23 @@ body{
   color:#111;
 }
 
-/* garante espaço da sidebar */
-.container{
-  max-width:900px;
-  margin:0 auto;
+/* ===== SIDEBAR NÃO ALTERADA (cole a sua aqui) ===== */
+/* >>> MANTIVE SEU CÓDIGO EXTERNO VIA sidebar.js <<< */
+
+/* LAYOUT CENTRALIZADO (CORRIGIDO) */
+#app{
+  margin-left:260px;
+  display:flex;
+  justify-content:center;
   padding:28px;
-  margin-left:260px; /* 🔥 mantém sidebar fixa visível */
 }
 
+.container{
+  width:100%;
+  max-width:900px;
+}
+
+/* CARD */
 .card{
   background:#fff;
   border:1px solid #e8e8e8;
@@ -38,21 +44,41 @@ body{
   box-shadow:0 8px 24px rgba(0,0,0,.05);
 }
 
-.question{ font-size:18px; font-weight:600; margin-bottom:16px; }
+/* QUESTÃO */
+.question{
+  font-size:18px;
+  font-weight:600;
+  line-height:1.5;
+  margin-bottom:18px;
+}
 
+/* OPTIONS */
 .option{
-  padding:12px;
+  padding:12px 14px;
   border:1px solid #e5e7eb;
   border-radius:12px;
   margin-top:10px;
   cursor:pointer;
   transition:.2s;
+  background:#fff;
 }
 
-.option.selected{ border:2px solid #2563eb; background:#eff6ff; }
-.correct{ border:2px solid #16a34a !important; background:#f0fdf4 !important; }
-.wrong{ border:2px solid #dc2626 !important; background:#fef2f2 !important; }
+.option:hover{
+  border-color:#cbd5e1;
+  background:#f9fafb;
+}
 
+.correct{
+  border:2px solid #16a34a !important;
+  background:#f0fdf4 !important;
+}
+
+.wrong{
+  border:2px solid #dc2626 !important;
+  background:#fef2f2 !important;
+}
+
+/* BOTÕES */
 .actions{
   display:flex;
   justify-content:center;
@@ -69,16 +95,47 @@ button{
   cursor:pointer;
 }
 
-.primary{ background:#2563eb; color:#fff; }
-.secondary{ background:#fff; border:1px solid #e5e7eb; }
+.primary{
+  background:#2563eb;
+  color:#fff;
+}
 
-#feedback{ margin-top:20px; display:none; }
+.secondary{
+  background:#fff;
+  border:1px solid #e5e7eb;
+}
 
-.comment-box{ margin-top:16px; }
+/* FEEDBACK */
+#feedback{
+  margin-top:20px;
+  display:none;
+}
 
+/* TABS */
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.tab{
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.tab.active{
+  background:#2563eb;
+  color:#fff;
+  border-color:#2563eb;
+}
+
+/* COMENTÁRIOS */
 .comment{
   padding:12px 0;
-  border-bottom:1px solid #f1f1f1;
+  border-bottom:1px solid #eee;
 }
 
 .comment-header{
@@ -88,8 +145,8 @@ button{
 }
 
 .avatar{
-  width:32px;
-  height:32px;
+  width:34px;
+  height:34px;
   border-radius:50%;
   background:#2563eb;
   color:#fff;
@@ -97,14 +154,13 @@ button{
   align-items:center;
   justify-content:center;
   font-weight:700;
-  font-size:13px;
 }
 
 .reply{
-  margin-left:42px;
+  margin-left:44px;
   border-left:2px solid #eee;
-  padding-left:10px;
-  margin-top:6px;
+  padding-left:12px;
+  margin-top:8px;
 }
 
 textarea{
@@ -116,51 +172,51 @@ textarea{
   font-family:Inter;
   resize:none;
 }
-
-.small-btn{
+.reply-box{
+  margin-top:8px;
+  display:none;
+}
+.reply-btn{
   font-size:12px;
-  background:none;
-  border:none;
   color:#2563eb;
   cursor:pointer;
-  margin-left:42px;
+  margin-left:44px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 SIDEBAR ORIGINAL (NÃO MEXIDO) -->
+<!-- SIDEBAR (SEU SCRIPT ORIGINAL) -->
 <script src="js/sidebar.js"></script>
 
-<div class="container" id="app" style="display:none">
+<div id="app" style="display:none">
 
-  <div class="card">
+  <div class="container">
 
-    <div class="question" id="question"></div>
-    <div id="options"></div>
+    <div class="card">
 
-    <div class="actions">
-      <button class="secondary" onclick="prev()">⬅ Anterior</button>
-      <button class="secondary" onclick="next()">Próxima ➜</button>
-      <button class="primary" onclick="confirmAnswer()">Responder</button>
-    </div>
+      <div class="question" id="question"></div>
 
-    <div id="feedback">
+      <div id="options"></div>
 
-      <div id="explicacao" style="margin-top:14px"></div>
+      <div class="actions">
+        <button class="secondary" onclick="prev()">⬅ Anterior</button>
+        <button class="secondary" onclick="next()">Próxima ➜</button>
+        <button class="primary" onclick="confirmAnswer()">Responder</button>
+      </div>
 
-      <div class="comment-box">
+      <div id="feedback">
 
-        <h4>Comentários</h4>
+        <div class="tabs">
+          <div class="tab active" onclick="setTab('alunos')">Alunos</div>
+          <div class="tab" onclick="setTab('prof')">Professor</div>
+        </div>
 
         <div id="comments"></div>
 
         <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
-
-        <button class="primary" onclick="sendComment()" style="margin-top:8px">
-          Enviar comentário
-        </button>
+        <button class="primary" onclick="sendComment()">Enviar comentário</button>
 
       </div>
 
@@ -171,21 +227,19 @@ textarea{
 </div>
 
 <script>
-
 let questions = [];
 let index = 0;
 let selected = null;
 let answered = false;
-let replyTo = null;
+let tab = "alunos";
 
 /* INIT */
 window.addEventListener("load", async () => {
-  const session = await exigirLogin();
-  if(!session) return;
+  await exigirLogin();
 
-  document.getElementById("app").style.display = "block";
+  document.getElementById("app").style.display = "flex";
 
-  const { data } = await db.from("banco_questoes").select("*").limit(50);
+  const { data } = await db.from("banco_questoes").select("*").limit(30);
   questions = data || [];
 
   render();
@@ -193,9 +247,8 @@ window.addEventListener("load", async () => {
 
 /* RENDER */
 function render(){
-  answered = false;
   selected = null;
-  replyTo = null;
+  answered = false;
 
   const q = questions[index];
 
@@ -211,28 +264,34 @@ function render(){
   document.getElementById("feedback").style.display = "none";
 }
 
+/* SELECT */
 function selectOption(letter, el){
-  selected = letter;
-  document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
-  el.classList.add("selected");
+  if(answered) return;
+
+  selected = { letter, el };
+
+  document.querySelectorAll(".option").forEach(o=>{
+    o.style.borderColor = "#e5e7eb";
+  });
+
+  el.style.borderColor = "#2563eb";
 }
 
+/* CONFIRM ANSWER */
 async function confirmAnswer(){
-
   if(!selected || answered) return;
+
   answered = true;
 
   const q = questions[index];
-  const correct = selected === q.correta;
+  const correct = selected.letter === q.correta;
 
   document.getElementById("feedback").style.display = "block";
-  document.getElementById("explicacao").innerHTML =
-    "<b>Comentário da questão:</b><br>" + (q.comentario || "Sem comentário.");
 
   document.querySelectorAll(".option").forEach(o=>{
     const l = o.innerText.trim()[0].toLowerCase();
     if(l === q.correta) o.classList.add("correct");
-    if(l === selected && !correct) o.classList.add("wrong");
+    if(o === selected.el && !correct) o.classList.add("wrong");
   });
 
   const { data } = await supabase.auth.getUser();
@@ -241,16 +300,24 @@ async function confirmAnswer(){
   await db.from("respostas_usuario").insert({
     user_id: user.id,
     questao_id: q.id,
-    resposta_marcada: selected,
+    resposta_marcada: selected.letter,
     correta: correct
   });
 
   loadComments();
 }
 
-/* COMMENTS */
-async function loadComments(){
+/* NAV */
+function prev(){ if(index>0){ index--; render(); } }
+function next(){ if(index<questions.length-1){ index++; render(); } }
 
+/* COMMENTS */
+function setTab(t){
+  tab = t;
+  loadComments();
+}
+
+async function loadComments(){
   const q = questions[index];
 
   const { data } = await db
@@ -266,32 +333,44 @@ function renderComments(comments){
 
   const box = document.getElementById("comments");
 
-  box.innerHTML = comments.map(c => `
+  const parents = comments.filter(c => !c.parent_id);
+
+  box.innerHTML = parents.map(c => `
     <div class="comment">
 
       <div class="comment-header">
-        <div class="avatar">${(c.nome||"U")[0].toUpperCase()}</div>
+        <div class="avatar">${c.user_name?.[0] || "U"}</div>
         <div>
-          <b>${c.nome || "Usuário"}</b><br>
-          <small>${new Date(c.created_at).toLocaleString()}</small>
+          <div style="font-weight:600;font-size:13px">${c.user_name || "Usuário"}</div>
+          <div style="font-size:11px;color:#888">
+            ${new Date(c.created_at).toLocaleString()}
+          </div>
         </div>
       </div>
 
-      <div style="margin-left:42px;margin-top:6px">
+      <div style="margin-left:44px;margin-top:6px">
         ${c.conteudo}
       </div>
 
-      <button class="small-btn" onclick="startReply('${c.id}')">
-        Responder
-      </button>
+      <div class="reply-btn" onclick="toggleReply('${c.id}')">Responder</div>
+
+      <div class="reply-box" id="reply-${c.id}">
+        <textarea id="reply-text-${c.id}" placeholder="Responder comentário..."></textarea>
+        <button class="primary" onclick="sendReply('${c.id}')">Enviar</button>
+      </div>
+
+      ${comments.filter(r => r.parent_id === c.id).map(r => `
+        <div class="reply">
+          <b>${r.user_name || "Usuário"}</b>: ${r.conteudo}
+        </div>
+      `).join("")}
 
     </div>
   `).join("");
 }
 
-/* ENVIAR COMENTÁRIO */
+/* COMMENT */
 async function sendComment(){
-
   const text = document.getElementById("commentInput").value.trim();
   if(!text) return;
 
@@ -302,27 +381,40 @@ async function sendComment(){
   await db.from("comentarios_questao").insert({
     questao_id: q.id,
     user_id: user.id,
-    nome: user.email.split("@")[0],
+    user_name: user.email,
     conteudo: text,
-    parent_id: replyTo
+    parent_id: null
   });
 
   document.getElementById("commentInput").value = "";
-  replyTo = null;
+  loadComments();
+}
+
+/* REPLY */
+async function sendReply(parentId){
+  const input = document.getElementById("reply-text-"+parentId);
+  const text = input.value.trim();
+  if(!text) return;
+
+  const q = questions[index];
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  await db.from("comentarios_questao").insert({
+    questao_id: q.id,
+    user_id: user.id,
+    user_name: user.email,
+    conteudo: text,
+    parent_id: parentId
+  });
 
   loadComments();
 }
 
-/* RESPOSTA */
-function startReply(id){
-  replyTo = id;
-  document.getElementById("commentInput").focus();
+function toggleReply(id){
+  const el = document.getElementById("reply-"+id);
+  el.style.display = el.style.display === "block" ? "none" : "block";
 }
-
-/* NAV */
-function prev(){ if(index>0){ index--; render(); } }
-function next(){ if(index<questions.length-1){ index++; render(); } }
-
 </script>
 
 </body>
