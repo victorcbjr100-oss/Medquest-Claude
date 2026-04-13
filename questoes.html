@@ -8,19 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
+    
+    <script src="js/sidebar.js" defer></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --sb-bg: #0f172a;
-            --sb-text: #94a3b8;
-            --sb-active-bg: #1e293b;
-            --sb-active-text: #ffffff;
-            --sb-accent: #2563eb;
-            --sb-divider: #1e293b;
-        }
-
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -29,178 +22,9 @@
             display: flex;
         }
 
-        /* ================= SIDEBAR ================= */
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            background-color: var(--sb-bg);
-            color: var(--sb-text);
-            position: fixed;
-            left: 0;
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem 0;
-            z-index: 1000;
-            border-right: 1px solid var(--sb-divider);
-            box-sizing: border-box;
-        }
-
-        .sidebar-brand {
-            padding: 0 1.5rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-        }
-
-        .sidebar-brand-icon {
-            background-color: var(--sb-accent);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-        }
-
-        .sidebar-brand-name {
-            color: white;
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: -0.025em;
-        }
-
-        .sidebar-section-label {
-            padding: 0 1.5rem 0.5rem;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #475569;
-            margin-top: 1rem;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.5rem;
-            color: var(--sb-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-link:hover {
-            color: white;
-            background-color: var(--sb-active-bg);
-        }
-
-        .sidebar-link.active {
-            background-color: var(--sb-active-bg);
-            color: white;
-            border-left-color: var(--sb-accent);
-        }
-
-        .sidebar-link-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;
-        }
-
-        .active .sidebar-link-icon {
-            color: var(--sb-accent);
-            opacity: 1;
-        }
-
-        .sidebar-divider {
-            height: 1px;
-            background-color: var(--sb-divider);
-            margin: 1.5rem 1rem;
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding: 0 1rem;
-        }
-
-        .sidebar-user-card {
-            background-color: var(--sb-active-bg);
-            border-radius: 12px;
-            padding: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .sidebar-user-card:hover {
-            background-color: #334155;
-        }
-
-        .sidebar-avatar {
-            width: 36px;
-            height: 36px;
-            background-color: var(--sb-accent);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .sidebar-user-info {
-            overflow: hidden;
-            flex-grow: 1;
-        }
-
-        .sidebar-user-name {
-            color: white;
-            font-size: 0.85rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sidebar-user-email {
-            font-size: 0.7rem;
-            color: var(--sb-text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .btn-logout-minimal {
-            background: transparent;
-            border: none;
-            color: var(--sb-text);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .btn-logout-minimal:hover {
-            color: #ef4444;
-            background-color: rgba(239, 68, 68, 0.1);
-        }
-
         /* ================= CONTEÚDO PRINCIPAL ================= */
         #app {
-            margin-left: 260px;
+            margin-left: 260px; /* Espaço para a sidebar fixa */
             width: calc(100% - 260px);
             min-height: 100vh;
             display: flex;
@@ -245,27 +69,13 @@
             align-items: center;
         }
 
-        .option:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-        }
+        .option:hover { background: #f9fafb; border-color: #d1d5db; }
 
-        .option.selected {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-        }
+        .option.selected { border-color: #2563eb; background-color: #eff6ff; }
 
-        .option.correct {
-            border: 2px solid #16a34a;
-            background: #f0fdf4;
-            color: #166534;
-        }
+        .option.correct { border: 2px solid #16a34a; background: #f0fdf4; color: #166534; }
 
-        .option.wrong {
-            border: 2px solid #dc2626;
-            background: #fef2f2;
-            color: #991b1b;
-        }
+        .option.wrong { border: 2px solid #dc2626; background: #fef2f2; color: #991b1b; }
 
         .actions {
             display: flex;
@@ -276,10 +86,7 @@
             border-top: 1px solid #f3f4f6;
         }
 
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .nav-buttons { display: flex; gap: 10px; }
 
         button {
             font-family: 'Inter', sans-serif;
@@ -292,29 +99,9 @@
             font-size: 14px;
         }
 
-        button:active {
-            transform: scale(0.98);
-        }
-
-        .primary {
-            background: #2563eb;
-            color: #fff;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-        }
-
-        .primary:hover {
-            background: #1d4ed8;
-        }
-
-        .secondary {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            color: #374151;
-        }
-
-        .secondary:hover {
-            background: #f3f4f6;
-        }
+        .primary { background: #2563eb; color: #fff; }
+        .primary:hover { background: #1d4ed8; }
+        .secondary { background: #fff; border: 1px solid #e5e7eb; color: #374151; }
 
         /* ================= COMENTÁRIOS ================= */
         #feedback {
@@ -326,125 +113,31 @@
             border: 1px solid #e2e8f0;
         }
 
-        #feedback h3 {
-            margin: 0 0 20px 0;
-            font-size: 16px;
-            color: #1e293b;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-        }
-
-        .comment {
-            padding: 16px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .comment:last-child {
-            border-bottom: none;
-        }
-
-        .comment-header {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
+        .comment { padding: 16px 0; border-bottom: 1px solid #e2e8f0; }
+        .comment:last-child { border-bottom: none; }
+        .comment-header { display: flex; gap: 12px; align-items: center; }
         .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #2563eb;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #2563eb; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px;
         }
-
-        .comment-name {
-            font-weight: 600;
-            font-size: 14px;
-            color: #0f172a;
-        }
-
-        .comment-date {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-
-        .comment-text {
-            margin-left: 48px;
-            margin-top: 8px;
-            font-size: 14px;
-            color: #334155;
-            line-height: 1.5;
-        }
-
-        .reply-btn {
-            margin-left: 48px;
-            font-size: 12px;
-            color: #2563eb;
-            cursor: pointer;
-            margin-top: 8px;
-            font-weight: 600;
-            display: inline-block;
-        }
+        .comment-name { font-weight: 600; font-size: 14px; color: #0f172a; }
+        .comment-date { font-size: 12px; color: #64748b; }
+        .comment-text { margin-left: 48px; margin-top: 8px; font-size: 14px; color: #334155; }
+        .reply-btn { margin-left: 48px; font-size: 12px; color: #2563eb; cursor: pointer; font-weight: 600; }
         
-        .reply-btn:hover {
-            text-decoration: underline;
-        }
-
         .comment-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-            background: #fff;
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .reply-box {
-            margin-left: 48px;
-            margin-top: 12px;
-            display: none;
-            background: #f1f5f9;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; gap: 10px; margin-top: 20px;
+            background: #fff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0;
         }
 
         textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            font-family: 'Inter', sans-serif;
-            resize: vertical;
-            min-height: 80px;
-            box-sizing: border-box;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .small-btn {
-            align-self: flex-end;
-            font-size: 13px;
-            padding: 8px 16px;
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; box-sizing: border-box;
         }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
             #app { margin-left: 0; width: 100%; padding: 20px 15px; }
         }
     </style>
@@ -457,62 +150,15 @@
             <div class="sidebar-brand-icon">MQ</div>
             <div class="sidebar-brand-name">MedQuest</div>
         </div>
-
-        <div class="sidebar-section-label">Estudos</div>
-        
-        <a href="dashboard.html" class="sidebar-link">
-            <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-            <span>Página Inicial</span>
-        </a>
-        <a href="temas.html" class="sidebar-link">
-            <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-            <span>Temas</span>
-        </a>
-        <a href="simulado.html" class="sidebar-link">
-            <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <span>Simulados</span>
-        </a>
-        <a href="estatisticas.html" class="sidebar-link">
-            <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-            <span>Estatísticas</span>
-        </a>
-        <a href="favoritas.html" class="sidebar-link">
-            <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <span>Favoritas</span>
-        </a>
-        <a href="caderno.html" class="sidebar-link">
-            <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <span>Meu Caderno</span>
-        </a>
-
-        <div id="sidebar-admin-section" style="display:none">
-            <div class="sidebar-divider"></div>
-            <div class="sidebar-section-label">Painel Admin</div>
-            
-            <a href="admin-usuarios.html" class="sidebar-link">
-                <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                <span>Gerenciar Usuários</span>
-            </a>
-            <a href="admin-questoes.html" class="sidebar-link">
-                <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                <span>Gerenciar Questões</span>
-            </a>
-            <a href="admin-temas.html" class="sidebar-link">
-                <div class="sidebar-link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-                <span>Gerenciar Temas</span>
-            </a>
-        </div>
-
+        <div id="sidebar-menu">
+            </div>
         <div class="sidebar-footer">
-            <div class="sidebar-user-card" onclick="window.location.href='perfil.html'">
+            <div class="sidebar-user-card">
                 <div class="sidebar-avatar" id="sb-avatar">?</div>
                 <div class="sidebar-user-info">
                     <div class="sidebar-user-name" id="sb-nome">Carregando...</div>
                     <div class="sidebar-user-email" id="sb-email"></div>
                 </div>
-                <button class="btn-logout-minimal" onclick="event.stopPropagation();logout()" title="Sair">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                </button>
             </div>
         </div>
     </aside>
@@ -534,10 +180,9 @@
                 <div id="feedback">
                     <h3>Discussão da Questão</h3>
                     <div id="comments"></div>
-
                     <div class="comment-box">
                         <textarea id="newComment" placeholder="Ficou com dúvida? Escreva um comentário..."></textarea>
-                        <button class="primary small-btn" onclick="sendComment()">Enviar comentário</button>
+                        <button class="primary" style="align-self: flex-end;" onclick="sendComment()">Enviar comentário</button>
                     </div>
                 </div>
             </div>
@@ -550,91 +195,51 @@ let i = 0;
 let selected = null;
 let answered = false;
 
-/* INIT GERAL E SIDEBAR DINÂMICA */
+// Inicialização da página
 window.addEventListener("load", async () => {
-    // 1. Lógica da Aplicação Principal
     if (typeof exigirLogin === "function") await exigirLogin();
     
     document.getElementById("app").style.display = "flex";
 
+    // Carrega questões do banco (db vem do supabase.js)
     if (typeof db !== "undefined") {
-        const { data } = await db.from("banco_questoes").select("*").limit(30);
-        qs = data || [];
-        if(qs.length > 0) render();
-    }
-
-    // 2. Lógica da Sidebar
-    const page = window.location.pathname.split('/').pop() || 'dashboard.html';
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        if (link.getAttribute('href') === page) {
-            link.classList.add('active');
+        try {
+            const { data, error } = await db.from("banco_questoes").select("*").limit(30);
+            if (error) throw error;
+            qs = data || [];
+            if(qs.length > 0) render();
+        } catch (err) {
+            console.error("Erro ao carregar questões:", err);
         }
-    });
-
-    // 3. Atualizar Dados do Usuário
-    try {
-        if (typeof supabase !== 'undefined') {
-            const { data } = await supabase.auth.getUser();
-            if (data && data.user) {
-                const user = data.user;
-                const nome = user.user_metadata?.nome || user.email.split('@');
-                document.getElementById('sb-avatar').textContent = nome.charAt(0).toUpperCase();
-                document.getElementById('sb-nome').textContent = nome;
-                document.getElementById('sb-email').textContent = user.email;
-
-                if (typeof getPerfil === "function") {
-                    const perfil = await getPerfil(user.id);
-                    if (perfil?.role === 'admin') {
-                        document.getElementById('sidebar-admin-section').style.display = 'block';
-                    }
-                }
-            }
-        }
-    } catch (e) {
-        console.error("Erro ao carregar usuário:", e);
-        document.getElementById('sb-nome').textContent = "Usuário";
     }
 });
 
-/* RENDER */
 function render(){
     selected = null;
     answered = false;
-
     const q = qs[i];
     document.getElementById("question").innerText = q.enunciado;
-
     document.getElementById("options").innerHTML = ["a","b","c","d"].map(l => `
         <div class="option" onclick="selectOpt('${l}', this)">
             <strong>${l.toUpperCase()})</strong> &nbsp;${q["alternativa_"+l]}
         </div>
     `).join("");
-
     document.getElementById("feedback").style.display = "none";
 }
 
-/* SELECT */
 function selectOpt(letter, el){
     if(answered) return;
-
     selected = { letter, el };
-
-    document.querySelectorAll(".option").forEach(o => {
-        o.classList.remove("selected");
-    });
-
+    document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
     el.classList.add("selected");
 }
 
-/* CONFIRM */
 async function confirm(){
     if(!selected || answered) return;
-
     answered = true;
 
     const q = qs[i];
     const correct = selected.letter === q.correta;
-
     document.getElementById("feedback").style.display = "block";
 
     document.querySelectorAll(".option").forEach(o => {
@@ -644,41 +249,37 @@ async function confirm(){
         if(o === selected.el && !correct) o.classList.add("wrong");
     });
 
-    if (typeof supabase !== "undefined") {
-        const { data } = await supabase.auth.getUser();
-        if (data && data.user) {
-            await db.from("respostas_usuario").insert({
-                user_id: data.user.id,
-                questao_id: q.id,
-                resposta_marcada: selected.letter,
-                correta: correct
-            });
-        }
+    // Salva resposta
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+        await db.from("respostas_usuario").insert({
+            user_id: data.user.id,
+            questao_id: q.id,
+            resposta_marcada: selected.letter,
+            correta: correct
+        });
     }
-
     loadComments();
 }
 
-/* NAV */
 function prev(){ if(i>0){ i--; render(); } }
 function next(){ if(i<qs.length-1){ i++; render(); } }
 
-/* COMMENTS */
+// --- LÓGICA DE COMENTÁRIOS ---
+
 async function loadComments(){
     const q = qs[i];
-
-    const { data } = await db
+    const { data, error } = await db
         .from("comentarios_questao")
         .select("*")
         .eq("questao_id", q.id)
         .order("created_at", { ascending: false });
 
-    renderComments(data || []);
+    if (!error) renderComments(data || []);
 }
 
 function renderComments(cms){
     const box = document.getElementById("comments");
-
     box.innerHTML = cms.map(c => `
         <div class="comment">
             <div class="comment-header">
@@ -688,72 +289,41 @@ function renderComments(cms){
                     <div class="comment-date">${new Date(c.created_at).toLocaleString('pt-BR')}</div>
                 </div>
             </div>
-
             <div class="comment-text">${c.conteudo}</div>
-
-            <div class="reply-btn" onclick="toggleReply('${c.id}')">Responder</div>
-
-            <div class="reply-box" id="r-${c.id}">
-                <textarea id="t-${c.id}" placeholder="Escreva sua resposta..."></textarea>
-                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-                    <button class="primary small-btn" onclick="reply('${c.id}')">Enviar resposta</button>
-                </div>
-            </div>
         </div>
     `).join("");
 }
 
-/* SEND COMMENT */
 async function sendComment(){
     const textEl = document.getElementById("newComment");
     const text = textEl.value.trim();
     if(!text) return;
 
-    const q = qs[i];
-    const { data } = await supabase.auth.getUser();
-    if (!data || !data.user) return;
+    // Pega usuário atual do Supabase
+    const { data, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !data.user) {
+        alert("Você precisa estar logado para comentar.");
+        return;
+    }
+
     const user = data.user;
     const userName = user.user_metadata?.nome || user.email.split('@');
 
-    await db.from("comentarios_questao").insert({
-        questao_id: q.id,
+    const { error } = await db.from("comentarios_questao").insert({
+        questao_id: qs[i].id,
         user_id: user.id,
         user_name: userName,
-        conteudo: text,
-        parent_id: null
+        conteudo: text
     });
 
-    textEl.value = "";
-    loadComments();
-}
-
-/* REPLY */
-async function reply(id){
-    const textEl = document.getElementById("t-"+id);
-    const text = textEl.value.trim();
-    if(!text) return;
-
-    const q = qs[i];
-    const { data } = await supabase.auth.getUser();
-    if (!data || !data.user) return;
-    const user = data.user;
-    const userName = user.user_metadata?.nome || user.email.split('@');
-
-    await db.from("comentarios_questao").insert({
-        questao_id: q.id,
-        user_id: user.id,
-        user_name: userName,
-        conteudo: text,
-        parent_id: id
-    });
-
-    textEl.value = "";
-    loadComments();
-}
-
-function toggleReply(id){
-    const el = document.getElementById("r-"+id);
-    el.style.display = el.style.display === "block" ? "none" : "block";
+    if (error) {
+        console.error("Erro ao enviar:", error);
+        alert("Erro ao enviar comentário.");
+    } else {
+        textEl.value = "";
+        loadComments(); // Recarrega a lista
+    }
 }
 </script>
 
