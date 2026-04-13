@@ -79,18 +79,16 @@ window.addEventListener('load', async () => {
 
   document.getElementById('main').style.display = 'block';
 
-  // pegar parâmetros da URL
   const params = new URLSearchParams(window.location.search);
   tema = params.get('tema');
   subtema = params.get('subtema');
 
   atualizarTitulo();
-
   carregarQuestoes();
 });
 
 
-// 🔹 TÍTULO DINÂMICO
+// 🔹 TÍTULO
 function atualizarTitulo(){
   let titulo = '🧠 Questões';
 
@@ -106,17 +104,13 @@ function atualizarTitulo(){
 }
 
 
-// 🔹 CARREGAR QUESTÕES
+// 🔹 CARREGAR QUESTÕES (AJUSTADO)
 async function carregarQuestoes(){
 
-  let query = supabase.from('questoes').select('*');
+  let query = supabase.from('banco_questoes').select('*');
 
   if(tema){
-    query = query.eq('tema', tema);
-  }
-
-  if(subtema){
-    query = query.eq('subtema', subtema);
+    query = query.ilike('tema', tema);
   }
 
   const { data, error } = await query.limit(10);
@@ -138,7 +132,7 @@ async function carregarQuestoes(){
 }
 
 
-// 🔹 MOSTRAR QUESTÃO
+// 🔹 MOSTRAR QUESTÃO (AJUSTADO)
 function mostrarQuestao(){
   respondeu = false;
 
@@ -151,7 +145,7 @@ function mostrarQuestao(){
 
     ${['a','b','c','d'].map(l => `
       <div class="alternativa" onclick="responder('${l}', this)">
-        ${l.toUpperCase()}) ${q['alternativa_'+l]}
+        ${l.toUpperCase()}) ${q['opcao_'+l]}
       </div>
     `).join('')}
   `;
