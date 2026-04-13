@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Cardiologia</title>
+<style>
+body{font-family:Arial;padding:20px}
+.subtema{padding:12px;border:1px solid #ccc;margin-bottom:8px;cursor:pointer}
+</style>
+</head>
+
+<body>
+
+<h1>Cardiologia</h1>
+
+<div class="subtema" onclick="abrir('Hipertensão arterial')">Hipertensão arterial</div>
+<div class="subtema" onclick="abrir('Arritmias')">Arritmias</div>
+<div class="subtema" onclick="abrir('Miocardiopatias')">Miocardiopatias</div>
+<div class="subtema" onclick="abrir('Insuficiência cardíaca')">Insuficiência cardíaca</div>
+
+<script>
+function abrir(sub){
+  window.location.href = `questoes.html?tema=Cardiologia&subtema=${encodeURIComponent(sub)}`
+}
+</script>
+
+</body>
+</html>
