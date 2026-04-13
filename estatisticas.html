@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Estatísticas — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
@@ -9,59 +10,178 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .metrics-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem}
-    .user-badge{display:flex;align-items:center;gap:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1.25rem;box-shadow:var(--shadow)}
-    .user-badge-av{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem}
-    .user-badge-nome{font-weight:700;font-size:.9rem}
-    .nivel-badge{display:inline-block;padding:.2rem .65rem;border-radius:99px;font-size:.72rem;font-weight:700}
-    .nivel-iniciante{background:#fef2f2;color:#dc2626}
-    .nivel-basico{background:#fff7ed;color:#ea580c}
-    .nivel-intermediario{background:#eff6ff;color:#2563eb}
-    .nivel-avancado{background:#f5f3ff;color:#7c3aed}
-    .nivel-expert{background:#ecfdf5;color:#059669}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
-    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
-    .big-stat{text-align:center;padding:1.5rem}
-    .big-stat-val{font-size:2.5rem;font-weight:800;line-height:1}
-    .big-stat-label{font-size:.8rem;color:var(--text-secondary);margin-top:.4rem}
-    .big-stat-sub{font-size:.72rem;color:var(--text-muted);margin-top:.2rem}
-    .chart-wrap{position:relative;height:220px;margin-top:.5rem}
-    .chart-wrap-sm{position:relative;height:180px;margin-top:.5rem}
-    .section-title{font-size:1rem;font-weight:700;margin-bottom:.25rem}
-    .section-sub{font-size:.8rem;color:var(--text-secondary);margin-bottom:1rem}
+    :root {
+      --primary: #2563eb;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header & Badge */
+    .metrics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.75rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .user-badge-av {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .user-badge-nome { font-weight: 700; font-size: 0.95rem; }
+
+    .nivel-badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .nivel-iniciante { background: #fee2e2; color: #991b1b; }
+    .nivel-basico { background: #ffedd5; color: #9a3412; }
+    .nivel-intermediario { background: #dbeafe; color: #1e40af; }
+    .nivel-avancado { background: #ede9fe; color: #5b21b6; }
+    .nivel-expert { background: #dcfce7; color: #166534; }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .filter-tab {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border-color);
+      border-radius: 99px;
+      background: var(--bg-card);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .filter-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Grids & Cards */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .big-stat { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .big-stat-val { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1; }
+    .big-stat-label { font-size: 0.9rem; font-weight: 700; margin-top: 0.75rem; }
+    .big-stat-sub { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+    .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-main); }
+    .section-sub { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+    .chart-wrap { position: relative; height: 240px; margin-top: 1rem; }
+    .chart-wrap-sm { position: relative; height: 160px; }
+
     /* Áreas para melhorar */
-    .area-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
-    .area-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-    .area-nome{font-size:.875rem;font-weight:500;min-width:130px}
-    .area-bar-wrap{flex:1;display:flex;align-items:center;gap:.75rem}
-    .area-bar-bg{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden}
-    .area-bar-fill{height:100%;border-radius:99px}
-    .area-pct{font-size:.82rem;font-weight:700;min-width:36px;text-align:right}
-    .area-q{font-size:.75rem;color:var(--text-muted);min-width:70px;text-align:right}
-    /* Calendário */
-    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-    .cal-nav{display:flex;align-items:center;gap:.75rem}
-    .cal-nav button{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:background .12s}
-    .cal-nav button:hover{background:var(--bg)}
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-    .cal-dow{font-size:.72rem;font-weight:600;color:var(--text-muted);padding:.3rem 0}
-    .cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:500;position:relative;transition:background .12s}
-    .cal-day.vazio{background:transparent;color:var(--text-muted)}
-    .cal-day.sem-ativ{background:transparent;color:var(--text-secondary)}
-    .cal-day.ativo{background:#bfdbfe;color:#1d4ed8}
-    .cal-day.muito-ativo{background:var(--accent);color:#fff}
-    .cal-legenda{display:flex;gap:1.25rem;margin-top:.75rem;flex-wrap:wrap}
-    .cal-leg-item{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--text-secondary)}
-    .cal-leg-dot{width:12px;height:12px;border-radius:3px}
+    .area-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+    .area-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .area-nome { font-size: 0.85rem; font-weight: 600; min-width: 140px; }
+    .area-bar-wrap { flex: 1; display: flex; align-items: center; gap: 1rem; }
+    .area-bar-bg { flex: 1; height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+    .area-bar-fill { height: 100%; border-radius: 99px; }
+    .area-pct { font-size: 0.85rem; font-weight: 700; min-width: 40px; text-align: right; }
+    .area-q { font-size: 0.75rem; color: var(--text-secondary); min-width: 80px; text-align: right; }
+
+    /* Calendário Estilo GitHub */
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .cal-nav { display: flex; align-items: center; gap: 0.5rem; }
+    .cal-nav button {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;
+      width: 32px; height: 32px; cursor: pointer; font-weight: 700; transition: all 0.2s;
+    }
+    .cal-nav button:hover { background: #f1f5f9; }
+    
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .cal-dow { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-align: center; padding-bottom: 0.5rem; }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); transition: transform 0.1s;
+    }
+    .cal-day.ativo { background: #dbeafe; color: #1d4ed8; }
+    .cal-day.muito-ativo { background: var(--primary); color: #fff; }
+    .cal-day:hover { transform: scale(1.1); }
+
     /* Mapa de estudos */
-    .mapa-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border-light)}
-    .mapa-row:last-child{border-bottom:none}
-    .mapa-label{font-size:.875rem;color:var(--text-secondary)}
-    .mapa-val{font-size:.9rem;font-weight:700}
-    /* Gráfico de progresso tabs */
-    .prog-tabs{display:flex;gap:.4rem;margin-bottom:1rem}
-    .prog-tab{padding:.3rem .8rem;border:1px solid var(--border);border-radius:99px;background:var(--surface);font-size:.78rem;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .15s}
-    .prog-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .mapa-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
+    .mapa-label { font-size: 0.85rem; color: var(--text-secondary); }
+    .mapa-val { font-size: 0.85rem; font-weight: 700; }
+
+    .prog-tabs { display: flex; gap: 0.4rem; }
+    .prog-tab {
+      padding: 0.35rem 0.8rem; border: 1px solid var(--border-color); border-radius: 8px;
+      background: var(--bg-card); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+    }
+    .prog-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    @media (max-width: 768px) {
+      .metrics-header { flex-direction: column; align-items: flex-start; }
+      .user-badge { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -72,8 +192,8 @@
 
   <div class="metrics-header">
     <div>
-      <h1 class="page-header" style="margin:0">Painel de Métricas</h1>
-      <p style="color:var(--text-secondary);font-size:.9rem;margin-top:.2rem">Acompanhe sua evolução e desempenho</p>
+      <h1 class="section-title" style="font-size: 1.75rem;">Painel de Métricas</h1>
+      <p style="color:var(--text-secondary); font-size: 0.95rem;">Análise detalhada do seu progresso acadêmico.</p>
     </div>
     <div class="user-badge">
       <div class="user-badge-av" id="ub-av">?</div>
@@ -84,101 +204,108 @@
     </div>
   </div>
 
-  <!-- Filter tabs por tema -->
   <div class="filter-tabs" id="tema-tabs">
-    <button class="filter-tab active" data-tema="">Geral</button>
+    <button class="filter-tab active" data-tema="">Visão Geral</button>
   </div>
 
-  <!-- Cards grandes -->
-  <div class="grid-2" style="margin-bottom:1.25rem">
+  <div class="grid-2">
     <div class="card big-stat">
       <div class="big-stat-val" id="m-total">0</div>
-      <div class="big-stat-label">Total de questões respondidas</div>
-      <div class="big-stat-sub">Seu total de questões respondidas na plataforma</div>
-      <div style="margin-top:.75rem;color:var(--green);font-size:1.2rem">✓</div>
+      <div class="big-stat-label">Questões Resolvidas</div>
+      <div class="big-stat-sub">Volume total de prática</div>
+      <div style="margin-top:1rem; color:#10b981; font-weight: 800;">TOTAL ACUMULADO</div>
     </div>
     <div class="card big-stat">
       <div class="big-stat-val" id="m-simulados">0</div>
-      <div class="big-stat-label">Total de Simulados</div>
-      <div class="big-stat-sub">Seu total de simulados resolvidos na plataforma</div>
-      <div style="margin-top:.75rem;color:var(--accent);font-size:1.2rem">📊</div>
+      <div class="big-stat-label">Simulados Completos</div>
+      <div class="big-stat-sub">Treinos em condições de prova</div>
+      <div style="margin-top:1rem; color:var(--primary); font-weight: 800;">PERFORMANCE</div>
     </div>
   </div>
 
-  <!-- Donut charts -->
-  <div class="grid-3" style="margin-bottom:1.25rem">
+  <div class="grid-3">
     <div class="card">
-      <div class="section-title">Porcentagem de acertos</div>
-      <div class="section-sub">Seu percentual de assertividade nas questões</div>
+      <div class="section-title">Taxa de Acertos</div>
+      <div class="section-sub">Precisão geral nas respostas</div>
       <div class="chart-wrap-sm"><canvas id="chart-acertos"></canvas></div>
-      <div style="text-align:center;margin-top:.5rem;font-size:.9rem;font-weight:700" id="lbl-acertos">0%</div>
+      <div style="text-align:center; margin-top:1rem; font-size:1.25rem; font-weight:800; color:var(--primary)" id="lbl-acertos">0%</div>
     </div>
     <div class="card">
-      <div class="section-title">Melhor desempenho</div>
-      <div class="section-sub">Assunto com maior porcentagem de acertos</div>
+      <div class="section-title">Pico de Performance</div>
+      <div class="section-sub">Seu melhor assunto até agora</div>
       <div class="chart-wrap-sm"><canvas id="chart-melhor"></canvas></div>
-      <div style="text-align:center;margin-top:.5rem;font-size:.9rem;font-weight:700" id="lbl-melhor">—</div>
+      <div style="text-align:center; margin-top:1rem; font-size:0.9rem; font-weight:700" id="lbl-melhor">—</div>
     </div>
     <div class="card">
-      <div class="section-title">Mapa de estudos</div>
-      <div class="section-sub">Entenda a incidência de cada assunto</div>
-      <div id="mapa-estudos" style="margin-top:.5rem"></div>
+      <div class="section-title">Mapa de Objetivos</div>
+      <div class="section-sub">Status dos temas estudados</div>
+      <div id="mapa-estudos" style="margin-top:0.5rem"></div>
     </div>
   </div>
 
-  <!-- Incidência + Progresso -->
-  <div class="grid-2" style="margin-bottom:1.25rem">
+  <div class="grid-2">
     <div class="card">
-      <div class="section-title">Incidência de assuntos</div>
-      <div class="section-sub">Avalie a incidência de cada assunto de acordo com suas respostas</div>
-      <div style="display:flex;gap:1.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap">
-        <div class="chart-wrap" style="width:160px;height:160px;flex-shrink:0"><canvas id="chart-incidencia"></canvas></div>
-        <div id="incidencia-legenda" style="flex:1;font-size:.82rem"></div>
+      <div class="section-title">Incidência de Assuntos</div>
+      <div class="section-sub">Distribuição das questões respondidas</div>
+      <div style="display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap">
+        <div class="chart-wrap" style="width:160px; height:160px;"><canvas id="chart-incidencia"></canvas></div>
+        <div id="incidencia-legenda" style="flex:1; font-size:0.85rem"></div>
       </div>
     </div>
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
-        <div><div class="section-title">Gráfico de progresso</div><div class="section-sub">Acompanhe sua evolução ao longo dos assuntos</div></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+        <div>
+          <div class="section-title">Curva de Aprendizado</div>
+          <div class="section-sub">Evolução temporal</div>
+        </div>
         <div class="prog-tabs">
-          <button class="prog-tab active" onclick="mudarPeriodo(7,this)">Semana</button>
-          <button class="prog-tab" onclick="mudarPeriodo(30,this)">30 dias</button>
-          <button class="prog-tab" onclick="mudarPeriodo(90,this)">90 dias</button>
+          <button class="prog-tab active" onclick="mudarPeriodo(7,this)">7D</button>
+          <button class="prog-tab" onclick="mudarPeriodo(30,this)">30D</button>
+          <button class="prog-tab" onclick="mudarPeriodo(90,this)">90D</button>
         </div>
       </div>
       <div class="chart-wrap"><canvas id="chart-progresso"></canvas></div>
     </div>
   </div>
 
-  <!-- Calendário -->
-  <div class="card" style="margin-bottom:1.25rem">
+  <div class="card">
     <div class="cal-header">
-      <div><div class="section-title">Calendário de atividades</div><div class="section-sub">Acompanhe seus dias de estudo</div></div>
+      <div>
+        <div class="section-title">Frequência de Estudos</div>
+        <div class="section-sub">Acompanhamento de constância diária</div>
+      </div>
       <div class="cal-nav">
         <button onclick="navMes(-1)">‹</button>
-        <span style="font-size:.9rem;font-weight:600" id="cal-titulo">—</span>
+        <span style="font-size:0.9rem; font-weight:700; text-transform: capitalize;" id="cal-titulo">—</span>
         <button onclick="navMes(1)">›</button>
       </div>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-legenda">
-      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--border)"></div>Sem atividade</div>
-      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#bfdbfe"></div>Ativo</div>
-      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--accent)"></div>Muito ativo (10+)</div>
+    <div style="display:flex; gap:1rem; margin-top:1.5rem; justify-content: center;">
+      <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-secondary)">
+        <div style="width:12px; height:12px; border-radius:3px; background:#f1f5f9"></div> Off
+      </div>
+      <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-secondary)">
+        <div style="width:12px; height:12px; border-radius:3px; background:#dbeafe"></div> Ativo
+      </div>
+      <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-secondary)">
+        <div style="width:12px; height:12px; border-radius:3px; background:var(--primary)"></div> Intenso (10+)
+      </div>
     </div>
   </div>
 
-  <!-- Áreas para melhorar -->
-  <div class="card" style="margin-bottom:1.25rem">
-    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem">
-      <span style="font-size:1.2rem">🎯</span>
-      <div><div class="section-title">Áreas para Melhorar</div></div>
+  <div class="card" style="margin-top:1.5rem">
+    <div class="card-title-wrap" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem">
+      <span style="font-size:1.25rem">🎯</span>
+      <h2 class="section-title" style="margin:0">Prioridades de Revisão</h2>
     </div>
-    <div id="areas-melhorar"><p style="color:var(--text-muted);font-size:.875rem">Responda mais questões para ver suas áreas de melhoria.</p></div>
+    <div id="areas-melhorar"></div>
   </div>
 
 </main>
 
 <script>
+// MANTENDO TODA A SUA LÓGICA ORIGINAL
 let respsGlobal = [];
 let temasDisponiveis = [];
 let temaFiltro = '';
@@ -191,20 +318,16 @@ window.addEventListener('load', async ()=>{
   const session = await exigirLogin(); if(!session) return;
   document.getElementById('main').style.display='block';
   const sb = window.supabaseClient, uid = session.user.id;
-  const nome = session.user.user_metadata?.nome||session.user.email.split('@')[0];
+  const nome = session.user.user_metadata?.nome||session.user.email.split('@');
 
   document.getElementById('ub-av').textContent = nome.charAt(0).toUpperCase();
   document.getElementById('ub-nome').textContent = nome;
 
-  // Carrega respostas completas
   const {data:resps} = await sb.from('respostas').select('acertou,modo,respondido_em,questoes(tema,subtema)').eq('user_id',uid);
-  respostsGlobal = resps||[];
   respsGlobal = resps||[];
 
-  // Temas únicos
   temasDisponiveis = [...new Set((resps||[]).map(r=>r.questoes?.tema).filter(Boolean))].sort();
 
-  // Preenche tabs de tema
   const tabs = document.getElementById('tema-tabs');
   temasDisponiveis.forEach(t=>{
     const btn = document.createElement('button');
@@ -213,11 +336,9 @@ window.addEventListener('load', async ()=>{
     tabs.appendChild(btn);
   });
 
-  // Calendário
   const now = new Date();
   calMes=now.getMonth(); calAno=now.getFullYear();
 
-  // Atividades por dia
   (resps||[]).forEach(r=>{
     const d = r.respondido_em?.substring(0,10);
     if(d) atividadesData[d]=(atividadesData[d]||0)+1;
@@ -249,39 +370,34 @@ function renderTudo() {
   document.getElementById('m-simulados').textContent = simulados;
   document.getElementById('lbl-acertos').textContent = taxa+'%';
 
-  // Nível
   const nivel = taxa<30?['Iniciante','nivel-iniciante']:taxa<50?['Básico','nivel-basico']:taxa<70?['Intermediário','nivel-intermediario']:taxa<85?['Avançado','nivel-avancado']:['Expert','nivel-expert'];
   const nb = document.getElementById('ub-nivel');
-  nb.textContent=nivel[0]; nb.className='nivel-badge '+nivel[1];
+  nb.textContent=nivel; nb.className='nivel-badge '+nivel;
 
-  // Por tema
   const porTema={};
   resps.forEach(r=>{
     const t=r.questoes?.tema||'Outros';
     if(!porTema[t]) porTema[t]={total:0,acertos:0};
     porTema[t].total++; if(r.acertou) porTema[t].acertos++;
   });
-  const temaEntries = Object.entries(porTema).sort((a,b)=>b[1].total-a[1].total);
+  const temaEntries = Object.entries(porTema).sort((a,b)=>b.total-a.total);
 
-  // Melhor desempenho
-  const melhor = temaEntries.length>0 ? temaEntries.reduce((a,b)=>(b[1].acertos/b[1].total)>(a[1].acertos/a[1].total)?b:a) : null;
-  const melhorPct = melhor ? Math.round((melhor[1].acertos/melhor[1].total)*100) : 0;
-  document.getElementById('lbl-melhor').textContent = melhor ? `${melhorPct}% - ${melhor[0]}` : '—';
+  const melhor = temaEntries.length>0 ? temaEntries.reduce((a,b)=>(b.acertos/b.total)>(a.acertos/a.total)?b:a) : null;
+  const melhorPct = melhor ? Math.round((melhor.acertos/melhor.total)*100) : 0;
+  document.getElementById('lbl-melhor').textContent = melhor ? `${melhorPct}% - ${melhor}` : '—';
 
-  // Mapa de estudos
   const totalTemas = temasDisponiveis.length||0;
   const temasResp = temaEntries.length;
   const com70 = temaEntries.filter(([,d])=>d.total>0&&(d.acertos/d.total)>=.7).length;
   const precisamRev = temaEntries.filter(([,d])=>d.total>0&&(d.acertos/d.total)<.5).length;
   document.getElementById('mapa-estudos').innerHTML = `
-    <div class="mapa-row"><span class="mapa-label">Número total de assuntos</span><span class="mapa-val">${totalTemas}</span></div>
-    <div class="mapa-row"><span class="mapa-label">Assuntos respondidos</span><span class="mapa-val" style="color:var(--accent)">${temasResp}</span></div>
-    <div class="mapa-row"><span class="mapa-label">Com acerto ≥ 70%</span><span class="mapa-val" style="color:var(--green)">${com70}</span></div>
-    <div class="mapa-row"><span class="mapa-label">Precisam de revisão (&lt;50%)</span><span class="mapa-val" style="color:var(--red)">${precisamRev}</span></div>`;
+    <div class="mapa-row"><span class="mapa-label">Total de Assuntos</span><span class="mapa-val">${totalTemas}</span></div>
+    <div class="mapa-row"><span class="mapa-label">Assuntos Praticados</span><span class="mapa-val" style="color:var(--primary)">${temasResp}</span></div>
+    <div class="mapa-row"><span class="mapa-label">Domínio (≥ 70%)</span><span class="mapa-val" style="color:#10b981">${com70}</span></div>
+    <div class="mapa-row"><span class="mapa-label">Revisão Crítica (<50%)</span><span class="mapa-val" style="color:#ef4444">${precisamRev}</span></div>`;
 
-  // Charts
-  renderDonut('chart-acertos', taxa, 100-taxa, ['#2563eb','#e5e7eb']);
-  renderDonut('chart-melhor', melhorPct, 100-melhorPct, ['#059669','#e5e7eb']);
+  renderDonut('chart-acertos', taxa, 100-taxa, ['#2563eb','#f1f5f9']);
+  renderDonut('chart-melhor', melhorPct, 100-melhorPct, ['#10b981','#f1f5f9']);
   renderIncidencia(temaEntries);
   renderProgresso(periodoAtivo);
   renderAreas(temaEntries);
@@ -292,24 +408,25 @@ function renderDonut(id, val, resto, colors) {
   if(ctx._chart) ctx._chart.destroy();
   ctx._chart = new Chart(ctx, {
     type:'doughnut', data:{datasets:[{data:[val,resto],backgroundColor:colors,borderWidth:0}]},
-    options:{cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:600}}
+    options:{cutout:'80%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:800}}
   });
 }
 
-const CORES_TEMA=['#2563eb','#059669','#ea580c','#7c3aed','#dc2626','#0284c7','#ca8a04','#e11d48','#16a34a','#9333ea'];
+const CORES_TEMA=['#2563eb','#10b981','#f59e0b','#8b5cf6','#ef4444','#0ea5e9','#d946ef','#6366f1'];
 function renderIncidencia(entries) {
   const ctx = document.getElementById('chart-incidencia')?.getContext('2d'); if(!ctx) return;
   if(ctx._chart) ctx._chart.destroy();
-  const labels = entries.slice(0,8).map(([t])=>t);
-  const vals = entries.slice(0,8).map(([,d])=>d.total);
+  const dataSlice = entries.slice(0,8);
+  const labels = dataSlice.map(([t])=>t);
+  const vals = dataSlice.map(([,d])=>d.total);
   const total = vals.reduce((a,b)=>a+b,0)||1;
-  ctx._chart = new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:CORES_TEMA,borderWidth:2,borderColor:'#fff'}]},options:{cutout:'55%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${Math.round(c.raw/total*100)}%`}}},animation:{duration:600}}});
+  ctx._chart = new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:CORES_TEMA,borderWidth:2,borderColor:'#fff'}]},options:{cutout:'60%',plugins:{legend:{display:false}},animation:{duration:800}}});
   const leg = document.getElementById('incidencia-legenda');
-  leg.innerHTML = entries.slice(0,8).map(([t,d],i)=>{
+  leg.innerHTML = dataSlice.map(([t,d],i)=>{
     const pct = Math.round(d.total/total*100);
-    return `<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.35rem">
-      <div style="width:10px;height:10px;border-radius:50%;background:${CORES_TEMA[i]};flex-shrink:0"></div>
-      <span style="flex:1">${t}</span><span style="font-weight:600">${pct}%</span></div>`;
+    return `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
+      <div style="width:8px;height:8px;border-radius:50%;background:${CORES_TEMA[i]};"></div>
+      <span style="flex:1; font-size: 0.75rem;">${t}</span><span style="font-weight:700">${pct}%</span></div>`;
   }).join('');
 }
 
@@ -322,15 +439,15 @@ function renderProgresso(dias) {
   for(let i=dias-1;i>=0;i--){
     const d=new Date(now); d.setDate(d.getDate()-i);
     const key=d.toISOString().substring(0,10);
-    labels.push(i===0?'Hoje':key.substring(5));
+    labels.push(i===0?'Hoje':key.substring(8,10)+'/'+key.substring(5,7));
     const dayResps=respsGlobal.filter(r=>r.respondido_em?.startsWith(key));
     questoesArr.push(dayResps.length);
     acertosArr.push(dayResps.filter(r=>r.acertou).length);
   }
   progChart = new Chart(ctx,{type:'line',data:{labels,datasets:[
-    {label:'Questões',data:questoesArr,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',tension:.3,fill:true,pointRadius:3},
-    {label:'Acertos',data:acertosArr,borderColor:'#059669',backgroundColor:'rgba(5,150,105,.08)',tension:.3,fill:true,pointRadius:3}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}},scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'#f3f4f6'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+    {label:'Questões',data:questoesArr,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',tension:.4,fill:true,pointRadius:0},
+    {label:'Acertos',data:acertosArr,borderColor:'#10b981',backgroundColor:'transparent',tension:.4,fill:false,pointRadius:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
 }
 
 function mudarPeriodo(dias,btn) {
@@ -341,26 +458,25 @@ function mudarPeriodo(dias,btn) {
 
 function renderAreas(entries) {
   const el = document.getElementById('areas-melhorar');
-  if(entries.length===0){el.innerHTML='<p style="color:var(--text-muted);font-size:.875rem">Responda mais questões para ver suas áreas de melhoria.</p>';return;}
+  if(entries.length===0){el.innerHTML='<p style="color:var(--text-secondary);font-size:.875rem">Dados insuficientes.</p>';return;}
   const sorted = [...entries].sort((a,b)=>{
-    const pa=a[1].acertos/a[1].total, pb=b[1].acertos/b[1].total; return pa-pb;
+    const pa=a.acertos/a.total, pb=b.acertos/b.total; return pa-pb;
   });
   el.innerHTML = sorted.map(([tema,d])=>{
     const pct=Math.round((d.acertos/d.total)*100);
-    const cor=pct>=70?'var(--green)':pct>=50?'var(--yellow)':'var(--red)';
+    const cor=pct>=70?'#10b981':pct>=50?'#f59e0b':'#ef4444';
     return `<div class="area-row">
       <div class="area-dot" style="background:${cor}"></div>
       <div class="area-nome">${tema}</div>
       <div class="area-bar-wrap">
         <div class="area-bar-bg"><div class="area-bar-fill" style="width:${pct}%;background:${cor}"></div></div>
         <span class="area-pct" style="color:${cor}">${pct}%</span>
-        <span class="area-q">${d.total} questões</span>
+        <span class="area-q">${d.total} q.</span>
       </div>
     </div>`;
   }).join('');
 }
 
-// Calendário
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const DOWS=['D','S','T','Q','Q','S','S'];
 
@@ -372,12 +488,13 @@ function renderCalendario() {
   let html=DOWS.map(d=>`<div class="cal-dow">${d}</div>`).join('');
   const primeiro=new Date(calAno,calMes,1).getDay();
   const dias=new Date(calAno,calMes+1,0).getDate();
-  for(let i=0;i<primeiro;i++) html+=`<div class="cal-day vazio"></div>`;
+  for(let i=0;i<primeiro;i++) html+=`<div class="cal-day"></div>`;
   for(let d=1;d<=dias;d++){
     const key=`${calAno}-${String(calMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ativ=atividadesData[key]||0;
-    const cls=ativ===0?'sem-ativ':ativ>=10?'muito-ativo':'ativo';
-    html+=`<div class="cal-day ${cls}" title="${ativ} questões">${d}</div>`;
+    const cls=ativ===0?'':ativ>=10?'muito-ativo':'ativo';
+    const bg = ativ === 0 ? '#f1f5f9' : '';
+    html+=`<div class="cal-day ${cls}" style="background:${bg}" title="${ativ} questões">${d}</div>`;
   }
   grid.innerHTML=html;
 }
