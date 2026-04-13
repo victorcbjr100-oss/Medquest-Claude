@@ -1,19 +1,23 @@
 // js/supabase.js
 
 const SUPABASE_URL = 'https://xkhwfudjcqmbhcdkpewr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhraHdmdWRqY3FtYmhjZGtwZXdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzOTAwMzQsImV4cCI6MjA4OTk2NjAzNH0.tOHjrpUCfqzt43b3MnC2sbCFXGJzFH95-p85lKGrwQI';
 
-// 🔥 cria cliente UMA VEZ só
-if (typeof window.supabaseClient === 'undefined') {
+// garante que a biblioteca carregou
+if (typeof window.supabase !== 'undefined') {
 
-  const client = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+  // cria o cliente UMA VEZ
+  if (!window.supabaseClient) {
 
-  // 👉 mantém compatibilidade com sistema antigo (login)
-  window.supabaseClient = client;
+    const client = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
-  // 👉 novo padrão (usado nas questões)
-  window.supabase = client;
+    // 👉 usado no auth.js
+    window.supabaseClient = client;
+
+    // 👉 usado no resto do sistema (questões)
+    window.db = client; // 🔥 usamos "db" pra não conflitar
+  }
 }
