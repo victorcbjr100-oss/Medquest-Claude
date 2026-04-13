@@ -19,14 +19,12 @@ body{
   color:#111;
 }
 
-/* LAYOUT */
 .container{
   max-width:950px;
   margin:0 auto;
   padding:28px;
 }
 
-/* CARD PRINCIPAL */
 .card{
   background:#fff;
   border:1px solid #e8e8e8;
@@ -35,7 +33,6 @@ body{
   box-shadow:0 8px 24px rgba(0,0,0,.05);
 }
 
-/* QUESTÃO */
 .question{
   font-size:18px;
   font-weight:600;
@@ -43,7 +40,6 @@ body{
   margin-bottom:18px;
 }
 
-/* ALTERNATIVAS */
 .option{
   padding:12px 14px;
   border:1px solid #e5e7eb;
@@ -69,7 +65,6 @@ body{
   background:#fef2f2 !important;
 }
 
-/* BOTÕES */
 .actions{
   display:flex;
   gap:10px;
@@ -95,7 +90,6 @@ button{
   border:1px solid #e5e7eb;
 }
 
-/* FEEDBACK */
 #feedback{
   margin-top:20px;
   display:none;
@@ -107,7 +101,6 @@ button{
   to{opacity:1; transform:translateY(0);}
 }
 
-/* TABS */
 .tabs{
   display:flex;
   gap:10px;
@@ -128,7 +121,6 @@ button{
   border-color:#2563eb;
 }
 
-/* COMENTÁRIOS */
 .comment{
   padding:14px 0;
   border-bottom:1px solid #eee;
@@ -150,13 +142,6 @@ button{
   align-items:center;
   justify-content:center;
   font-weight:700;
-}
-
-.reply{
-  margin-left:44px;
-  border-left:2px solid #eee;
-  padding-left:12px;
-  margin-top:8px;
 }
 
 textarea{
@@ -191,13 +176,14 @@ textarea{
     <div id="feedback">
 
       <div class="tabs">
-        <div class="tab active" onclick="setTab('alunos')">Alunos</div>
-        <div class="tab" onclick="setTab('prof')">Professor</div>
+        <div class="tab active" id="tab-alunos" onclick="setTab('alunos')">Alunos</div>
+        <div class="tab" id="tab-prof" onclick="setTab('prof')">Professor</div>
       </div>
 
       <div id="comments"></div>
 
       <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
+
       <button class="primary" style="margin-top:8px" onclick="sendComment()">
         Enviar
       </button>
@@ -209,6 +195,7 @@ textarea{
 </div>
 
 <script>
+
 let questions = [];
 let index = 0;
 let answered = false;
@@ -216,22 +203,29 @@ let tab = "alunos";
 
 /* INIT */
 window.addEventListener("load", async () => {
+
   const session = await exigirLogin();
   if(!session) return;
 
   document.getElementById("app").style.display = "block";
 
-  const { data } = await db.from("banco_questoes").select("*").limit(30);
+  const { data } = await db
+    .from("banco_questoes")
+    .select("*")
+    .limit(30);
+
   questions = data || [];
 
   render();
 });
 
-/* RENDER QUESTION */
+/* RENDER */
 function render(){
+
   answered = false;
 
   const q = questions[index];
+  if(!q) return;
 
   document.getElementById("question").innerText = q.enunciado;
 
@@ -263,7 +257,7 @@ async function answer(letter, el){
   });
 
   const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  const user = data?.user;
 
   await db.from("respostas_usuario").insert({
     user_id: user.id,
@@ -272,20 +266,28 @@ async function answer(letter, el){
     correta: correct
   });
 
-  loadComments();
+  await loadComments();
 }
 
-/* NAVIGATION */
+/* NAV */
 function prev(){ if(index>0){ index--; render(); } }
 function skip(){ if(index<questions.length-1){ index++; render(); } }
 function next(){ if(index<questions.length-1){ index++; render(); } }
 
-/* COMMENTS */
+/* TAB */
 function setTab(t){
   tab = t;
+
+  document.getElementById("tab-alunos").classList.remove("active");
+  document.getElementById("tab-prof").classList.remove("active");
+
+  if(t === "alunos") document.getElementById("tab-alunos").classList.add("active");
+  else document.getElementById("tab-prof").classList.add("active");
+
   loadComments();
 }
 
+/* COMMENTS */
 async function loadComments(){
 
   const q = questions[index];
@@ -294,6 +296,7 @@ async function loadComments(){
     .from("comentarios_questao")
     .select("*")
     .eq("questao_id", q.id)
+    .eq("tipo", tab === "prof" ? "professor" : "aluno")
     .order("created_at", { ascending:false });
 
   renderComments(data || []);
@@ -312,11 +315,13 @@ function renderComments(comments){
     <div class="comment">
 
       <div class="comment-header">
-        <div class="avatar">${c.tipo==="professor"?"P":"A"}</div>
+        <div class="avatar">
+          ${c.tipo === "professor" ? "P" : "A"}
+        </div>
 
         <div>
           <div style="font-weight:600;font-size:13px">
-            ${c.tipo==="professor"?"Professor":"Aluno"}
+            ${c.tipo === "professor" ? "Professor" : "Aluno"}
           </div>
           <div style="font-size:11px;color:#888">
             ${new Date(c.created_at).toLocaleString()}
@@ -332,26 +337,31 @@ function renderComments(comments){
   `).join("");
 }
 
-/* SEND COMMENT */
+/* SEND COMMENT (FIX DEFINITIVO) */
 async function sendComment(){
 
-  const text = document.getElementById("commentInput").value.trim();
-  if(!text) return;
-
   const q = questions[index];
+  const text = document.getElementById("commentInput").value.trim();
+
+  if(!text) return alert("Digite um comentário");
 
   const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  const user = data?.user;
 
-  await db.from("comentarios_questao").insert({
+  const { error } = await db.from("comentarios_questao").insert({
     questao_id: q.id,
     user_id: user.id,
     conteudo: text,
     tipo: "aluno"
   });
 
+  if(error){
+    console.error(error);
+    return alert("Erro ao enviar comentário");
+  }
+
   document.getElementById("commentInput").value = "";
-  loadComments();
+  await loadComments();
 }
 
 </script>
