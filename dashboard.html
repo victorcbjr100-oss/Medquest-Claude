@@ -1,108 +1,321 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Página Inicial — MedQuest Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #1e293b;
+      --text-secondary: #64748b;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --border-color: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .main-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    .page-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.875rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.025em;
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
+
+    .stat-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .icon-blue { background: #eff6ff; }
+    .icon-green { background: #ecfdf5; }
+    .icon-yellow { background: #fffbeb; }
+
+    /* Action Cards */
+    .action-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .action-card {
+      text-decoration: none;
+      padding: 1.75rem;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .action-card.blue { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .action-card.green { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+    .action-card.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+
+    .action-card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .action-card-sub { font-size: 0.875rem; opacity: 0.9; margin-bottom: 1rem; }
+    .action-card-link { font-size: 0.875rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+
+    .action-card-icon-wrap {
+      font-size: 3rem;
+      opacity: 0.2;
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+    }
+
+    /* General Card Component */
+    .card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 1.75rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title-wrap h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      height: 10px;
+      background: #f1f5f9;
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fill-green { background-color: var(--accent-green); }
+    .fill-blue { background-color: var(--accent-blue); }
+    .fill-red { background-color: #ef4444; }
+
+    /* Performance Grid */
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .perf-item-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    .perf-item-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .perf-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .action-cards { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 
 <main class="main-content" id="main" style="display:none">
   <div class="page-header">
-    <h1 id="saudacao">Olá! 👋</h1>
-    <p>Continue seus estudos médicos e acompanhe seu progresso</p>
+    <h1 id="saudacao">Carregando...</h1>
+    <p>Acompanhe seu desempenho e domine a residência médica.</p>
   </div>
 
-  <!-- Stats -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div><div class="stat-card-label">Total de Questões</div><div class="stat-card-value" id="s-total">—</div></div>
+      <div>
+        <div class="stat-card-label">Total Banco</div>
+        <div class="stat-card-value" id="s-total">—</div>
+      </div>
       <div class="stat-card-icon icon-blue">📚</div>
     </div>
     <div class="stat-card">
-      <div><div class="stat-card-label">Respondidas</div><div class="stat-card-value" id="s-respondidas">0</div></div>
+      <div>
+        <div class="stat-card-label">Respondidas</div>
+        <div class="stat-card-value" id="s-respondidas">0</div>
+      </div>
       <div class="stat-card-icon icon-green">🎯</div>
     </div>
     <div class="stat-card">
-      <div><div class="stat-card-label">Taxa de Acerto</div><div class="stat-card-value" id="s-taxa" style="color:var(--accent)">0%</div></div>
+      <div>
+        <div class="stat-card-label">Taxa de Acerto</div>
+        <div class="stat-card-value" id="s-taxa" style="color:var(--primary)">0%</div>
+      </div>
       <div class="stat-card-icon icon-blue">📈</div>
     </div>
     <div class="stat-card">
-      <div><div class="stat-card-label">Favoritas</div><div class="stat-card-value" id="s-favs">0</div></div>
+      <div>
+        <div class="stat-card-label">Favoritas</div>
+        <div class="stat-card-value" id="s-favs">0</div>
+      </div>
       <div class="stat-card-icon icon-yellow">⭐</div>
     </div>
   </div>
 
-  <!-- Action cards -->
   <div class="action-cards">
     <a href="temas.html" class="action-card blue">
       <div>
         <div class="action-card-title">Estudar por Temas</div>
-        <div class="action-card-sub">Pratique por especialidade</div>
-        <div class="action-card-link">Começar agora →</div>
+        <div class="action-card-sub">Prática focada por especialidade</div>
+        <div class="action-card-link">Acessar Banco →</div>
       </div>
       <div class="action-card-icon-wrap">📖</div>
     </a>
     <a href="simulado.html" class="action-card green">
       <div>
-        <div class="action-card-title">Fazer Simulado</div>
-        <div class="action-card-sub">Teste cronometrado</div>
-        <div class="action-card-link">Iniciar simulado →</div>
+        <div class="action-card-title">Novo Simulado</div>
+        <div class="action-card-sub">Treine com tempo real de prova</div>
+        <div class="action-card-link">Iniciar Agora →</div>
       </div>
       <div class="action-card-icon-wrap">⏱️</div>
     </a>
     <a href="estatisticas.html" class="action-card purple">
       <div>
-        <div class="action-card-title">Ver Estatísticas</div>
-        <div class="action-card-sub">Acompanhe seu progresso</div>
-        <div class="action-card-link">Ver →</div>
+        <div class="action-card-title">Desempenho</div>
+        <div class="action-card-sub">Análise detalhada por área</div>
+        <div class="action-card-link">Ver Métricas →</div>
       </div>
       <div class="action-card-icon-wrap">📊</div>
     </a>
   </div>
 
-  <!-- Resumo da Performance -->
-  <div class="card" style="margin-bottom:1.5rem">
-    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem">
-      <span style="font-size:1.1rem">🏅</span>
-      <h2 style="font-size:1rem;font-weight:700">Resumo da Performance</h2>
+  <div class="card">
+    <div class="card-title-wrap">
+      <span>🏅</span>
+      <h2>Resumo da Performance</h2>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-bottom:1.25rem">
-      <div style="text-align:center">
-        <div style="font-size:2rem;font-weight:800" id="r-taxa">0%</div>
-        <div style="font-size:.8rem;color:var(--text-secondary)">Taxa de Acerto Geral</div>
+    
+    <div class="perf-grid">
+      <div>
+        <div class="perf-item-value" id="r-taxa">0%</div>
+        <div class="perf-item-label">Taxa de Acerto</div>
       </div>
-      <div style="text-align:center">
-        <div style="font-size:2rem;font-weight:800" id="r-resp">0</div>
-        <div style="font-size:.8rem;color:var(--text-secondary)">Questões Respondidas</div>
-        <div style="font-size:.78rem;color:var(--text-muted)" id="r-pct">0% do total</div>
+      <div>
+        <div class="perf-item-value" id="r-resp">0</div>
+        <div class="perf-item-label">Respondidas</div>
+        <div style="font-size:.7rem; color:var(--text-secondary)" id="r-pct">0% do total</div>
       </div>
-      <div style="text-align:center">
-        <div style="font-size:2rem;font-weight:800" id="r-favs">0</div>
-        <div style="font-size:.8rem;color:var(--text-secondary)">Questões Favoritas</div>
-        <a href="favoritas.html" style="font-size:.78rem;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:.3rem">⭐ Ver Favoritas</a>
+      <div>
+        <div class="perf-item-value" id="r-favs">0</div>
+        <div class="perf-item-label">Favoritas</div>
+        <a href="favoritas.html" style="font-size:.7rem;color:var(--primary);text-decoration:none;display:block;margin-top:4px">VER TODAS</a>
       </div>
     </div>
-    <div style="margin-top:.5rem">
-      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-secondary);margin-bottom:.4rem">
-        <span>Progresso geral</span><span id="r-pct2">0%</span>
+
+    <div style="margin-top:2rem">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;margin-bottom:.5rem">
+        <span>Progresso na Plataforma</span><span id="r-pct2">0%</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill fill-green" id="bar-prog" style="width:0%"></div></div>
+      <div class="progress-bar">
+        <div class="progress-fill fill-green" id="bar-prog" style="width:0%"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Desempenho por tema -->
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
-      <h2 style="font-size:1rem;font-weight:700">Desempenho por Tema</h2>
-      <a href="estatisticas.html" style="font-size:.82rem;color:var(--accent);text-decoration:none">Ver tudo →</a>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-size:1.125rem;font-weight:700">Top Temas</h2>
+      <a href="estatisticas.html" style="font-size:.82rem;color:var(--primary);text-decoration:none;font-weight:600">Ver relatório completo →</a>
     </div>
-    <div id="temas-perf"><p style="color:var(--text-muted);font-size:.875rem">Responda questões para ver seu desempenho por tema.</p></div>
+    <div id="temas-perf">
+      <p style="color:var(--text-secondary);font-size:.875rem">Aguardando dados de estudo...</p>
+    </div>
   </div>
 </main>
 
@@ -111,7 +324,8 @@ window.addEventListener('load', async () => {
   const session = await exigirLogin(); if(!session) return;
   document.getElementById('main').style.display='block';
   const sb = window.supabaseClient, uid = session.user.id;
-  const nome = session.user.user_metadata?.nome || session.user.email.split('@')[0];
+  
+  const nome = session.user.user_metadata?.nome || session.user.email.split('@');
   document.getElementById('saudacao').textContent = `Olá, ${nome}! 👋`;
 
   // Total banco
@@ -123,15 +337,18 @@ window.addEventListener('load', async () => {
   document.getElementById('s-favs').textContent = favTotal||0;
   document.getElementById('r-favs').textContent = favTotal||0;
 
-  // Respostas com tema
+  // Respostas
   const {data:resps} = await sb.from('respostas').select('acertou, questoes(tema)').eq('user_id',uid);
-  if (resps && resps.length>0) {
+  
+  if (resps && resps.length > 0) {
     const acertos = resps.filter(r=>r.acertou).length;
     const taxa = Math.round((acertos/resps.length)*100);
+    
     document.getElementById('s-respondidas').textContent = resps.length;
     document.getElementById('s-taxa').textContent = taxa+'%';
     document.getElementById('r-taxa').textContent = taxa+'%';
     document.getElementById('r-resp').textContent = resps.length;
+    
     const pct = total ? Math.round((resps.length/total)*100) : 0;
     document.getElementById('r-pct').textContent = pct+'% do total';
     document.getElementById('r-pct2').textContent = pct+'%';
@@ -140,22 +357,29 @@ window.addEventListener('load', async () => {
     // Por tema
     const porTema = {};
     resps.forEach(r => {
-      const t = r.questoes?.tema||'Outros';
+      const t = r.questoes?.tema || 'Outros';
       if(!porTema[t]) porTema[t]={total:0,acertos:0};
       porTema[t].total++; if(r.acertou) porTema[t].acertos++;
     });
+
     const container = document.getElementById('temas-perf');
-    container.innerHTML = Object.entries(porTema).sort((a,b)=>b[1].total-a[1].total).slice(0,5).map(([tema,d])=>{
-      const p = Math.round((d.acertos/d.total)*100);
-      const cor = p>=70?'fill-green':p>=50?'fill-blue':'fill-red';
-      return `<div style="margin-bottom:1rem">
-        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.4rem">
-          <span style="font-weight:500">${tema}</span>
-          <span style="color:var(--text-secondary)">${p}% (${d.acertos}/${d.total})</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill ${cor}" style="width:${p}%"></div></div>
-      </div>`;
-    }).join('');
+    container.innerHTML = Object.entries(porTema)
+      .sort((a,b) => b.total - a.total)
+      .slice(0,5)
+      .map(([tema, d]) => {
+        const p = Math.round((d.acertos/d.total)*100);
+        const cor = p >= 75 ? 'fill-green' : p >= 50 ? 'fill-blue' : 'fill-red';
+        return `
+          <div style="margin-bottom:1.25rem">
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.5rem">
+              <span style="font-weight:600; color:var(--text-main)">${tema}</span>
+              <span style="color:var(--text-secondary)">${p}% acerto (${d.acertos}/${d.total})</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${cor}" style="width:${p}%"></div>
+            </div>
+          </div>`;
+      }).join('');
   }
 });
 </script>
