@@ -3,35 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — Elite</title>
+<title>MedQuest — Questões</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 body{
   margin:0;
-  font-family:Inter;
+  font-family:Inter, sans-serif;
   background:#f6f7fb;
   color:#0f172a;
 }
 
 /* CONTAINER */
-.wrap{
+.main-content{
   max-width:900px;
   margin:0 auto;
-  padding:24px;
+  padding:28px 18px;
 }
 
-/* HEADER INFO */
+/* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
   font-size:13px;
   color:#64748b;
+  margin-bottom:10px;
 }
 
 /* PROGRESS */
@@ -43,7 +44,7 @@ body{
   margin-bottom:18px;
 }
 
-.progress-bar{
+.progress-fill{
   height:100%;
   width:0%;
   background:#2563eb;
@@ -54,9 +55,9 @@ body{
 .card{
   background:#fff;
   border:1px solid #e5e7eb;
-  border-radius:16px;
-  padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.05);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
 }
 
 /* BADGES */
@@ -71,32 +72,36 @@ body{
   padding:4px 10px;
   border-radius:999px;
   border:1px solid #e5e7eb;
+  background:#fff;
+  color:#334155;
 }
 
-.badge.med{
+.badge-level{
   border-color:#facc15;
+  background:#fffbeb;
   color:#b45309;
 }
 
-/* QUESTION */
+/* QUESTÃO */
 .question{
-  font-size:17px;
+  font-size:18px;
   font-weight:600;
   line-height:1.5;
   margin:12px 0 18px;
 }
 
-/* OPTIONS */
+/* OPÇÕES */
 .option{
-  border:1px solid #e5e7eb;
-  padding:12px;
-  border-radius:12px;
-  margin-top:10px;
-  cursor:pointer;
-  transition:.2s;
   display:flex;
   gap:10px;
   align-items:flex-start;
+  padding:12px 14px;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  margin-top:10px;
+  cursor:pointer;
+  transition:.2s;
+  background:#fff;
 }
 
 .option:hover{
@@ -105,8 +110,8 @@ body{
 }
 
 .letter{
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
   border-radius:50%;
   border:1px solid #cbd5e1;
   display:flex;
@@ -115,23 +120,26 @@ body{
   font-weight:700;
   font-size:13px;
   flex-shrink:0;
+  background:#fff;
 }
 
+/* CORREÇÃO */
 .correct{
   border:2px solid #16a34a !important;
-  background:#ecfdf5;
+  background:#ecfdf5 !important;
 }
 
 .wrong{
   border:2px solid #dc2626 !important;
-  background:#fef2f2;
+  background:#fef2f2 !important;
 }
 
-/* NAV */
-.nav{
+/* BOTÕES */
+.actions{
   display:flex;
   justify-content:space-between;
   margin-top:18px;
+  gap:10px;
 }
 
 button{
@@ -139,16 +147,16 @@ button{
   border:none;
   cursor:pointer;
   padding:10px 14px;
-  border-radius:10px;
+  border-radius:12px;
   font-weight:600;
 }
 
-.btn{
+.btn-primary{
   background:#2563eb;
   color:#fff;
 }
 
-.btn2{
+.btn-secondary{
   background:#fff;
   border:1px solid #e5e7eb;
 }
@@ -157,14 +165,8 @@ button{
 .feedback{
   display:none;
   margin-top:18px;
+  padding-top:16px;
   border-top:1px solid #e5e7eb;
-  padding-top:14px;
-  animation:fade .2s ease;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(5px)}
-  to{opacity:1;transform:translateY(0)}
 }
 
 /* TABS */
@@ -188,10 +190,10 @@ button{
   border-color:#2563eb;
 }
 
-/* COMMENTS */
+/* COMENTÁRIOS */
 .comment{
   padding:12px 0;
-  border-bottom:1px solid #eee;
+  border-bottom:1px solid #f1f5f9;
 }
 
 .user{
@@ -217,10 +219,16 @@ textarea{
   width:100%;
   margin-top:10px;
   padding:10px;
-  border-radius:10px;
+  border-radius:12px;
   border:1px solid #e5e7eb;
   font-family:Inter;
   resize:none;
+  outline:none;
+}
+
+textarea:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.1);
 }
 </style>
 
@@ -228,7 +236,7 @@ textarea{
 
 <body>
 
-<div class="wrap">
+<main class="main-content" id="main" style="display:none">
 
   <div class="header">
     <div id="counter">Questão 1 de 1</div>
@@ -236,24 +244,24 @@ textarea{
   </div>
 
   <div class="progress">
-    <div class="progress-bar" id="progress"></div>
+    <div class="progress-fill" id="progress"></div>
   </div>
 
   <div class="card">
 
     <div class="badges">
-      <span class="badge">Anestesiologia</span>
-      <span class="badge med">Médio</span>
+      <span class="badge">Tema</span>
+      <span class="badge-level">Médio</span>
     </div>
 
-    <div class="question" id="q"></div>
+    <div class="question" id="question"></div>
 
     <div id="options"></div>
 
-    <div class="nav">
-      <button class="btn2" onclick="prev()">Anterior</button>
-      <button class="btn2" onclick="skip()">Pular</button>
-      <button class="btn" onclick="next()">Próxima</button>
+    <div class="actions">
+      <button class="btn-secondary" onclick="prev()">Anterior</button>
+      <button class="btn-secondary" onclick="skip()">Pular</button>
+      <button class="btn-primary" onclick="next()">Próxima</button>
     </div>
 
     <div class="feedback" id="feedback">
@@ -265,50 +273,57 @@ textarea{
 
       <div id="comments"></div>
 
-      <textarea id="txt" placeholder="Escreva um comentário..."></textarea>
-      <button class="btn" style="margin-top:8px" onclick="sendComment()">Enviar</button>
+      <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
+      <button class="btn-primary" style="margin-top:8px" onclick="sendComment()">
+        Enviar
+      </button>
 
     </div>
 
   </div>
 
-</div>
+</main>
 
 <script>
 
-let qIndex = 0;
 let questions = [];
+let index = 0;
 let answered = false;
 let tab = "aluno";
 let score = {c:0,e:0};
 
 /* INIT */
-window.onload = async () => {
+window.addEventListener("load", async () => {
+
+  const session = await exigirLogin();
+  if(!session) return;
+
+  document.getElementById("main").style.display = "block";
 
   const { data } = await db.from("banco_questoes").select("*").limit(30);
   questions = data || [];
 
   render();
-};
+});
 
 /* RENDER */
 function render(){
 
-  const q = questions[qIndex];
+  const q = questions[index];
   if(!q) return;
 
   answered = false;
 
-  document.getElementById("q").innerText = q.enunciado;
+  document.getElementById("question").innerText = q.enunciado;
 
   document.getElementById("counter").innerText =
-    `Questão ${qIndex+1} de ${questions.length}`;
+    `Questão ${index+1} de ${questions.length}`;
 
   document.getElementById("progress").style.width =
-    ((qIndex+1)/questions.length)*100 + "%";
+    ((index+1)/questions.length)*100 + "%";
 
   document.getElementById("options").innerHTML =
-    ["a","b","c","d","e"].map(l => `
+    ["a","b","c","d"].map(l => `
       <div class="option" onclick="answer('${l}', this)">
         <div class="letter">${l.toUpperCase()}</div>
         <div>${q["alternativa_"+l]}</div>
@@ -324,14 +339,13 @@ async function answer(l, el){
   if(answered) return;
   answered = true;
 
-  const q = questions[qIndex];
+  const q = questions[index];
   const correct = l === q.correta;
 
   document.getElementById("feedback").style.display = "block";
 
   document.querySelectorAll(".option").forEach(o=>{
     const letter = o.innerText.trim()[0].toLowerCase();
-
     if(letter === q.correta) o.classList.add("correct");
     if(o === el && !correct) o.classList.add("wrong");
   });
@@ -345,9 +359,9 @@ async function answer(l, el){
 }
 
 /* NAV */
-function prev(){ if(qIndex>0){ qIndex--; render(); } }
-function skip(){ if(qIndex<questions.length-1){ qIndex++; render(); } }
-function next(){ if(qIndex<questions.length-1){ qIndex++; render(); } }
+function prev(){ if(index>0){ index--; render(); } }
+function skip(){ if(index<questions.length-1){ index++; render(); } }
+function next(){ if(index<questions.length-1){ index++; render(); } }
 
 /* COMMENTS */
 function setTab(t){
@@ -357,14 +371,14 @@ function setTab(t){
 
 async function loadComments(){
 
-  const q = questions[qIndex];
+  const q = questions[index];
 
   const { data } = await db
     .from("comentarios_questao")
     .select("*")
     .eq("questao_id", q.id)
     .eq("tipo", tab)
-    .order("created_at", { ascending:false });
+    .order("created_at",{ascending:false});
 
   renderComments(data || []);
 }
@@ -382,7 +396,7 @@ function renderComments(list){
     <div class="comment">
       <div class="user">
         <div class="avatar">${c.tipo==="prof"?"P":"A"}</div>
-        <div style="font-size:12px;color:#555">
+        <div style="font-size:12px;color:#666">
           ${new Date(c.created_at).toLocaleString()}
         </div>
       </div>
@@ -396,8 +410,8 @@ function renderComments(list){
 /* SEND */
 async function sendComment(){
 
-  const q = questions[qIndex];
-  const text = document.getElementById("txt").value.trim();
+  const q = questions[index];
+  const text = document.getElementById("commentInput").value.trim();
 
   if(!text) return;
 
@@ -407,7 +421,7 @@ async function sendComment(){
     tipo: tab
   });
 
-  document.getElementById("txt").value = "";
+  document.getElementById("commentInput").value = "";
   loadComments();
 }
 
