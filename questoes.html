@@ -57,7 +57,7 @@
 
 <main class="main-content" id="main" style="display:none">
 
-  <h1 style="font-weight:800; margin-bottom:1.5rem;">🧠 Questões</h1>
+  <h1 id="titulo" style="font-weight:800; margin-bottom:1.5rem;">🧠 Questões</h1>
 
   <div class="card" id="questao"></div>
 
@@ -68,6 +68,10 @@ let questoes = [];
 let atual = 0;
 let respondeu = false;
 
+let tema = null;
+let subtema = null;
+
+
 // 🔐 LOGIN + SIDEBAR
 window.addEventListener('load', async () => {
   const session = await exigirLogin();
@@ -75,16 +79,54 @@ window.addEventListener('load', async () => {
 
   document.getElementById('main').style.display = 'block';
 
+  // pegar parâmetros da URL
+  const params = new URLSearchParams(window.location.search);
+  tema = params.get('tema');
+  subtema = params.get('subtema');
+
+  atualizarTitulo();
+
   carregarQuestoes();
 });
 
 
+// 🔹 TÍTULO DINÂMICO
+function atualizarTitulo(){
+  let titulo = '🧠 Questões';
+
+  if(tema){
+    titulo = `📚 ${tema}`;
+  }
+
+  if(subtema){
+    titulo += ` — ${subtema}`;
+  }
+
+  document.getElementById('titulo').innerText = titulo;
+}
+
+
 // 🔹 CARREGAR QUESTÕES
 async function carregarQuestoes(){
-  const { data } = await supabase
-    .from('questoes')
-    .select('*')
-    .limit(10);
+
+  let query = supabase.from('questoes').select('*');
+
+  if(tema){
+    query = query.eq('tema', tema);
+  }
+
+  if(subtema){
+    query = query.eq('subtema', subtema);
+  }
+
+  const { data, error } = await query.limit(10);
+
+  console.log('QUESTÕES:', data, error);
+
+  if(error){
+    document.getElementById('questao').innerHTML = 'Erro ao carregar questões';
+    return;
+  }
 
   if(!data || data.length === 0){
     document.getElementById('questao').innerHTML = 'Nenhuma questão encontrada';
