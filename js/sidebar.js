@@ -59,35 +59,28 @@
             padding: 0 1.5rem 2rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.85rem;
         }
 
         .sidebar-brand-icon {
             background-color: var(--sb-accent);
             color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
         }
 
         .sidebar-brand-name {
             color: white;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             letter-spacing: -0.025em;
-        }
-
-        .sidebar-brand-sub {
-            font-size: 0.7rem;
-            color: var(--sb-text);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         .sidebar-section-label {
@@ -225,10 +218,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <div class="sidebar-brand-icon">MQ</div>
-        <div>
-            <div class="sidebar-brand-name">MedQuest</div>
-            <div class="sidebar-brand-sub">Premium Prep</div>
-        </div>
+        <div class="sidebar-brand-name">MedQuest</div>
       </div>
 
       <div class="sidebar-section-label">Estudos</div>
@@ -277,7 +267,7 @@
     }
 })();
 
-/* SVG Icons - Mantidos com Stroke para leveza visual */
+/* SVG Icons */
 function iconHome() { return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`; }
 function iconTemas() { return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`; }
 function iconSimulado() { return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`; }
