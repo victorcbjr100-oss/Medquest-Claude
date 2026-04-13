@@ -2,25 +2,95 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Cardiologia</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Especialidades — MedQuest Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-body{font-family:Arial;padding:20px}
-.subtema{padding:12px;border:1px solid #ccc;margin-bottom:8px;cursor:pointer}
+:root {
+  --bg-body: #f8fafc;
+  --surface: #ffffff;
+  --primary: #2563eb;
+  --text-main: #1e293b;
+  --border: #e2e8f0;
+  --radius-lg: 16px;
+}
+
+body {
+  background: var(--bg-body);
+  font-family: 'Inter', sans-serif;
+}
+
+.main-content {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.materias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.materia-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.materia-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+}
+
+.materia-emoji {
+  font-size: 2rem;
+}
+
+.materia-nome {
+  font-weight: 700;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Cardiologia</h1>
+<main class="main-content">
+  <h1>Especialidades</h1>
 
-<div class="subtema" onclick="abrir('Hipertensão arterial')">Hipertensão arterial</div>
-<div class="subtema" onclick="abrir('Arritmias')">Arritmias</div>
-<div class="subtema" onclick="abrir('Miocardiopatias')">Miocardiopatias</div>
-<div class="subtema" onclick="abrir('Insuficiência cardíaca')">Insuficiência cardíaca</div>
+  <div class="materias-grid">
+
+    <div class="materia-card" onclick="ir('cardiologia.html')">
+      <div class="materia-emoji">❤️</div>
+      <div class="materia-nome">Cardiologia</div>
+    </div>
+
+    <div class="materia-card" onclick="ir('endocrinologia.html')">
+      <div class="materia-emoji">🧪</div>
+      <div class="materia-nome">Endocrinologia</div>
+    </div>
+
+    <div class="materia-card" onclick="ir('pediatria.html')">
+      <div class="materia-emoji">👶</div>
+      <div class="materia-nome">Pediatria</div>
+    </div>
+
+  </div>
+</main>
 
 <script>
-function abrir(sub){
-  window.location.href = `questoes.html?tema=Cardiologia&subtema=${encodeURIComponent(sub)}`
+function ir(pagina){
+  window.location.href = pagina;
 }
 </script>
 
