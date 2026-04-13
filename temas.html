@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Especialidades — MedQuest Pro</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 
 <style>
 :root {
@@ -13,21 +17,23 @@
   --surface: #ffffff;
   --primary: #2563eb;
   --text-main: #1e293b;
+  --text-muted: #64748b;
   --border: #e2e8f0;
   --radius-lg: 16px;
 }
 
 body {
-  background: var(--bg-body);
+  background-color: var(--bg-body);
   font-family: 'Inter', sans-serif;
 }
 
 .main-content {
   max-width: 900px;
-  margin: auto;
-  padding: 2rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
 }
 
+/* ===== NOVOS BLOCOS ===== */
 .materias-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -65,9 +71,17 @@ body {
 
 <body>
 
-<main class="main-content">
-  <h1>Especialidades</h1>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
 
+<main class="main-content" id="main" style="display:none">
+
+  <div class="page-header" style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2rem; font-weight: 800;">Especialidades</h1>
+    <p style="color: var(--text-muted);">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
+  </div>
+
+  <!-- 🔥 NOVOS BLOCOS -->
   <div class="materias-grid">
 
     <div class="materia-card" onclick="ir('cardiologia.html')">
@@ -86,9 +100,17 @@ body {
     </div>
 
   </div>
+
 </main>
 
 <script>
+window.addEventListener('load', async () => {
+  const session = await exigirLogin();
+  if(!session) return;
+
+  document.getElementById('main').style.display = 'block';
+});
+
 function ir(pagina){
   window.location.href = pagina;
 }
