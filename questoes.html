@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
-    
     <script src="js/sidebar.js" defer></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,176 +16,113 @@
         :root {
             --sb-bg: #0f172a;
             --sb-text: #94a3b8;
-            --sb-active-bg: #1e293b;
             --sb-accent: #2563eb;
         }
 
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background: #f6f7fb;
-            color: #111;
+            background: #f8fafc;
             display: flex;
         }
 
-        /* ================= ESTRUTURA FIXA DA SIDEBAR ================= */
+        /* SIDEBAR FIXA */
         .sidebar {
             width: 260px;
             height: 100vh;
-            background-color: var(--sb-bg);
-            color: var(--sb-text);
+            background: var(--sb-bg);
             position: fixed;
-            left: 0;
-            top: 0;
+            left: 0; top: 0;
             display: flex;
             flex-direction: column;
             z-index: 1000;
         }
 
-        .sidebar-brand {
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-            color: white;
-            font-weight: 700;
-            font-size: 1.25rem;
-        }
-
-        .sidebar-brand-icon {
-            background: var(--sb-accent);
-            width: 32px; height: 32px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        /* Menu onde o sidebar.js injeta os links */
-        #sidebar-nav {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .sidebar-footer {
-            padding: 1rem;
-            border-top: 1px solid #1e293b;
-        }
-
-        .sidebar-user-card {
-            background: var(--sb-active-bg);
-            padding: 10px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar-avatar {
-            width: 35px; height: 35px;
-            background: var(--sb-accent);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold;
-        }
-
-        .sidebar-user-info { overflow: hidden; }
-        .sidebar-user-name { color: white; font-size: 0.85rem; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-        .sidebar-user-email { color: var(--sb-text); font-size: 0.7rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-
-        /* ================= CONTEÚDO PRINCIPAL (CORRIGE DESCENTRALIZAÇÃO) ================= */
+        /* CONTEÚDO CENTRALIZADO */
         #app {
-            margin-left: 260px; /* Alinha com a largura da sidebar */
-            width: calc(100% - 260px);
-            min-height: 100vh;
+            margin-left: 260px; /* Margem da sidebar */
+            flex: 1;
             display: flex;
-            flex-direction: column;
-            align-items: center; /* Centraliza horizontalmente o conteúdo */
+            justify-content: center; /* Centraliza horizontalmente */
             padding: 40px 20px;
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
         .container {
             width: 100%;
-            max-width: 800px; /* Largura ideal para leitura de questões */
+            max-width: 800px; /* Largura focada para estudo */
         }
 
         .card {
             background: #fff;
-            border: 1px solid #e8e8e8;
-            border-radius: 14px;
-            padding: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,.03);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        .question { font-size: 18px; font-weight: 600; line-height: 1.6; margin-bottom: 24px; color: #1e293b; }
+        .question { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 25px; line-height: 1.5; }
 
         .option {
-            padding: 14px 16px;
+            padding: 16px;
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 12px;
             cursor: pointer;
-            transition: all .2s;
-            font-size: 15px;
+            transition: 0.2s;
+            font-size: 16px;
             display: flex;
             align-items: center;
         }
 
-        .option:hover { background: #f8fafc; }
+        .option:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .option.selected { border-color: #2563eb; background: #eff6ff; }
-        .option.correct { border: 2px solid #16a34a; background: #f0fdf4; color: #166534; }
-        .option.wrong { border: 2px solid #dc2626; background: #fef2f2; color: #991b1b; }
+        .option.correct { border: 2px solid #10b981; background: #ecfdf5; color: #065f46; }
+        .option.wrong { border: 2px solid #ef4444; background: #fef2f2; color: #991b1b; }
 
         .actions {
-            display: flex; justify-content: space-between;
-            margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;
         }
 
         button {
-            font-family: 'Inter', sans-serif; font-weight: 600; border: none;
-            border-radius: 8px; padding: 12px 20px; cursor: pointer; font-size: 14px;
+            font-family: inherit; font-weight: 600; border: none;
+            border-radius: 10px; padding: 12px 24px; cursor: pointer; transition: 0.2s;
         }
 
-        .primary { background: #2563eb; color: #fff; }
+        .primary { background: #2563eb; color: white; }
+        .primary:hover { background: #1d4ed8; }
         .secondary { background: #f1f5f9; color: #475569; }
 
-        /* ================= COMENTÁRIOS ================= */
-        #feedback {
-            margin-top: 30px; display: none;
-            background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;
-        }
+        #feedback { margin-top: 30px; display: none; }
 
-        .comment-box {
-            display: flex; flex-direction: column; gap: 10px; margin-top: 20px;
-        }
+        /* AREA DE USUARIO NA SIDEBAR */
+        .sidebar-footer { margin-top: auto; padding: 20px; border-top: 1px solid #1e293b; }
+        .sidebar-user-card { display: flex; align-items: center; gap: 12px; color: white; }
+        .sidebar-avatar { width: 40px; height: 40px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .sidebar-user-name { font-size: 14px; font-weight: 600; }
 
-        textarea {
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;
-            font-family: 'Inter', sans-serif; resize: vertical; min-height: 100px; box-sizing: border-box;
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .sidebar { display: none; }
-            #app { margin-left: 0; width: 100%; }
+            #app { margin-left: 0; }
         }
     </style>
 </head>
-
 <body>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-icon">MQ</div>
-            <span>MedQuest</span>
-        </div>
+    <aside class="sidebar">
+        <div style="padding: 25px; color: white; font-weight: 800; font-size: 1.5rem;">MedQuest</div>
         
-        <nav id="sidebar-nav"></nav>
+        <nav id="sidebar-menu" style="flex: 1;"></nav>
+        <div id="nav-links"></div>
 
         <div class="sidebar-footer">
             <div class="sidebar-user-card">
                 <div class="sidebar-avatar" id="sb-avatar">?</div>
-                <div class="sidebar-user-info">
+                <div>
                     <div class="sidebar-user-name" id="sb-nome">Carregando...</div>
-                    <div class="sidebar-user-email" id="sb-email"></div>
+                    <div style="font-size: 11px; color: #94a3b8;" id="sb-email">...</div>
                 </div>
             </div>
         </div>
@@ -199,19 +135,20 @@
                 <div id="options"></div>
 
                 <div class="actions">
-                    <div class="nav-buttons">
-                        <button class="secondary" onclick="prev()">⬅ Anterior</button>
-                        <button class="secondary" onclick="next()">Próxima ➜</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="secondary" onclick="prev()">Anterior</button>
+                        <button class="secondary" onclick="next()">Próxima</button>
                     </div>
                     <button class="primary" id="btnResponder" onclick="confirm()">Responder</button>
                 </div>
 
                 <div id="feedback">
-                    <h3 style="font-size: 16px; margin-bottom: 15px;">Discussão da Questão</h3>
+                    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+                    <h3 style="margin-bottom: 20px;">Discussão</h3>
                     <div id="comments"></div>
-                    <div class="comment-box">
-                        <textarea id="newComment" placeholder="Escreva seu comentário ou dúvida..."></textarea>
-                        <button class="primary" style="align-self: flex-end;" onclick="sendComment()">Enviar comentário</button>
+                    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                        <textarea id="newComment" placeholder="Digite seu comentário..."></textarea>
+                        <button class="primary" style="align-self: flex-end" onclick="sendComment()">Enviar Comentário</button>
                     </div>
                 </div>
             </div>
@@ -225,38 +162,39 @@ let selected = null;
 let answered = false;
 
 window.addEventListener("load", async () => {
-    // 1. Verificar login (função do seu auth.js)
     if (typeof exigirLogin === "function") await exigirLogin();
-    
     document.getElementById("app").style.display = "flex";
 
-    // 2. Carregar questões usando a conexão global 'db' do seu supabase.js
-    if (typeof db !== "undefined") {
-        try {
-            const { data, error } = await db.from("banco_questoes").select("*").limit(50);
-            if (error) throw error;
-            qs = data || [];
-            if(qs.length > 0) render();
-        } catch (err) {
-            console.error("Erro Supabase:", err);
-            document.getElementById("question").innerText = "Erro ao carregar questões do banco.";
+    // Carregar dados do Perfil (Caso o sidebar.js falhe, esse aqui garante)
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const nome = user.user_metadata?.nome || user.email.split('@');
+            document.getElementById('sb-nome').textContent = nome;
+            document.getElementById('sb-email').textContent = user.email;
+            document.getElementById('sb-avatar').textContent = nome.toUpperCase();
         }
+    } catch (e) { console.error("Erro perfil:", e); }
+
+    // Carregar Questões
+    if (typeof db !== "undefined") {
+        const { data } = await db.from("banco_questoes").select("*").limit(20);
+        qs = data || [];
+        if(qs.length > 0) render();
     }
 });
 
 function render(){
-    selected = null;
-    answered = false;
+    selected = null; answered = false;
     const q = qs[i];
-    
     document.getElementById("btnResponder").style.display = "block";
+    document.getElementById("feedback").style.display = "none";
     document.getElementById("question").innerText = q.enunciado;
     document.getElementById("options").innerHTML = ["a","b","c","d"].map(l => `
         <div class="option" onclick="selectOpt('${l}', this)">
-            <strong>${l.toUpperCase()})</strong> &nbsp;${q["alternativa_"+l]}
+            <strong>${l.toUpperCase()})</strong> &nbsp; ${q["alternativa_"+l]}
         </div>
     `).join("");
-    document.getElementById("feedback").style.display = "none";
 }
 
 function selectOpt(letter, el){
@@ -269,103 +207,56 @@ function selectOpt(letter, el){
 async function confirm(){
     if(!selected || answered) return;
     answered = true;
-
     const q = qs[i];
     const correct = selected.letter === q.correta;
-    document.getElementById("feedback").style.display = "block";
-    document.getElementById("btnResponder").style.display = "none";
 
     document.querySelectorAll(".option").forEach(o => {
-        const text = o.innerText.trim();
-        const l = text.toLowerCase();
+        const l = o.innerText.trim().toLowerCase();
         if(l === q.correta) o.classList.add("correct");
         if(o === selected.el && !correct) o.classList.add("wrong");
     });
 
-    // Registrar resposta (db vem de supabase.js)
-    try {
-        const { data } = await supabase.auth.getUser();
-        if (data?.user) {
-            await db.from("respostas_usuario").insert({
-                user_id: data.user.id,
-                questao_id: q.id,
-                resposta_marcada: selected.letter,
-                correta: correct
-            });
-        }
-    } catch(e) { console.error("Erro ao salvar resposta:", e); }
-
+    document.getElementById("btnResponder").style.display = "none";
+    document.getElementById("feedback").style.display = "block";
     loadComments();
 }
 
-function prev(){ if(i > 0){ i--; render(); } }
-function next(){ if(i < qs.length - 1){ i++; render(); } }
-
-/* --- COMENTÁRIOS --- */
+function prev(){ if(i > 0) { i--; render(); } }
+function next(){ if(i < qs.length - 1) { i++; render(); } }
 
 async function loadComments(){
-    const q = qs[i];
-    try {
-        const { data, error } = await db
-            .from("comentarios_questao")
-            .select("*")
-            .eq("questao_id", q.id)
-            .order("created_at", { ascending: false });
-
-        if (!error) renderComments(data || []);
-    } catch(e) { console.error("Erro ao buscar comentários:", e); }
-}
-
-function renderComments(cms){
+    const { data } = await db.from("comentarios_questao").select("*").eq("questao_id", qs[i].id);
     const box = document.getElementById("comments");
-    if(cms.length === 0) {
-        box.innerHTML = "<p style='font-size:13px; color:#64748b;'>Nenhum comentário ainda. Seja o primeiro!</p>";
-        return;
-    }
-    box.innerHTML = cms.map(c => `
-        <div style="padding: 12px 0; border-bottom: 1px solid #edf2f7;">
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
-                <div style="font-weight:700; font-size:13px;">${c.user_name || "Usuário"}</div>
-                <div style="font-size:11px; color:#94a3b8;">${new Date(c.created_at).toLocaleDateString()}</div>
-            </div>
-            <div style="font-size:14px; color:#334155; line-height:1.5;">${c.conteudo}</div>
+    box.innerHTML = (data || []).map(c => `
+        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0;">
+            <b style="font-size: 13px;">${c.user_name}</b>
+            <p style="margin: 5px 0 0; font-size: 14px;">${c.conteudo}</p>
         </div>
-    `).join("");
+    `).join("") || "<p style='color:#94a3b8; font-size: 13px;'>Sem comentários ainda.</p>";
 }
 
 async function sendComment(){
-    const textEl = document.getElementById("newComment");
-    const text = textEl.value.trim();
+    const text = document.getElementById("newComment").value.trim();
     if(!text) return;
 
-    try {
-        // Pega o usuário logado via supabase.auth
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
-        if (authError || !user) {
-            alert("Sessão expirada. Por favor, faça login novamente.");
-            return;
-        }
+    const { data: { user } } = await supabase.auth.getUser();
+    if(!user) return alert("Faça login para comentar");
 
-        const nomeUsuario = user.user_metadata?.nome || user.email.split('@');
+    const { error } = await db.from("comentarios_questao").insert({
+        questao_id: qs[i].id,
+        user_id: user.id,
+        user_name: user.user_metadata?.nome || user.email.split('@'),
+        conteudo: text
+    });
 
-        const { error } = await db.from("comentarios_questao").insert({
-            questao_id: qs[i].id,
-            user_id: user.id,
-            user_name: nomeUsuario,
-            conteudo: text
-        });
-
-        if (error) throw error;
-
-        textEl.value = "";
-        loadComments(); // Atualiza a lista
-    } catch (err) {
-        console.error("Erro ao comentar:", err);
-        alert("Erro técnico ao enviar comentário. Verifique o console (F12).");
+    if(error) {
+        console.error(error);
+        alert("Erro ao enviar: " + error.message);
+    } else {
+        document.getElementById("newComment").value = "";
+        loadComments();
     }
 }
 </script>
-
 </body>
 </html>
