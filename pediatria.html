@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Pediatria</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#f8fafc;
+  --card:#fff;
+  --primary:#0284c7;
+  --border:#e2e8f0;
+}
+
+body{font-family:Inter;background:var(--bg);margin:0}
+
+.container{max-width:900px;margin:auto;padding:2rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:1.2rem;
+  cursor:pointer;
+  transition:0.25s;
+}
+
+.card:hover{transform:translateY(-5px);border-color:var(--primary)}
+</style>
+</head>
+
+<body>
+
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+
+<main class="container" id="main" style="display:none">
+
+<h1>👶 Pediatria</h1>
+
+<div class="grid">
+  <div class="card" onclick="abrir('Puericultura')">🍼 Puericultura</div>
+  <div class="card" onclick="abrir('Infecções')">🤒 Infecções</div>
+  <div class="card" onclick="abrir('Neonatologia')">👶 Neonatologia</div>
+  <div class="card" onclick="abrir('Vacinação')">💉 Vacinação</div>
+</div>
+
+</main>
+
+<script>
+window.addEventListener('load', async ()=>{
+  const s = await exigirLogin();
+  if(!s) return;
+  document.getElementById('main').style.display='block';
+});
+
+function abrir(sub){
+  window.location.href = `questoes.html?tema=Pediatria&subtema=${encodeURIComponent(sub)}`
+}
+</script>
+
+</body>
+</html>
