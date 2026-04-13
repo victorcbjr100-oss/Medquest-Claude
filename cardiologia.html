@@ -1,148 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cardiologia — MedQuest</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-:root {
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --primary: #dc2626;
-  --text: #1e293b;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --radius: 16px;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  margin: 0;
-}
-
-/* layout */
-.container {
-  max-width: 900px;
-  margin: auto;
-  padding: 2.5rem 1.5rem;
-}
-
-/* header */
-.header {
-  margin-bottom: 2.2rem;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-.header p {
-  margin-top: 0.4rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-/* grid */
-.subtemas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-  gap: 1.2rem;
-}
-
-/* card */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.4rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* efeito brilho */
-.card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at top, rgba(255,255,255,0.4), transparent);
-  opacity: 0;
-  transition: 0.3s;
-}
-
-.card:hover::after {
-  opacity: 1;
-}
-
-/* hover */
-.card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: var(--primary);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-}
-
-/* clique */
-.card:active {
-  transform: scale(0.96);
-}
-
-/* emoji */
-.emoji {
-  font-size: 1.6rem;
-}
-
-/* nome */
-.nome {
-  font-weight: 700;
-  color: var(--text);
-  font-size: 0.95rem;
-}
-
-/* botão voltar */
-.back {
-  display: inline-block;
-  margin-bottom: 1.5rem;
-  font-size: 0.85rem;
-  color: var(--primary);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.back:hover {
-  text-decoration: underline;
-}
-</style>
-</head>
-
-<body>
-
-<script src="js/auth.js"></script>
-<script src="js/sidebar.js"></script>
-
-<main class="container" id="main" style="display:none">
-
-<div class="back" onclick="voltar()">← Voltar</div>
-
-<div class="header">
-  <h1>❤️ Cardiologia</h1>
-  <p>Selecione um subtema para começar</p>
-</div>
-
 <div class="subtemas-grid">
 
-  <div class="card" onclick="abrir('Hipertensão arterial')">
+  <div class="card" onclick="abrir('Hipertensão arterial sistêmica')">
     <div class="emoji">🩸</div>
-    <div class="nome">Hipertensão arterial</div>
+    <div class="nome">Hipertensão arterial sistêmica</div>
   </div>
 
   <div class="card" onclick="abrir('Arritmias')">
@@ -160,25 +20,49 @@ body {
     <div class="nome">Miocardiopatias</div>
   </div>
 
+  <div class="card" onclick="abrir('Doença arterial coronariana')">
+    <div class="emoji">⚠️</div>
+    <div class="nome">Doença arterial coronariana</div>
+  </div>
+
+  <div class="card" onclick="abrir('Síndromes coronarianas agudas')">
+    <div class="emoji">🚑</div>
+    <div class="nome">Síndromes coronarianas agudas</div>
+  </div>
+
+  <div class="card" onclick="abrir('Valvopatias')">
+    <div class="emoji">🔊</div>
+    <div class="nome">Valvopatias</div>
+  </div>
+
+  <div class="card" onclick="abrir('Pericardites')">
+    <div class="emoji">🧊</div>
+    <div class="nome">Pericardites</div>
+  </div>
+
+  <div class="card" onclick="abrir('Endocardite infecciosa')">
+    <div class="emoji">🦠</div>
+    <div class="nome">Endocardite infecciosa</div>
+  </div>
+
+  <div class="card" onclick="abrir('Doenças da aorta')">
+    <div class="emoji">🪢</div>
+    <div class="nome">Doenças da aorta</div>
+  </div>
+
+  <div class="card" onclick="abrir('Hipertensão pulmonar')">
+    <div class="emoji">🌬️</div>
+    <div class="nome">Hipertensão pulmonar</div>
+  </div>
+
+  <div class="card" onclick="abrir('Tromboembolismo pulmonar')">
+    <div class="emoji">🫁</div>
+    <div class="nome">Tromboembolismo pulmonar</div>
+  </div>
+
+  <div class="card" onclick="abrir('Doenças congênitas')">
+    <div class="emoji">👶</div>
+    <div class="nome">Cardiopatias congênitas</div>
+  </div>
+
 </div>
-
-</main>
-
-<script>
-window.addEventListener('load', async () => {
-  const session = await exigirLogin();
-  if(!session) return;
-  document.getElementById('main').style.display = 'block';
-});
-
-function abrir(sub){
-  window.location.href = `questoes.html?tema=Cardiologia&subtema=${encodeURIComponent(sub)}`;
-}
-
-function voltar(){
-  window.location.href = 'temas.html';
-}
-</script>
-
-</body>
-</html>
