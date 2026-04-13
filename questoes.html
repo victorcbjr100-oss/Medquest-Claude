@@ -68,9 +68,6 @@ let questoes = [];
 let atual = 0;
 let respondeu = false;
 
-let tema = null;
-let subtema = null;
-
 
 // 🔐 LOGIN + SIDEBAR
 window.addEventListener('load', async () => {
@@ -79,41 +76,17 @@ window.addEventListener('load', async () => {
 
   document.getElementById('main').style.display = 'block';
 
-  const params = new URLSearchParams(window.location.search);
-  tema = params.get('tema');
-  subtema = params.get('subtema');
-
-  atualizarTitulo();
   carregarQuestoes();
 });
 
 
-// 🔹 TÍTULO
-function atualizarTitulo(){
-  let titulo = '🧠 Questões';
-
-  if(tema){
-    titulo = `📚 ${tema}`;
-  }
-
-  if(subtema){
-    titulo += ` — ${subtema}`;
-  }
-
-  document.getElementById('titulo').innerText = titulo;
-}
-
-
-// 🔹 CARREGAR QUESTÕES (AJUSTADO)
+// 🔹 CARREGAR QUESTÕES (SEM FILTRO)
 async function carregarQuestoes(){
 
-  let query = supabase.from('banco_questoes').select('*');
-
-  if(tema){
-    query = query.ilike('tema', tema);
-  }
-
-  const { data, error } = await query.limit(10);
+  const { data, error } = await supabase
+    .from('banco_questoes')
+    .select('*')
+    .limit(10);
 
   console.log('QUESTÕES:', data, error);
 
@@ -132,7 +105,7 @@ async function carregarQuestoes(){
 }
 
 
-// 🔹 MOSTRAR QUESTÃO (AJUSTADO)
+// 🔹 MOSTRAR QUESTÃO
 function mostrarQuestao(){
   respondeu = false;
 
