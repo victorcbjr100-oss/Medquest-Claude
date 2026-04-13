@@ -1,289 +1,292 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — Questões</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>MedQuest — Questões</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/sidebar.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sidebar.js" defer></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-:root {
-    --sb-bg: #0f172a;
-    --sb-text: #94a3b8;
-    --sb-accent: #2563eb;
-}
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            display: flex;
+        }
 
-body {
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    background: #f8fafc;
-}
+        /* ÁREA PRINCIPAL: O margin-left reserva o espaço para a sidebar injetada pelo seu JS */
+        #app {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
 
-/* ÁREA PRINCIPAL */
-#app {
-    margin-left: 260px;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 40px 20px;
-    box-sizing: border-box;
-}
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
 
-/* CONTAINER CENTRALIZADO */
-.container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-}
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
 
-/* CARD DA QUESTÃO */
-.card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 40px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-}
+        /* TOPBAR DA QUESTÃO */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
 
-.question {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 25px;
-    line-height: 1.5;
-}
+        .question {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
 
-.option {
-    padding: 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    margin-top: 12px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-}
+        .option {
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
 
-.option:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-}
+        .option:hover { background: #f1f5f9; }
+        .option.selected { border-color: #2563eb; background: #eff6ff; }
+        .option.correct { border: 2px solid #10b981 !important; background: #ecfdf5; color: #065f46; }
+        .option.wrong { border: 2px solid #ef4444 !important; background: #fef2f2; color: #991b1b; }
 
-.option.selected {
-    border-color: #2563eb;
-    background: #eff6ff;
-}
+        /* AÇÕES E BOTÕES */
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
 
-.option.correct {
-    border: 2px solid #10b981;
-    background: #ecfdf5;
-    color: #065f46;
-}
+        button {
+            font-family: inherit;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-.option.wrong {
-    border: 2px solid #ef4444;
-    background: #fef2f2;
-    color: #991b1b;
-}
+        .primary { background: #2563eb; color: white; }
+        .primary:hover { background: #1d4ed8; }
+        .secondary { background: #f1f5f9; color: #475569; }
 
-.actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
-}
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            min-height: 90px;
+            box-sizing: border-box;
+            font-family: inherit;
+            margin-top: 15px;
+            resize: vertical;
+        }
 
-button {
-    font-family: inherit;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 24px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.primary {
-    background: #2563eb;
-    color: white;
-}
-
-.primary:hover {
-    background: #1d4ed8;
-}
-
-.secondary {
-    background: #f1f5f9;
-    color: #475569;
-}
-
-#feedback {
-    margin-top: 30px;
-    display: none;
-}
-
-@media (max-width: 900px) {
-    #app {
-        margin-left: 0;
-    }
-}
-</style>
+        @media (max-width: 900px) {
+            #app { margin-left: 0; }
+        }
+    </style>
 </head>
-
 <body>
 
-<main id="app" style="display:none">
-    <div class="container">
-        <div class="card">
-
-            <div class="question" id="question">Carregando questão...</div>
-            <div id="options"></div>
-
-            <div class="actions">
-                <div style="display:flex; gap:10px;">
-                    <button class="secondary" onclick="prev()">Anterior</button>
-                    <button class="secondary" onclick="next()">Próxima</button>
+    <main id="app" style="display:none">
+        <div class="container">
+            <div class="card">
+                
+                <div class="topbar">
+                    <div id="counter">Questão 0 / 0</div>
+                    <div id="status" style="text-transform: uppercase; letter-spacing: 0.5px;">Carregando...</div>
                 </div>
-                <button class="primary" id="btnResponder" onclick="confirm()">Responder</button>
-            </div>
 
-            <div id="feedback">
-                <hr style="border:0;border-top:1px solid #e2e8f0;margin:30px 0;">
-                <h3>Discussão</h3>
+                <div class="question" id="question">Buscando questão no banco...</div>
+                
+                <div id="options"></div>
 
-                <div id="comments"></div>
-
-                <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-                    <textarea id="newComment" placeholder="Digite seu comentário..."></textarea>
-                    <button class="primary" style="align-self:flex-end" onclick="sendComment()">
-                        Enviar Comentário
-                    </button>
+                <div class="actions">
+                    <div style="display:flex; gap:10px;">
+                        <button class="secondary" onclick="prev()">Anterior</button>
+                        <button class="secondary" onclick="next()">Próxima</button>
+                    </div>
+                    <button class="primary" id="btnResponder" onclick="confirm()">Responder</button>
                 </div>
-            </div>
 
+                <div id="feedback" style="display:none">
+                    <hr style="margin:35px 0; border:0; border-top:1px solid #e2e8f0;">
+                    <h3 style="color: #1e293b; font-size: 18px;">Discussão</h3>
+                    
+                    <div id="comments" style="margin-bottom: 20px;"></div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <textarea id="newComment" placeholder="Escreva seu comentário ou dúvida técnica..."></textarea>
+                        <button class="primary" style="align-self:flex-end" onclick="sendComment()">Enviar Comentário</button>
+                    </div>
+                </div>
+
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 
 <script>
-let qs = [];
-let i = 0;
-let selected = null;
-let answered = false;
+    // Gerenciamento de Estado da Aplicação
+    const state = {
+        qs: [],
+        i: 0,
+        selected: null,
+        answered: false
+    };
 
-window.addEventListener("load", async () => {
-    if (typeof exigirLogin === "function") await exigirLogin();
+    // Definição da instância do Supabase baseada no seu projeto
+    const supa = window.db || window.supabaseClient || window.supabase;
 
-    document.getElementById("app").style.display = "flex";
+    window.addEventListener("load", async () => {
+        // Validação de segurança do MedQuest
+        if (typeof exigirLogin === "function") await exigirLogin();
+        
+        document.getElementById("app").style.display = "flex";
+        await loadQuestions();
+    });
 
-    try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            const nome = user.user_metadata?.nome || user.email.split('@')[0];
-            document.getElementById('sb-nome').textContent = nome;
-            document.getElementById('sb-email').textContent = user.email;
-            document.getElementById('sb-avatar').textContent = nome[0].toUpperCase();
+    async function loadQuestions() {
+        try {
+            const { data, error } = await supa.from("banco_questoes").select("*").limit(50);
+            if (error) throw error;
+
+            state.qs = data || [];
+            if (state.qs.length > 0) render();
+            else document.getElementById("question").innerText = "Nenhuma questão encontrada no banco.";
+
+        } catch (e) {
+            console.error("Erro ao carregar dados:", e);
+            document.getElementById("question").innerText = "Erro na conexão com o banco de dados.";
         }
-    } catch (e) {}
-
-    if (typeof db !== "undefined") {
-        const { data } = await db.from("banco_questoes").select("*").limit(20);
-        qs = data || [];
-        if (qs.length > 0) render();
     }
-});
 
-function render() {
-    selected = null;
-    answered = false;
+    function render() {
+        const q = state.qs[state.i];
+        state.selected = null;
+        state.answered = false;
 
-    const q = qs[i];
+        // Reset de UI
+        document.getElementById("btnResponder").style.display = "block";
+        document.getElementById("feedback").style.display = "none";
+        
+        // Conteúdo
+        document.getElementById("question").innerText = q.enunciado;
+        document.getElementById("counter").innerText = `Questão ${state.i + 1} de ${state.qs.length}`;
+        document.getElementById("status").innerText = q.categoria || "Clínica Geral";
 
-    document.getElementById("btnResponder").style.display = "block";
-    document.getElementById("feedback").style.display = "none";
+        // Alternativas dinâmicas
+        document.getElementById("options").innerHTML = ["a","b","c","d"].map(l => `
+            <div class="option" data-letter="${l}" onclick="selectOpt('${l}', this)">
+                <strong>${l.toUpperCase()})</strong>&nbsp; ${q["alternativa_"+l]}
+            </div>
+        `).join("");
+    }
 
-    document.getElementById("question").innerText = q.enunciado;
+    function selectOpt(letter, el) {
+        if (state.answered) return;
+        state.selected = { letter, el };
+        document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+        el.classList.add("selected");
+    }
 
-    document.getElementById("options").innerHTML =
-        ["a","b","c","d"].map(l => `
-        <div class="option" onclick="selectOpt('${l}', this)">
-            <strong>${l.toUpperCase()})</strong>&nbsp;${q["alternativa_"+l]}
-        </div>
-    `).join("");
-}
+    async function confirm() {
+        if (!state.selected || state.answered) return;
+        state.answered = true;
 
-function selectOpt(letter, el) {
-    if (answered) return;
-    selected = { letter, el };
+        const q = state.qs[state.i];
+        const correct = state.selected.letter === q.correta;
 
-    document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
-    el.classList.add("selected");
-}
+        // Feedback Visual
+        document.querySelectorAll(".option").forEach(o => {
+            const letter = o.getAttribute("data-letter");
+            if (letter === q.correta) o.classList.add("correct");
+            if (o === state.selected.el && !correct) o.classList.add("wrong");
+        });
 
-async function confirm() {
-    if (!selected || answered) return;
+        document.getElementById("btnResponder").style.display = "none";
+        document.getElementById("feedback").style.display = "block";
+        
+        loadComments();
+    }
 
-    answered = true;
-    const q = qs[i];
-    const correct = selected.letter === q.correta;
+    function prev() { if (state.i > 0) { state.i--; render(); } }
+    function next() { if (state.i < state.qs.length - 1) { state.i++; render(); } }
 
-    document.querySelectorAll(".option").forEach(o => {
-        const text = o.innerText.toLowerCase();
-        if (text.includes(q.correta)) o.classList.add("correct");
-        if (o === selected.el && !correct) o.classList.add("wrong");
-    });
+    async function loadComments() {
+        const q = state.qs[state.i];
+        const { data } = await supa.from("comentarios_questao")
+            .select("*")
+            .eq("questao_id", q.id)
+            .order("created_at", { ascending: false });
 
-    document.getElementById("btnResponder").style.display = "none";
-    document.getElementById("feedback").style.display = "block";
+        const box = document.getElementById("comments");
+        box.innerHTML = (data || []).length 
+            ? data.map(c => `
+                <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
+                    <b style="font-size:13px; color:#1e293b;">${c.user_name}</b>
+                    <p style="margin:5px 0 0; font-size:14px; color:#475569;">${c.conteudo}</p>
+                </div>
+            `).join("") 
+            : "<p style='color:#94a3b8; font-size:13px;'>Sem comentários ainda. Compartilhe seu conhecimento!</p>";
+    }
 
-    loadComments();
-}
+    async function sendComment() {
+        const input = document.getElementById("newComment");
+        const text = input.value.trim();
+        if (!text) return;
 
-function prev(){ if(i>0){ i--; render(); } }
-function next(){ if(i<qs.length-1){ i++; render(); } }
+        try {
+            const { data: { user } } = await supa.auth.getUser();
+            if (!user) return alert("Sessão expirada. Refaça o login.");
 
-async function loadComments(){
-    const { data } = await db.from("comentarios_questao")
-        .select("*")
-        .eq("questao_id", qs[i].id);
+            const { error } = await supa.from("comentarios_questao").insert({
+                questao_id: state.qs[state.i].id,
+                user_id: user.id,
+                user_name: user.user_metadata?.nome || user.email.split("@"),
+                conteudo: text
+            });
 
-    document.getElementById("comments").innerHTML =
-        (data || []).map(c => `
-        <div style="background:#f8fafc;padding:12px;border-radius:8px;margin-bottom:10px;border:1px solid #e2e8f0;">
-            <b>${c.user_name}</b>
-            <p style="margin:5px 0 0;">${c.conteudo}</p>
-        </div>
-    `).join("") || "<p style='color:#94a3b8'>Sem comentários ainda.</p>";
-}
-
-async function sendComment(){
-    const text = document.getElementById("newComment").value.trim();
-    if (!text) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return alert("Faça login");
-
-    await db.from("comentarios_questao").insert({
-        questao_id: qs[i].id,
-        user_id: user.id,
-        user_name: user.user_metadata?.nome || user.email.split('@')[0],
-        conteudo: text
-    });
-
-    document.getElementById("newComment").value = "";
-    loadComments();
-}
+            if (error) throw error;
+            input.value = "";
+            loadComments();
+        } catch (e) {
+            alert("Erro ao enviar: " + e.message);
+        }
+    }
 </script>
-
 </body>
 </html>
