@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — UWorld Elite</title>
+<title>MedQuest — Elite</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-<script src="js/auth.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -16,102 +14,171 @@ body{
   margin:0;
   font-family:Inter;
   background:#f6f7fb;
-  color:#111;
+  color:#0f172a;
 }
 
-.container{
-  max-width:950px;
+/* CONTAINER */
+.wrap{
+  max-width:900px;
   margin:0 auto;
-  padding:28px;
+  padding:24px;
 }
 
-.card{
-  background:#fff;
-  border:1px solid #e8e8e8;
-  border-radius:16px;
-  padding:22px;
-  box-shadow:0 8px 24px rgba(0,0,0,.05);
+/* HEADER INFO */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+  font-size:13px;
+  color:#64748b;
 }
 
-.question{
-  font-size:18px;
-  font-weight:600;
-  line-height:1.5;
+/* PROGRESS */
+.progress{
+  height:8px;
+  background:#e2e8f0;
+  border-radius:999px;
+  overflow:hidden;
   margin-bottom:18px;
 }
 
-.option{
-  padding:12px 14px;
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#2563eb;
+  transition:.3s;
+}
+
+/* CARD */
+.card{
+  background:#fff;
   border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.05);
+}
+
+/* BADGES */
+.badges{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.badge{
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+}
+
+.badge.med{
+  border-color:#facc15;
+  color:#b45309;
+}
+
+/* QUESTION */
+.question{
+  font-size:17px;
+  font-weight:600;
+  line-height:1.5;
+  margin:12px 0 18px;
+}
+
+/* OPTIONS */
+.option{
+  border:1px solid #e5e7eb;
+  padding:12px;
   border-radius:12px;
   margin-top:10px;
   cursor:pointer;
   transition:.2s;
-  background:#fff;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
 }
 
 .option:hover{
-  border-color:#cbd5e1;
-  background:#f9fafb;
+  border-color:#93c5fd;
+  background:#f8fafc;
+}
+
+.letter{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid #cbd5e1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:13px;
+  flex-shrink:0;
 }
 
 .correct{
   border:2px solid #16a34a !important;
-  background:#f0fdf4 !important;
+  background:#ecfdf5;
 }
 
 .wrong{
   border:2px solid #dc2626 !important;
-  background:#fef2f2 !important;
+  background:#fef2f2;
 }
 
-.actions{
+/* NAV */
+.nav{
   display:flex;
-  gap:10px;
+  justify-content:space-between;
   margin-top:18px;
 }
 
 button{
   font-family:Inter;
-  font-weight:600;
   border:none;
-  border-radius:10px;
-  padding:10px 14px;
   cursor:pointer;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:600;
 }
 
-.primary{
+.btn{
   background:#2563eb;
   color:#fff;
 }
 
-.secondary{
+.btn2{
   background:#fff;
   border:1px solid #e5e7eb;
 }
 
-#feedback{
-  margin-top:20px;
+/* FEEDBACK */
+.feedback{
   display:none;
+  margin-top:18px;
+  border-top:1px solid #e5e7eb;
+  padding-top:14px;
   animation:fade .2s ease;
 }
 
 @keyframes fade{
-  from{opacity:0; transform:translateY(5px);}
-  to{opacity:1; transform:translateY(0);}
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
+/* TABS */
 .tabs{
   display:flex;
-  gap:10px;
-  margin-bottom:12px;
+  gap:8px;
+  margin-bottom:10px;
 }
 
 .tab{
-  padding:6px 12px;
+  font-size:12px;
+  padding:5px 10px;
   border-radius:999px;
   border:1px solid #e5e7eb;
-  font-size:13px;
   cursor:pointer;
 }
 
@@ -121,20 +188,21 @@ button{
   border-color:#2563eb;
 }
 
+/* COMMENTS */
 .comment{
-  padding:14px 0;
+  padding:12px 0;
   border-bottom:1px solid #eee;
 }
 
-.comment-header{
+.user{
   display:flex;
   gap:10px;
   align-items:center;
 }
 
 .avatar{
-  width:34px;
-  height:34px;
+  width:32px;
+  height:32px;
   border-radius:50%;
   background:#2563eb;
   color:#fff;
@@ -142,6 +210,7 @@ button{
   align-items:center;
   justify-content:center;
   font-weight:700;
+  font-size:13px;
 }
 
 textarea{
@@ -159,34 +228,45 @@ textarea{
 
 <body>
 
-<div class="container" id="app" style="display:none">
+<div class="wrap">
+
+  <div class="header">
+    <div id="counter">Questão 1 de 1</div>
+    <div id="score">0 ✓ | 0 ✗</div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
 
   <div class="card">
 
-    <div class="question" id="question"></div>
+    <div class="badges">
+      <span class="badge">Anestesiologia</span>
+      <span class="badge med">Médio</span>
+    </div>
+
+    <div class="question" id="q"></div>
 
     <div id="options"></div>
 
-    <div class="actions">
-      <button class="secondary" onclick="prev()">⬅ Voltar</button>
-      <button class="secondary" onclick="skip()">⏭ Pular</button>
-      <button class="primary" onclick="next()">Próxima ➜</button>
+    <div class="nav">
+      <button class="btn2" onclick="prev()">Anterior</button>
+      <button class="btn2" onclick="skip()">Pular</button>
+      <button class="btn" onclick="next()">Próxima</button>
     </div>
 
-    <div id="feedback">
+    <div class="feedback" id="feedback">
 
       <div class="tabs">
-        <div class="tab active" id="tab-alunos" onclick="setTab('alunos')">Alunos</div>
-        <div class="tab" id="tab-prof" onclick="setTab('prof')">Professor</div>
+        <div class="tab active" onclick="setTab('aluno')">Alunos</div>
+        <div class="tab" onclick="setTab('prof')">Professor</div>
       </div>
 
       <div id="comments"></div>
 
-      <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
-
-      <button class="primary" style="margin-top:8px" onclick="sendComment()">
-        Enviar
-      </button>
+      <textarea id="txt" placeholder="Escreva um comentário..."></textarea>
+      <button class="btn" style="margin-top:8px" onclick="sendComment()">Enviar</button>
 
     </div>
 
@@ -196,43 +276,42 @@ textarea{
 
 <script>
 
+let qIndex = 0;
 let questions = [];
-let index = 0;
 let answered = false;
-let tab = "alunos";
+let tab = "aluno";
+let score = {c:0,e:0};
 
 /* INIT */
-window.addEventListener("load", async () => {
+window.onload = async () => {
 
-  const session = await exigirLogin();
-  if(!session) return;
-
-  document.getElementById("app").style.display = "block";
-
-  const { data } = await db
-    .from("banco_questoes")
-    .select("*")
-    .limit(30);
-
+  const { data } = await db.from("banco_questoes").select("*").limit(30);
   questions = data || [];
 
   render();
-});
+};
 
 /* RENDER */
 function render(){
 
-  answered = false;
-
-  const q = questions[index];
+  const q = questions[qIndex];
   if(!q) return;
 
-  document.getElementById("question").innerText = q.enunciado;
+  answered = false;
+
+  document.getElementById("q").innerText = q.enunciado;
+
+  document.getElementById("counter").innerText =
+    `Questão ${qIndex+1} de ${questions.length}`;
+
+  document.getElementById("progress").style.width =
+    ((qIndex+1)/questions.length)*100 + "%";
 
   document.getElementById("options").innerHTML =
-    ["a","b","c","d"].map(l => `
+    ["a","b","c","d","e"].map(l => `
       <div class="option" onclick="answer('${l}', this)">
-        ${l.toUpperCase()}) ${q["alternativa_"+l]}
+        <div class="letter">${l.toUpperCase()}</div>
+        <div>${q["alternativa_"+l]}</div>
       </div>
     `).join("");
 
@@ -240,128 +319,96 @@ function render(){
 }
 
 /* ANSWER */
-async function answer(letter, el){
+async function answer(l, el){
 
   if(answered) return;
   answered = true;
 
-  const q = questions[index];
-  const correct = letter === q.correta;
+  const q = questions[qIndex];
+  const correct = l === q.correta;
 
   document.getElementById("feedback").style.display = "block";
 
   document.querySelectorAll(".option").forEach(o=>{
-    const l = o.innerText.trim()[0].toLowerCase();
-    if(l === q.correta) o.classList.add("correct");
+    const letter = o.innerText.trim()[0].toLowerCase();
+
+    if(letter === q.correta) o.classList.add("correct");
     if(o === el && !correct) o.classList.add("wrong");
   });
 
-  const { data } = await supabase.auth.getUser();
-  const user = data?.user;
+  correct ? score.c++ : score.e++;
 
-  await db.from("respostas_usuario").insert({
-    user_id: user.id,
-    questao_id: q.id,
-    resposta_marcada: letter,
-    correta: correct
-  });
-
-  await loadComments();
-}
-
-/* NAV */
-function prev(){ if(index>0){ index--; render(); } }
-function skip(){ if(index<questions.length-1){ index++; render(); } }
-function next(){ if(index<questions.length-1){ index++; render(); } }
-
-/* TAB */
-function setTab(t){
-  tab = t;
-
-  document.getElementById("tab-alunos").classList.remove("active");
-  document.getElementById("tab-prof").classList.remove("active");
-
-  if(t === "alunos") document.getElementById("tab-alunos").classList.add("active");
-  else document.getElementById("tab-prof").classList.add("active");
+  document.getElementById("score").innerText =
+    `${score.c} ✓ | ${score.e} ✗`;
 
   loadComments();
 }
 
+/* NAV */
+function prev(){ if(qIndex>0){ qIndex--; render(); } }
+function skip(){ if(qIndex<questions.length-1){ qIndex++; render(); } }
+function next(){ if(qIndex<questions.length-1){ qIndex++; render(); } }
+
 /* COMMENTS */
+function setTab(t){
+  tab = t;
+  loadComments();
+}
+
 async function loadComments(){
 
-  const q = questions[index];
+  const q = questions[qIndex];
 
   const { data } = await db
     .from("comentarios_questao")
     .select("*")
     .eq("questao_id", q.id)
-    .eq("tipo", tab === "prof" ? "professor" : "aluno")
+    .eq("tipo", tab)
     .order("created_at", { ascending:false });
 
   renderComments(data || []);
 }
 
-function renderComments(comments){
+function renderComments(list){
 
   const box = document.getElementById("comments");
 
-  if(!comments.length){
+  if(!list.length){
     box.innerHTML = "<p style='color:#888'>Sem comentários</p>";
     return;
   }
 
-  box.innerHTML = comments.map(c => `
+  box.innerHTML = list.map(c=>`
     <div class="comment">
-
-      <div class="comment-header">
-        <div class="avatar">
-          ${c.tipo === "professor" ? "P" : "A"}
-        </div>
-
-        <div>
-          <div style="font-weight:600;font-size:13px">
-            ${c.tipo === "professor" ? "Professor" : "Aluno"}
-          </div>
-          <div style="font-size:11px;color:#888">
-            ${new Date(c.created_at).toLocaleString()}
-          </div>
+      <div class="user">
+        <div class="avatar">${c.tipo==="prof"?"P":"A"}</div>
+        <div style="font-size:12px;color:#555">
+          ${new Date(c.created_at).toLocaleString()}
         </div>
       </div>
-
-      <div style="margin-left:44px;margin-top:6px">
+      <div style="margin-left:42px;margin-top:6px">
         ${c.conteudo}
       </div>
-
     </div>
   `).join("");
 }
 
-/* SEND COMMENT (FIX DEFINITIVO) */
+/* SEND */
 async function sendComment(){
 
-  const q = questions[index];
-  const text = document.getElementById("commentInput").value.trim();
+  const q = questions[qIndex];
+  const text = document.getElementById("txt").value.trim();
 
-  if(!text) return alert("Digite um comentário");
+  if(!text) return;
 
-  const { data } = await supabase.auth.getUser();
-  const user = data?.user;
-
-  const { error } = await db.from("comentarios_questao").insert({
+  await db.from("comentarios_questao").insert({
     questao_id: q.id,
-    user_id: user.id,
     conteudo: text,
-    tipo: "aluno"
+    tipo: tab
   });
 
-  if(error){
-    console.error(error);
-    return alert("Erro ao enviar comentário");
-  }
-
-  document.getElementById("commentInput").value = "";
-  await loadComments();
+  document.getElementById("txt").value = "";
+  loadComments();
 }
 
 </script>
