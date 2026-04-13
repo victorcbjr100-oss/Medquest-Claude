@@ -1,253 +1,110 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Questões — MedQuest Pro</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .questao-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
-    .questao-meta{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
-    .questao-enunciado{font-size:.95rem;line-height:1.75;color:var(--text);margin-bottom:1.1rem;font-weight:500}
-    .questao-actions{display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap;align-items:center}
-    .btn-fav{padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text-secondary);font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;font-weight:500}
-    .btn-fav:hover,.btn-fav.on{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-light)}
-    .btn-coment{padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text-secondary);font-size:.8rem;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;font-weight:500}
-    .btn-coment:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
-    .coments-box{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:none}
-    .coment-item{padding:.6rem .8rem;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:.5rem}
-    .coment-autor{font-size:.72rem;color:var(--text-muted);margin-bottom:.2rem;font-weight:600}
-    .coment-texto{font-size:.85rem;color:var(--text)}
-    .coment-form{display:flex;gap:.5rem;margin-top:.5rem}
-    .coment-form input{flex:1;padding:.55rem .75rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:.85rem;outline:none}
-    .coment-form input:focus{border-color:var(--accent)}
-    .coment-form button{padding:.55rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
-    .filtros-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
-    .filtros-bar select{padding:.45rem .75rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);background:var(--surface);outline:none;cursor:pointer}
-    .filtros-bar select:focus{border-color:var(--accent)}
-    .info-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-    .info-bar span{font-size:.85rem;color:var(--text-secondary)}
-    .empty-msg{text-align:center;padding:3rem;color:var(--text-muted)}
-  </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<title>Questões</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/sidebar.js"></script>
 
-<main class="main-content" id="main" style="display:none">
-  <div class="page-header">
-    <h1 id="titulo-pagina">Questões</h1>
-    <p id="sub-pagina">Pratique e aprimore seu conhecimento</p>
-  </div>
+<style>
+body {
+  font-family: Arial;
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
 
-  <div class="filtros-bar">
-    <select id="f-tema" onchange="aplicarFiltros()"><option value="">Todos os temas</option></select>
-    <select id="f-subtema" onchange="aplicarFiltros()"><option value="">Todos os subtemas</option></select>
-    <select id="f-dif" onchange="aplicarFiltros()">
-      <option value="">Qualquer dificuldade</option>
-      <option value="facil">Fácil</option>
-      <option value="media">Média</option>
-      <option value="dificil">Difícil</option>
-    </select>
-    <select id="f-banca" onchange="aplicarFiltros()"><option value="">Qualquer banca</option></select>
-    <button class="btn btn-outline" onclick="resetFiltros()">Limpar filtros</button>
-  </div>
+.alternativa {
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  cursor: pointer;
+}
 
-  <div class="info-bar">
-    <span id="info-count">Carregando...</span>
-  </div>
+.alternativa:hover {
+  background: #eee;
+}
+</style>
+</head>
 
-  <div id="lista-questoes"></div>
-  <div class="pagination" id="paginacao"></div>
-</main>
+<body>
+
+<h2>Questões</h2>
+
+<div id="questao"></div>
 
 <script>
-const POR_PAGINA = 10;
-let pagina = 1;
-let todasQ = [];
-let filtradas = [];
-let favsSet = new Set();
-let sessao = null;
+let questoes = [];
+let atual = 0;
 
-window.addEventListener('load', async ()=>{
-  sessao = await exigirLogin(); if(!sessao) return;
-  document.getElementById('main').style.display='block';
-  const sb = window.supabaseClient, uid = sessao.user.id;
+// 🔹 CARREGAR QUESTÕES
+async function carregarQuestoes(){
+  const { data } = await supabase
+    .from('questoes')
+    .select('*')
+    .limit(10);
 
-  // URL params
-  const params = new URLSearchParams(window.location.search);
-  const temaParam = params.get('tema') ? decodeURIComponent(params.get('tema')) : '';
-  const subtemaParam = params.get('subtema') ? decodeURIComponent(params.get('subtema')) : '';
-  const difParam = params.get('dificuldade')||'';
+  questoes = data;
 
-  if(temaParam){ document.getElementById('titulo-pagina').textContent = temaParam; document.getElementById('sub-pagina').textContent = subtemaParam||'Todas as questões'; }
-
-  // Carrega favoritos
-  const {data:favs} = await sb.from('favoritos').select('questao_id').eq('user_id',uid);
-  if(favs) favs.forEach(f=>favsSet.add(f.questao_id));
-
-  // Carrega questões
-  const {data:questoes} = await sb.from('questoes').select('*').order('id',{ascending:true});
-  todasQ = questoes||[];
-
-  // Preenche filtros
-  const temas = [...new Set(todasQ.map(q=>q.tema).filter(Boolean))].sort();
-  const bancas = [...new Set(todasQ.map(q=>q.banca).filter(Boolean))].sort();
-  const selTema = document.getElementById('f-tema');
-  const selBanca = document.getElementById('f-banca');
-  temas.forEach(t=>{ const o=document.createElement('option'); o.value=o.textContent=t; selTema.appendChild(o); });
-  bancas.forEach(b=>{ const o=document.createElement('option'); o.value=o.textContent=b; selBanca.appendChild(o); });
-
-  if(temaParam) selTema.value=temaParam;
-  if(difParam) document.getElementById('f-dif').value=difParam;
-
-  // Preenche subtemas baseado no tema selecionado
-  if(temaParam) atualizarSubtemas(temaParam, subtemaParam);
-
-  selTema.addEventListener('change', ()=>{ atualizarSubtemas(selTema.value,''); aplicarFiltros(); });
-
-  aplicarFiltros();
-});
-
-function atualizarSubtemas(tema, selecionado='') {
-  const sel = document.getElementById('f-subtema');
-  sel.innerHTML = '<option value="">Todos os subtemas</option>';
-  const subs = [...new Set(todasQ.filter(q=>q.tema===tema).map(q=>q.subtema).filter(Boolean))].sort();
-  subs.forEach(s=>{ const o=document.createElement('option'); o.value=o.textContent=s; sel.appendChild(o); });
-  if(selecionado) sel.value=selecionado;
+  mostrarQuestao();
 }
 
-function aplicarFiltros() {
-  const tema = document.getElementById('f-tema').value;
-  const subtema = document.getElementById('f-subtema').value;
-  const dif = document.getElementById('f-dif').value;
-  const banca = document.getElementById('f-banca').value;
-  filtradas = todasQ.filter(q=>
-    (!tema||q.tema===tema) &&
-    (!subtema||q.subtema===subtema) &&
-    (!dif||q.dificuldade===dif) &&
-    (!banca||q.banca===banca)
-  );
-  pagina=1;
-  renderPagina();
-}
+// 🔹 MOSTRAR QUESTÃO
+function mostrarQuestao(){
+  const q = questoes[atual];
 
-function resetFiltros() {
-  ['f-tema','f-subtema','f-dif','f-banca'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-subtema').innerHTML='<option value="">Todos os subtemas</option>';
-  aplicarFiltros();
-}
+  document.getElementById('questao').innerHTML = `
+    <h3>${q.enunciado}</h3>
 
-function renderPagina() {
-  const total = filtradas.length;
-  const inicio = (pagina-1)*POR_PAGINA;
-  const slice = filtradas.slice(inicio, inicio+POR_PAGINA);
-  document.getElementById('info-count').textContent = `${total} questão${total!==1?'ões':''} encontrada${total!==1?'s':''}`;
-  const lista = document.getElementById('lista-questoes');
-  lista.innerHTML = slice.length ? slice.map((q,i)=>renderQ(q,inicio+i)).join('') : '<div class="empty-msg">Nenhuma questão encontrada com esses filtros.</div>';
-  renderPaginacao(Math.ceil(total/POR_PAGINA));
-}
-
-const LETRAS = ['A','B','C','D','E'];
-function renderQ(q, idx) {
-  const opcoes = parseOpcoes(q.opcoes);
-  const fav = favsSet.has(q.id);
-  const difLabel = {facil:'Fácil',media:'Média',dificil:'Difícil'}[q.dificuldade]||q.dificuldade||'Média';
-  const difClass = {facil:'badge-green',media:'badge-yellow',dificil:'badge-red'}[q.dificuldade]||'badge-gray';
-  return `<div class="questao-card" id="qcard-${q.id}">
-    <div class="questao-meta">
-      ${q.tema?`<span class="badge badge-blue">${q.tema}</span>`:''}
-      ${q.subtema?`<span class="badge badge-gray">${q.subtema}</span>`:''}
-      <span class="badge ${difClass}">${difLabel}</span>
-      ${q.banca?`<span class="badge badge-gray">${q.banca}${q.ano?' '+q.ano:''}</span>`:''}
+    <div class="alternativa" onclick="responder('a')">
+      A) ${q.alternativa_a}
     </div>
-    <div class="questao-enunciado">${q.pergunta}</div>
-    <div id="ops-${q.id}">
-      ${opcoes.map((op,i)=>`<div class="opcao-item" id="op-${q.id}-${i}" onclick="responder(${q.id},${i},${q.resposta})">
-        <div class="opcao-letra">${LETRAS[i]}</div>
-        <div style="font-size:.875rem;line-height:1.6">${op}</div>
-      </div>`).join('')}
+
+    <div class="alternativa" onclick="responder('b')">
+      B) ${q.alternativa_b}
     </div>
-    ${q.comentario?`<div class="gabarito-box" id="gab-${q.id}"><div class="gabarito-title">💡 Gabarito comentado</div>${q.comentario}</div>`:''}
-    <div class="questao-actions">
-      <button class="btn-fav ${fav?'on':''}" id="fav-${q.id}" onclick="toggleFav(${q.id},this)">${fav?'★ Favoritada':'☆ Favoritar'}</button>
-      <button class="btn-coment" onclick="toggleComent(${q.id},this)">💬 Comentários</button>
+
+    <div class="alternativa" onclick="responder('c')">
+      C) ${q.alternativa_c}
     </div>
-    <div class="coments-box" id="cbox-${q.id}">
-      <div id="clist-${q.id}"></div>
-      <div class="coment-form">
-        <input type="text" id="cinput-${q.id}" placeholder="Escreva um comentário...">
-        <button onclick="enviarComent(${q.id})">Enviar</button>
-      </div>
+
+    <div class="alternativa" onclick="responder('d')">
+      D) ${q.alternativa_d}
     </div>
-  </div>`;
+  `;
 }
 
-async function responder(qId, opIdx, correta) {
-  const card = document.getElementById(`qcard-${qId}`);
-  if(card.dataset.respondida) return;
-  card.dataset.respondida='1';
-  const acertou = opIdx===correta;
-  document.querySelectorAll(`[id^="op-${qId}-"]`).forEach((el,i)=>{
-    el.style.pointerEvents='none';
-    if(i===correta) el.classList.add('correta');
-    else if(i===opIdx&&!acertou) el.classList.add('errada');
+// 🔹 RESPONDER
+async function responder(letra){
+  const q = questoes[atual];
+
+  const correta = letra === q.correta;
+
+  alert(correta ? 'Acertou!' : 'Errou!');
+
+  const user = (await supabase.auth.getUser()).data.user;
+
+  await supabase.from('respostas_usuario').insert({
+    user_id: user.id,
+    questao_id: q.id,
+    resposta_marcada: letra,
+    correta
   });
-  const gab = document.getElementById(`gab-${qId}`);
-  if(gab) gab.classList.add('show');
-  const sb = window.supabaseClient;
-  await sb.from('respostas').insert({user_id:sessao.user.id,questao_id:qId,opcao_escolhida:opIdx,acertou,modo:'normal'});
-}
 
-async function toggleFav(qId, btn) {
-  const sb = window.supabaseClient, uid = sessao.user.id;
-  if(favsSet.has(qId)){
-    await sb.from('favoritos').delete().eq('user_id',uid).eq('questao_id',qId);
-    favsSet.delete(qId); btn.className='btn-fav'; btn.textContent='☆ Favoritar';
+  atual++;
+
+  if(atual < questoes.length){
+    mostrarQuestao();
   } else {
-    await sb.from('favoritos').insert({user_id:uid,questao_id:qId});
-    favsSet.add(qId); btn.className='btn-fav on'; btn.textContent='★ Favoritada';
+    alert('Fim das questões');
   }
 }
 
-async function toggleComent(qId, btn) {
-  const box = document.getElementById(`cbox-${qId}`);
-  const open = box.style.display==='block';
-  box.style.display = open?'none':'block';
-  if(!open) await carregarComents(qId);
-}
-
-async function carregarComents(qId) {
-  const sb = window.supabaseClient;
-  const {data} = await sb.from('comentarios').select('texto,criado_em,perfis(nome)').eq('questao_id',qId).order('criado_em',{ascending:true});
-  const lista = document.getElementById(`clist-${qId}`);
-  lista.innerHTML = (!data||data.length===0)
-    ? '<p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.5rem">Sem comentários ainda.</p>'
-    : data.map(c=>`<div class="coment-item"><div class="coment-autor">${c.perfis?.nome||'Usuário'} · ${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div><div class="coment-texto">${c.texto}</div></div>`).join('');
-}
-
-async function enviarComent(qId) {
-  const input = document.getElementById(`cinput-${qId}`);
-  const texto = input.value.trim(); if(!texto) return;
-  const sb = window.supabaseClient;
-  await sb.from('comentarios').insert({user_id:sessao.user.id,questao_id:qId,texto});
-  input.value=''; await carregarComents(qId);
-}
-
-function renderPaginacao(totalPags) {
-  const el = document.getElementById('paginacao');
-  if(totalPags<=1){el.innerHTML='';return;}
-  let html='';
-  if(pagina>1) html+=`<button class="page-btn" onclick="irPag(${pagina-1})">‹</button>`;
-  for(let i=Math.max(1,pagina-2);i<=Math.min(totalPags,pagina+2);i++)
-    html+=`<button class="page-btn ${i===pagina?'active':''}" onclick="irPag(${i})">${i}</button>`;
-  if(pagina<totalPags) html+=`<button class="page-btn" onclick="irPag(${pagina+1})">›</button>`;
-  el.innerHTML=html;
-}
-
-function irPag(n){ pagina=n; renderPagina(); window.scrollTo({top:0,behavior:'smooth'}); }
+// 🔹 INICIAR
+window.onload = carregarQuestoes;
 </script>
+
 </body>
 </html>
