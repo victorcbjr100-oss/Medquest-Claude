@@ -26,7 +26,7 @@
             font-family: 'Inter', sans-serif;
             background: #f6f7fb;
             color: #111;
-            display: flex; /* Adicionado para lidar com a sidebar e o app lado a lado */
+            display: flex;
         }
 
         /* ================= SIDEBAR ================= */
@@ -200,12 +200,12 @@
 
         /* ================= CONTEÚDO PRINCIPAL ================= */
         #app {
-            margin-left: 260px; /* Respeita a sidebar permanentemente */
-            width: calc(100% - 260px); /* Ocupa o restante da tela */
+            margin-left: 260px;
+            width: calc(100% - 260px);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Evita que o card estique verticalmente no centro */
+            align-items: flex-start;
             padding: 40px 30px;
             box-sizing: border-box;
         }
@@ -219,7 +219,7 @@
             background: #fff;
             border: 1px solid #e8e8e8;
             border-radius: 14px;
-            padding: 30px; /* Aumentei um pouco o padding para respirar melhor */
+            padding: 30px;
             box-shadow: 0 6px 18px rgba(0,0,0,.05);
         }
 
@@ -269,7 +269,7 @@
 
         .actions {
             display: flex;
-            justify-content: space-between; /* Distribui os botões melhor */
+            justify-content: space-between;
             gap: 12px;
             margin-top: 24px;
             padding-top: 20px;
@@ -397,7 +397,6 @@
             text-decoration: underline;
         }
 
-        /* Estética consertada da caixa de comentário/resposta */
         .comment-box {
             display: flex;
             flex-direction: column;
@@ -565,32 +564,35 @@ window.addEventListener("load", async () => {
     }
 
     // 2. Lógica da Sidebar
-    const page = window.location.pathname.split('/').pop();
+    const page = window.location.pathname.split('/').pop() || 'dashboard.html';
     document.querySelectorAll('.sidebar-link').forEach(link => {
         if (link.getAttribute('href') === page) {
             link.classList.add('active');
         }
     });
 
-    const esperar = ms => new Promise(r => setTimeout(r, ms));
-    let t = 0;
-    while (!window.supabase && t++ < 40) await esperar(80);
-    if (!window.supabase) return;
+    // 3. Atualizar Dados do Usuário
+    try {
+        if (typeof supabase !== 'undefined') {
+            const { data } = await supabase.auth.getUser();
+            if (data && data.user) {
+                const user = data.user;
+                const nome = user.user_metadata?.nome || user.email.split('@');
+                document.getElementById('sb-avatar').textContent = nome.charAt(0).toUpperCase();
+                document.getElementById('sb-nome').textContent = nome;
+                document.getElementById('sb-email').textContent = user.email;
 
-    const { data: { session } } = await window.supabase.auth.getSession();
-    if (!session) return;
-
-    const user = session.user;
-    const nome = user.user_metadata?.nome || user.email.split('@');
-    document.getElementById('sb-avatar').textContent = nome.charAt(0).toUpperCase();
-    document.getElementById('sb-nome').textContent = nome;
-    document.getElementById('sb-email').textContent = user.email;
-
-    if (typeof getPerfil === "function") {
-        const perfil = await getPerfil(user.id);
-        if (perfil?.role === 'admin') {
-            document.getElementById('sidebar-admin-section').style.display = 'block';
+                if (typeof getPerfil === "function") {
+                    const perfil = await getPerfil(user.id);
+                    if (perfil?.role === 'admin') {
+                        document.getElementById('sidebar-admin-section').style.display = 'block';
+                    }
+                }
+            }
         }
+    } catch (e) {
+        console.error("Erro ao carregar usuário:", e);
+        document.getElementById('sb-nome').textContent = "Usuário";
     }
 });
 
@@ -642,7 +644,7 @@ async function confirm(){
         if(o === selected.el && !correct) o.classList.add("wrong");
     });
 
-    if (window.supabase) {
+    if (typeof supabase !== "undefined") {
         const { data } = await supabase.auth.getUser();
         if (data && data.user) {
             await db.from("respostas_usuario").insert({
@@ -663,7 +665,6 @@ function next(){ if(i<qs.length-1){ i++; render(); } }
 
 /* COMMENTS */
 async function loadComments(){
-    if (!window.db) return;
     const q = qs[i];
 
     const { data } = await db
@@ -706,7 +707,7 @@ function renderComments(cms){
 async function sendComment(){
     const textEl = document.getElementById("newComment");
     const text = textEl.value.trim();
-    if(!text || !window.supabase) return;
+    if(!text) return;
 
     const q = qs[i];
     const { data } = await supabase.auth.getUser();
@@ -730,7 +731,7 @@ async function sendComment(){
 async function reply(id){
     const textEl = document.getElementById("t-"+id);
     const text = textEl.value.trim();
-    if(!text || !window.supabase) return;
+    if(!text) return;
 
     const q = qs[i];
     const { data } = await supabase.auth.getUser();
