@@ -1,68 +1,198 @@
-<div class="subtemas-grid">
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cardiologia — MedQuest Pro</title>
 
-  <div class="card" onclick="abrir('Hipertensão arterial sistêmica')">
-    <div class="emoji">🩸</div>
-    <div class="nome">Hipertensão arterial sistêmica</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+:root {
+  --bg-body: #f8fafc;
+  --surface: #ffffff;
+  --primary: #dc2626; /* vermelho cardiologia */
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --radius-lg: 18px;
+}
+
+body {
+  background-color: var(--bg-body);
+  font-family: 'Inter', sans-serif;
+}
+
+.main-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* GRID */
+.subtemas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 1.2rem;
+}
+
+/* CARD */
+.subtema-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  height: 150px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* brilho */
+.subtema-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(255,255,255,0.4), transparent);
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.subtema-card:hover::after {
+  opacity: 1;
+}
+
+/* hover */
+.subtema-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: var(--primary);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+/* clique */
+.subtema-card:active {
+  transform: scale(0.96);
+}
+
+/* emoji */
+.subtema-emoji {
+  font-size: 2.2rem;
+}
+
+/* nome */
+.subtema-nome {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  text-align: center;
+  padding: 0 6px;
+}
+</style>
+</head>
+
+<body>
+
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+
+<main class="main-content" id="main" style="display:none">
+
+  <div class="page-header" style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2rem; font-weight: 800;">❤️ Cardiologia</h1>
+    <p style="color: var(--text-muted); margin-top: 0.4rem;">
+      Escolha um subtema para treinar questões
+    </p>
   </div>
 
-  <div class="card" onclick="abrir('Arritmias')">
-    <div class="emoji">💓</div>
-    <div class="nome">Arritmias</div>
+  <div class="subtemas-grid">
+
+    <div class="subtema-card" onclick="abrir('Hipertensão arterial sistêmica')">
+      <div class="subtema-emoji">🩸</div>
+      <div class="subtema-nome">Hipertensão</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Arritmias')">
+      <div class="subtema-emoji">💓</div>
+      <div class="subtema-nome">Arritmias</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Insuficiência cardíaca')">
+      <div class="subtema-emoji">🫀</div>
+      <div class="subtema-nome">Insuficiência Cardíaca</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Miocardiopatias')">
+      <div class="subtema-emoji">📉</div>
+      <div class="subtema-nome">Miocardiopatias</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Doença arterial coronariana')">
+      <div class="subtema-emoji">⚠️</div>
+      <div class="subtema-nome">DAC</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Síndromes coronarianas agudas')">
+      <div class="subtema-emoji">🚑</div>
+      <div class="subtema-nome">SCA</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Valvopatias')">
+      <div class="subtema-emoji">🔊</div>
+      <div class="subtema-nome">Valvopatias</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Pericardites')">
+      <div class="subtema-emoji">🧊</div>
+      <div class="subtema-nome">Pericardites</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Endocardite infecciosa')">
+      <div class="subtema-emoji">🦠</div>
+      <div class="subtema-nome">Endocardite</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Doenças da aorta')">
+      <div class="subtema-emoji">🪢</div>
+      <div class="subtema-nome">Aorta</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Hipertensão pulmonar')">
+      <div class="subtema-emoji">🌬️</div>
+      <div class="subtema-nome">Hipertensão Pulmonar</div>
+    </div>
+
+    <div class="subtema-card" onclick="abrir('Tromboembolismo pulmonar')">
+      <div class="subtema-emoji">🫁</div>
+      <div class="subtema-nome">TEP</div>
+    </div>
+
   </div>
 
-  <div class="card" onclick="abrir('Insuficiência cardíaca')">
-    <div class="emoji">🫀</div>
-    <div class="nome">Insuficiência cardíaca</div>
-  </div>
+</main>
 
-  <div class="card" onclick="abrir('Miocardiopatias')">
-    <div class="emoji">📉</div>
-    <div class="nome">Miocardiopatias</div>
-  </div>
+<script>
+window.addEventListener('load', async () => {
+  const session = await exigirLogin();
+  if(!session) return;
 
-  <div class="card" onclick="abrir('Doença arterial coronariana')">
-    <div class="emoji">⚠️</div>
-    <div class="nome">Doença arterial coronariana</div>
-  </div>
+  document.getElementById('main').style.display = 'block';
+});
 
-  <div class="card" onclick="abrir('Síndromes coronarianas agudas')">
-    <div class="emoji">🚑</div>
-    <div class="nome">Síndromes coronarianas agudas</div>
-  </div>
+function abrir(subtema){
+  window.location.href = `questoes.html?tema=Cardiologia&subtema=${encodeURIComponent(subtema)}`;
+}
+</script>
 
-  <div class="card" onclick="abrir('Valvopatias')">
-    <div class="emoji">🔊</div>
-    <div class="nome">Valvopatias</div>
-  </div>
-
-  <div class="card" onclick="abrir('Pericardites')">
-    <div class="emoji">🧊</div>
-    <div class="nome">Pericardites</div>
-  </div>
-
-  <div class="card" onclick="abrir('Endocardite infecciosa')">
-    <div class="emoji">🦠</div>
-    <div class="nome">Endocardite infecciosa</div>
-  </div>
-
-  <div class="card" onclick="abrir('Doenças da aorta')">
-    <div class="emoji">🪢</div>
-    <div class="nome">Doenças da aorta</div>
-  </div>
-
-  <div class="card" onclick="abrir('Hipertensão pulmonar')">
-    <div class="emoji">🌬️</div>
-    <div class="nome">Hipertensão pulmonar</div>
-  </div>
-
-  <div class="card" onclick="abrir('Tromboembolismo pulmonar')">
-    <div class="emoji">🫁</div>
-    <div class="nome">Tromboembolismo pulmonar</div>
-  </div>
-
-  <div class="card" onclick="abrir('Doenças congênitas')">
-    <div class="emoji">👶</div>
-    <div class="nome">Cardiopatias congênitas</div>
-  </div>
-
-</div>
+</body>
+</html>
