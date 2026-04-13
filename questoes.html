@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — UWorld Elite</title>
+<title>MedQuest — Questões</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 body{
@@ -19,34 +20,32 @@ body{
   color:#111;
 }
 
-/* ===== SIDEBAR NÃO ALTERADA (cole a sua aqui) ===== */
-/* >>> MANTIVE SEU CÓDIGO EXTERNO VIA sidebar.js <<< */
-
-/* LAYOUT CENTRALIZADO (CORRIGIDO) */
+/* IMPORTANTE: não mexe na sidebar */
 #app{
   margin-left:260px;
   display:flex;
   justify-content:center;
-  padding:28px;
+  padding:30px;
 }
 
+/* CONTAINER CENTRAL */
 .container{
   width:100%;
-  max-width:900px;
+  max-width:850px;
 }
 
 /* CARD */
 .card{
   background:#fff;
   border:1px solid #e8e8e8;
-  border-radius:16px;
+  border-radius:14px;
   padding:22px;
-  box-shadow:0 8px 24px rgba(0,0,0,.05);
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
 }
 
 /* QUESTÃO */
 .question{
-  font-size:18px;
+  font-size:17px;
   font-weight:600;
   line-height:1.5;
   margin-bottom:18px;
@@ -56,33 +55,36 @@ body{
 .option{
   padding:12px 14px;
   border:1px solid #e5e7eb;
-  border-radius:12px;
+  border-radius:10px;
   margin-top:10px;
   cursor:pointer;
-  transition:.2s;
+  transition:.15s;
   background:#fff;
 }
 
 .option:hover{
-  border-color:#cbd5e1;
   background:#f9fafb;
 }
 
-.correct{
-  border:2px solid #16a34a !important;
-  background:#f0fdf4 !important;
+.option.selected{
+  border-color:#2563eb;
 }
 
-.wrong{
-  border:2px solid #dc2626 !important;
-  background:#fef2f2 !important;
+.option.correct{
+  border:2px solid #16a34a;
+  background:#f0fdf4;
+}
+
+.option.wrong{
+  border:2px solid #dc2626;
+  background:#fef2f2;
 }
 
 /* BOTÕES */
 .actions{
   display:flex;
   justify-content:center;
-  gap:12px;
+  gap:10px;
   margin-top:18px;
 }
 
@@ -90,7 +92,7 @@ button{
   font-family:Inter;
   font-weight:600;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
   padding:10px 14px;
   cursor:pointer;
 }
@@ -105,36 +107,14 @@ button{
   border:1px solid #e5e7eb;
 }
 
-/* FEEDBACK */
+/* COMENTÁRIOS */
 #feedback{
-  margin-top:20px;
+  margin-top:22px;
   display:none;
 }
 
-/* TABS */
-.tabs{
-  display:flex;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.tab{
-  padding:6px 12px;
-  border-radius:999px;
-  border:1px solid #e5e7eb;
-  font-size:13px;
-  cursor:pointer;
-}
-
-.tab.active{
-  background:#2563eb;
-  color:#fff;
-  border-color:#2563eb;
-}
-
-/* COMENTÁRIOS */
 .comment{
-  padding:12px 0;
+  padding:14px 0;
   border-bottom:1px solid #eee;
 }
 
@@ -145,8 +125,8 @@ button{
 }
 
 .avatar{
-  width:34px;
-  height:34px;
+  width:32px;
+  height:32px;
   border-radius:50%;
   background:#2563eb;
   color:#fff;
@@ -154,41 +134,58 @@ button{
   align-items:center;
   justify-content:center;
   font-weight:700;
+  font-size:13px;
 }
 
-.reply{
-  margin-left:44px;
-  border-left:2px solid #eee;
-  padding-left:12px;
+.comment-name{
+  font-weight:600;
+  font-size:13px;
+}
+
+.comment-date{
+  font-size:11px;
+  color:#888;
+}
+
+.comment-text{
+  margin-left:42px;
+  margin-top:6px;
+  font-size:14px;
+}
+
+/* REPLY */
+.reply-btn{
+  margin-left:42px;
+  font-size:12px;
+  color:#2563eb;
+  cursor:pointer;
+  margin-top:6px;
+}
+
+.reply-box{
+  margin-left:42px;
   margin-top:8px;
+  display:none;
 }
 
 textarea{
   width:100%;
-  margin-top:10px;
   padding:10px;
-  border-radius:10px;
-  border:1px solid #e5e7eb;
+  border-radius:8px;
+  border:1px solid #ddd;
   font-family:Inter;
   resize:none;
 }
-.reply-box{
-  margin-top:8px;
-  display:none;
-}
-.reply-btn{
+
+.small-btn{
+  margin-top:6px;
   font-size:12px;
-  color:#2563eb;
-  cursor:pointer;
-  margin-left:44px;
 }
 </style>
+
 </head>
 
 <body>
-
-<!-- SIDEBAR (SEU SCRIPT ORIGINAL) -->
-<script src="js/sidebar.js"></script>
 
 <div id="app" style="display:none">
 
@@ -203,20 +200,16 @@ textarea{
       <div class="actions">
         <button class="secondary" onclick="prev()">⬅ Anterior</button>
         <button class="secondary" onclick="next()">Próxima ➜</button>
-        <button class="primary" onclick="confirmAnswer()">Responder</button>
+        <button class="primary" onclick="confirm()">Responder</button>
       </div>
 
+      <!-- COMENTÁRIOS SÓ APARECEM APÓS RESPOSTA -->
       <div id="feedback">
-
-        <div class="tabs">
-          <div class="tab active" onclick="setTab('alunos')">Alunos</div>
-          <div class="tab" onclick="setTab('prof')">Professor</div>
-        </div>
 
         <div id="comments"></div>
 
-        <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
-        <button class="primary" onclick="sendComment()">Enviar comentário</button>
+        <textarea id="newComment" placeholder="Escreva um comentário..."></textarea>
+        <button class="primary small-btn" onclick="sendComment()">Enviar comentário</button>
 
       </div>
 
@@ -227,11 +220,10 @@ textarea{
 </div>
 
 <script>
-let questions = [];
-let index = 0;
+let qs = [];
+let i = 0;
 let selected = null;
 let answered = false;
-let tab = "alunos";
 
 /* INIT */
 window.addEventListener("load", async () => {
@@ -240,7 +232,7 @@ window.addEventListener("load", async () => {
   document.getElementById("app").style.display = "flex";
 
   const { data } = await db.from("banco_questoes").select("*").limit(30);
-  questions = data || [];
+  qs = data || [];
 
   render();
 });
@@ -250,13 +242,13 @@ function render(){
   selected = null;
   answered = false;
 
-  const q = questions[index];
+  const q = qs[i];
 
   document.getElementById("question").innerText = q.enunciado;
 
   document.getElementById("options").innerHTML =
     ["a","b","c","d"].map(l => `
-      <div class="option" onclick="selectOption('${l}', this)">
+      <div class="option" onclick="selectOpt('${l}', this)">
         ${l.toUpperCase()}) ${q["alternativa_"+l]}
       </div>
     `).join("");
@@ -265,25 +257,25 @@ function render(){
 }
 
 /* SELECT */
-function selectOption(letter, el){
+function selectOpt(letter, el){
   if(answered) return;
 
   selected = { letter, el };
 
   document.querySelectorAll(".option").forEach(o=>{
-    o.style.borderColor = "#e5e7eb";
+    o.classList.remove("selected");
   });
 
-  el.style.borderColor = "#2563eb";
+  el.classList.add("selected");
 }
 
-/* CONFIRM ANSWER */
-async function confirmAnswer(){
+/* CONFIRM */
+async function confirm(){
   if(!selected || answered) return;
 
   answered = true;
 
-  const q = questions[index];
+  const q = qs[i];
   const correct = selected.letter === q.correta;
 
   document.getElementById("feedback").style.display = "block";
@@ -308,17 +300,12 @@ async function confirmAnswer(){
 }
 
 /* NAV */
-function prev(){ if(index>0){ index--; render(); } }
-function next(){ if(index<questions.length-1){ index++; render(); } }
+function prev(){ if(i>0){ i--; render(); } }
+function next(){ if(i<qs.length-1){ i++; render(); } }
 
 /* COMMENTS */
-function setTab(t){
-  tab = t;
-  loadComments();
-}
-
 async function loadComments(){
-  const q = questions[index];
+  const q = qs[i];
 
   const { data } = await db
     .from("comentarios_questao")
@@ -329,52 +316,41 @@ async function loadComments(){
   renderComments(data || []);
 }
 
-function renderComments(comments){
+function renderComments(cms){
 
   const box = document.getElementById("comments");
 
-  const parents = comments.filter(c => !c.parent_id);
-
-  box.innerHTML = parents.map(c => `
+  box.innerHTML = cms.map(c => `
     <div class="comment">
 
       <div class="comment-header">
-        <div class="avatar">${c.user_name?.[0] || "U"}</div>
+        <div class="avatar">${(c.user_name || "U")[0]}</div>
+
         <div>
-          <div style="font-weight:600;font-size:13px">${c.user_name || "Usuário"}</div>
-          <div style="font-size:11px;color:#888">
-            ${new Date(c.created_at).toLocaleString()}
-          </div>
+          <div class="comment-name">${c.user_name || "Usuário"}</div>
+          <div class="comment-date">${new Date(c.created_at).toLocaleString()}</div>
         </div>
       </div>
 
-      <div style="margin-left:44px;margin-top:6px">
-        ${c.conteudo}
-      </div>
+      <div class="comment-text">${c.conteudo}</div>
 
       <div class="reply-btn" onclick="toggleReply('${c.id}')">Responder</div>
 
-      <div class="reply-box" id="reply-${c.id}">
-        <textarea id="reply-text-${c.id}" placeholder="Responder comentário..."></textarea>
-        <button class="primary" onclick="sendReply('${c.id}')">Enviar</button>
+      <div class="reply-box" id="r-${c.id}">
+        <textarea id="t-${c.id}" placeholder="Responder..."></textarea>
+        <button class="primary small-btn" onclick="reply('${c.id}')">Enviar</button>
       </div>
-
-      ${comments.filter(r => r.parent_id === c.id).map(r => `
-        <div class="reply">
-          <b>${r.user_name || "Usuário"}</b>: ${r.conteudo}
-        </div>
-      `).join("")}
 
     </div>
   `).join("");
 }
 
-/* COMMENT */
+/* SEND COMMENT */
 async function sendComment(){
-  const text = document.getElementById("commentInput").value.trim();
+  const text = document.getElementById("newComment").value.trim();
   if(!text) return;
 
-  const q = questions[index];
+  const q = qs[i];
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
@@ -386,17 +362,16 @@ async function sendComment(){
     parent_id: null
   });
 
-  document.getElementById("commentInput").value = "";
+  document.getElementById("newComment").value = "";
   loadComments();
 }
 
 /* REPLY */
-async function sendReply(parentId){
-  const input = document.getElementById("reply-text-"+parentId);
-  const text = input.value.trim();
+async function reply(id){
+  const text = document.getElementById("t-"+id).value.trim();
   if(!text) return;
 
-  const q = questions[index];
+  const q = qs[i];
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
@@ -405,14 +380,14 @@ async function sendReply(parentId){
     user_id: user.id,
     user_name: user.email,
     conteudo: text,
-    parent_id: parentId
+    parent_id: id
   });
 
   loadComments();
 }
 
 function toggleReply(id){
-  const el = document.getElementById("reply-"+id);
+  const el = document.getElementById("r-"+id);
   el.style.display = el.style.display === "block" ? "none" : "block";
 }
 </script>
