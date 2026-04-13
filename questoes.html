@@ -8,6 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
+
+<!-- 🔥 SIDEBAR ORIGINAL (OBRIGATÓRIO) -->
 <script src="js/sidebar.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +22,13 @@ body{
   color:#111;
 }
 
-.container{ max-width:900px; margin:0 auto; padding:28px; }
+/* garante espaço da sidebar */
+.container{
+  max-width:900px;
+  margin:0 auto;
+  padding:28px;
+  margin-left:260px; /* 🔥 mantém sidebar fixa visível */
+}
 
 .card{
   background:#fff;
@@ -38,6 +46,7 @@ body{
   border-radius:12px;
   margin-top:10px;
   cursor:pointer;
+  transition:.2s;
 }
 
 .option.selected{ border:2px solid #2563eb; background:#eff6ff; }
@@ -120,6 +129,9 @@ textarea{
 </head>
 
 <body>
+
+<!-- 🔥 SIDEBAR ORIGINAL (NÃO MEXIDO) -->
+<script src="js/sidebar.js"></script>
 
 <div class="container" id="app" style="display:none">
 
@@ -205,7 +217,6 @@ function selectOption(letter, el){
   el.classList.add("selected");
 }
 
-/* RESPONDER QUESTÃO */
 async function confirmAnswer(){
 
   if(!selected || answered) return;
@@ -274,12 +285,6 @@ function renderComments(comments){
         Responder
       </button>
 
-      ${c.respostas ? c.respostas.map(r=>`
-        <div class="reply">
-          <b>${r.nome}</b>: ${r.conteudo}
-        </div>
-      `).join("") : ""}
-
     </div>
   `).join("");
 }
@@ -308,7 +313,7 @@ async function sendComment(){
   loadComments();
 }
 
-/* RESPOSTA COMMENT */
+/* RESPOSTA */
 function startReply(id){
   replyTo = id;
   document.getElementById("commentInput").focus();
