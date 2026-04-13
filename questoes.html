@@ -14,6 +14,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --sb-bg: #0f172a;
+            --sb-text: #94a3b8;
+            --sb-active-bg: #1e293b;
+            --sb-accent: #2563eb;
+        }
+
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -22,21 +29,84 @@
             display: flex;
         }
 
-        /* ================= CONTEÚDO PRINCIPAL ================= */
+        /* ================= ESTRUTURA FIXA DA SIDEBAR ================= */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background-color: var(--sb-bg);
+            color: var(--sb-text);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .sidebar-brand-icon {
+            background: var(--sb-accent);
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Menu onde o sidebar.js injeta os links */
+        #sidebar-nav {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #1e293b;
+        }
+
+        .sidebar-user-card {
+            background: var(--sb-active-bg);
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-avatar {
+            width: 35px; height: 35px;
+            background: var(--sb-accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold;
+        }
+
+        .sidebar-user-info { overflow: hidden; }
+        .sidebar-user-name { color: white; font-size: 0.85rem; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .sidebar-user-email { color: var(--sb-text); font-size: 0.7rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+        /* ================= CONTEÚDO PRINCIPAL (CORRIGE DESCENTRALIZAÇÃO) ================= */
         #app {
-            margin-left: 260px; /* Espaço para a sidebar fixa */
+            margin-left: 260px; /* Alinha com a largura da sidebar */
             width: calc(100% - 260px);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 40px 30px;
+            flex-direction: column;
+            align-items: center; /* Centraliza horizontalmente o conteúdo */
+            padding: 40px 20px;
             box-sizing: border-box;
         }
 
         .container {
             width: 100%;
-            max-width: 850px;
+            max-width: 800px; /* Largura ideal para leitura de questões */
         }
 
         .card {
@@ -44,101 +114,59 @@
             border: 1px solid #e8e8e8;
             border-radius: 14px;
             padding: 30px;
-            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,.03);
         }
 
-        .question {
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            color: #1f2937;
-        }
+        .question { font-size: 18px; font-weight: 600; line-height: 1.6; margin-bottom: 24px; color: #1e293b; }
 
         .option {
             padding: 14px 16px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: 10px;
             margin-top: 12px;
             cursor: pointer;
-            transition: all .2s ease;
-            background: #fff;
+            transition: all .2s;
             font-size: 15px;
-            color: #374151;
             display: flex;
             align-items: center;
         }
 
-        .option:hover { background: #f9fafb; border-color: #d1d5db; }
-
-        .option.selected { border-color: #2563eb; background-color: #eff6ff; }
-
+        .option:hover { background: #f8fafc; }
+        .option.selected { border-color: #2563eb; background: #eff6ff; }
         .option.correct { border: 2px solid #16a34a; background: #f0fdf4; color: #166534; }
-
         .option.wrong { border: 2px solid #dc2626; background: #fef2f2; color: #991b1b; }
 
         .actions {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid #f3f4f6;
+            display: flex; justify-content: space-between;
+            margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;
         }
 
-        .nav-buttons { display: flex; gap: 10px; }
-
         button {
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
+            font-family: 'Inter', sans-serif; font-weight: 600; border: none;
+            border-radius: 8px; padding: 12px 20px; cursor: pointer; font-size: 14px;
         }
 
         .primary { background: #2563eb; color: #fff; }
-        .primary:hover { background: #1d4ed8; }
-        .secondary { background: #fff; border: 1px solid #e5e7eb; color: #374151; }
+        .secondary { background: #f1f5f9; color: #475569; }
 
         /* ================= COMENTÁRIOS ================= */
         #feedback {
-            margin-top: 30px;
-            display: none;
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid #e2e8f0;
+            margin-top: 30px; display: none;
+            background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;
         }
 
-        .comment { padding: 16px 0; border-bottom: 1px solid #e2e8f0; }
-        .comment:last-child { border-bottom: none; }
-        .comment-header { display: flex; gap: 12px; align-items: center; }
-        .avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: #2563eb; color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 14px;
-        }
-        .comment-name { font-weight: 600; font-size: 14px; color: #0f172a; }
-        .comment-date { font-size: 12px; color: #64748b; }
-        .comment-text { margin-left: 48px; margin-top: 8px; font-size: 14px; color: #334155; }
-        .reply-btn { margin-left: 48px; font-size: 12px; color: #2563eb; cursor: pointer; font-weight: 600; }
-        
         .comment-box {
             display: flex; flex-direction: column; gap: 10px; margin-top: 20px;
-            background: #fff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0;
         }
 
         textarea {
             width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;
-            font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; box-sizing: border-box;
+            font-family: 'Inter', sans-serif; resize: vertical; min-height: 100px; box-sizing: border-box;
         }
 
         @media (max-width: 768px) {
-            #app { margin-left: 0; width: 100%; padding: 20px 15px; }
+            .sidebar { display: none; }
+            #app { margin-left: 0; width: 100%; }
         }
     </style>
 </head>
@@ -148,10 +176,11 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
             <div class="sidebar-brand-icon">MQ</div>
-            <div class="sidebar-brand-name">MedQuest</div>
+            <span>MedQuest</span>
         </div>
-        <div id="sidebar-menu">
-            </div>
+        
+        <nav id="sidebar-nav"></nav>
+
         <div class="sidebar-footer">
             <div class="sidebar-user-card">
                 <div class="sidebar-avatar" id="sb-avatar">?</div>
@@ -166,7 +195,7 @@
     <main id="app" style="display:none">
         <div class="container">
             <div class="card">
-                <div class="question" id="question"></div>
+                <div class="question" id="question">Carregando questão...</div>
                 <div id="options"></div>
 
                 <div class="actions">
@@ -174,14 +203,14 @@
                         <button class="secondary" onclick="prev()">⬅ Anterior</button>
                         <button class="secondary" onclick="next()">Próxima ➜</button>
                     </div>
-                    <button class="primary" onclick="confirm()">Responder</button>
+                    <button class="primary" id="btnResponder" onclick="confirm()">Responder</button>
                 </div>
 
                 <div id="feedback">
-                    <h3>Discussão da Questão</h3>
+                    <h3 style="font-size: 16px; margin-bottom: 15px;">Discussão da Questão</h3>
                     <div id="comments"></div>
                     <div class="comment-box">
-                        <textarea id="newComment" placeholder="Ficou com dúvida? Escreva um comentário..."></textarea>
+                        <textarea id="newComment" placeholder="Escreva seu comentário ou dúvida..."></textarea>
                         <button class="primary" style="align-self: flex-end;" onclick="sendComment()">Enviar comentário</button>
                     </div>
                 </div>
@@ -195,21 +224,22 @@ let i = 0;
 let selected = null;
 let answered = false;
 
-// Inicialização da página
 window.addEventListener("load", async () => {
+    // 1. Verificar login (função do seu auth.js)
     if (typeof exigirLogin === "function") await exigirLogin();
     
     document.getElementById("app").style.display = "flex";
 
-    // Carrega questões do banco (db vem do supabase.js)
+    // 2. Carregar questões usando a conexão global 'db' do seu supabase.js
     if (typeof db !== "undefined") {
         try {
-            const { data, error } = await db.from("banco_questoes").select("*").limit(30);
+            const { data, error } = await db.from("banco_questoes").select("*").limit(50);
             if (error) throw error;
             qs = data || [];
             if(qs.length > 0) render();
         } catch (err) {
-            console.error("Erro ao carregar questões:", err);
+            console.error("Erro Supabase:", err);
+            document.getElementById("question").innerText = "Erro ao carregar questões do banco.";
         }
     }
 });
@@ -218,6 +248,8 @@ function render(){
     selected = null;
     answered = false;
     const q = qs[i];
+    
+    document.getElementById("btnResponder").style.display = "block";
     document.getElementById("question").innerText = q.enunciado;
     document.getElementById("options").innerHTML = ["a","b","c","d"].map(l => `
         <div class="option" onclick="selectOpt('${l}', this)">
@@ -241,55 +273,62 @@ async function confirm(){
     const q = qs[i];
     const correct = selected.letter === q.correta;
     document.getElementById("feedback").style.display = "block";
+    document.getElementById("btnResponder").style.display = "none";
 
     document.querySelectorAll(".option").forEach(o => {
-        const textOption = o.innerText.trim();
-        const l = textOption.toLowerCase();
+        const text = o.innerText.trim();
+        const l = text.toLowerCase();
         if(l === q.correta) o.classList.add("correct");
         if(o === selected.el && !correct) o.classList.add("wrong");
     });
 
-    // Salva resposta
-    const { data } = await supabase.auth.getUser();
-    if (data?.user) {
-        await db.from("respostas_usuario").insert({
-            user_id: data.user.id,
-            questao_id: q.id,
-            resposta_marcada: selected.letter,
-            correta: correct
-        });
-    }
+    // Registrar resposta (db vem de supabase.js)
+    try {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user) {
+            await db.from("respostas_usuario").insert({
+                user_id: data.user.id,
+                questao_id: q.id,
+                resposta_marcada: selected.letter,
+                correta: correct
+            });
+        }
+    } catch(e) { console.error("Erro ao salvar resposta:", e); }
+
     loadComments();
 }
 
-function prev(){ if(i>0){ i--; render(); } }
-function next(){ if(i<qs.length-1){ i++; render(); } }
+function prev(){ if(i > 0){ i--; render(); } }
+function next(){ if(i < qs.length - 1){ i++; render(); } }
 
-// --- LÓGICA DE COMENTÁRIOS ---
+/* --- COMENTÁRIOS --- */
 
 async function loadComments(){
     const q = qs[i];
-    const { data, error } = await db
-        .from("comentarios_questao")
-        .select("*")
-        .eq("questao_id", q.id)
-        .order("created_at", { ascending: false });
+    try {
+        const { data, error } = await db
+            .from("comentarios_questao")
+            .select("*")
+            .eq("questao_id", q.id)
+            .order("created_at", { ascending: false });
 
-    if (!error) renderComments(data || []);
+        if (!error) renderComments(data || []);
+    } catch(e) { console.error("Erro ao buscar comentários:", e); }
 }
 
 function renderComments(cms){
     const box = document.getElementById("comments");
+    if(cms.length === 0) {
+        box.innerHTML = "<p style='font-size:13px; color:#64748b;'>Nenhum comentário ainda. Seja o primeiro!</p>";
+        return;
+    }
     box.innerHTML = cms.map(c => `
-        <div class="comment">
-            <div class="comment-header">
-                <div class="avatar">${(c.user_name || "U").toUpperCase()}</div>
-                <div>
-                    <div class="comment-name">${c.user_name || "Usuário"}</div>
-                    <div class="comment-date">${new Date(c.created_at).toLocaleString('pt-BR')}</div>
-                </div>
+        <div style="padding: 12px 0; border-bottom: 1px solid #edf2f7;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                <div style="font-weight:700; font-size:13px;">${c.user_name || "Usuário"}</div>
+                <div style="font-size:11px; color:#94a3b8;">${new Date(c.created_at).toLocaleDateString()}</div>
             </div>
-            <div class="comment-text">${c.conteudo}</div>
+            <div style="font-size:14px; color:#334155; line-height:1.5;">${c.conteudo}</div>
         </div>
     `).join("");
 }
@@ -299,30 +338,31 @@ async function sendComment(){
     const text = textEl.value.trim();
     if(!text) return;
 
-    // Pega usuário atual do Supabase
-    const { data, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !data.user) {
-        alert("Você precisa estar logado para comentar.");
-        return;
-    }
+    try {
+        // Pega o usuário logado via supabase.auth
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !user) {
+            alert("Sessão expirada. Por favor, faça login novamente.");
+            return;
+        }
 
-    const user = data.user;
-    const userName = user.user_metadata?.nome || user.email.split('@');
+        const nomeUsuario = user.user_metadata?.nome || user.email.split('@');
 
-    const { error } = await db.from("comentarios_questao").insert({
-        questao_id: qs[i].id,
-        user_id: user.id,
-        user_name: userName,
-        conteudo: text
-    });
+        const { error } = await db.from("comentarios_questao").insert({
+            questao_id: qs[i].id,
+            user_id: user.id,
+            user_name: nomeUsuario,
+            conteudo: text
+        });
 
-    if (error) {
-        console.error("Erro ao enviar:", error);
-        alert("Erro ao enviar comentário.");
-    } else {
+        if (error) throw error;
+
         textEl.value = "";
-        loadComments(); // Recarrega a lista
+        loadComments(); // Atualiza a lista
+    } catch (err) {
+        console.error("Erro ao comentar:", err);
+        alert("Erro técnico ao enviar comentário. Verifique o console (F12).");
     }
 }
 </script>
