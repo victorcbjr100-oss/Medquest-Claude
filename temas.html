@@ -1,235 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Especialidades — MedQuest Pro</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    :root {
-      --bg-body: #f8fafc;
-      --surface: #ffffff;
-      --primary: #2563eb;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --radius-lg: 16px;
-      --radius-md: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-    }
-
-    body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; }
-
-    .main-content { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-
-    /* ===== NOVA SEÇÃO: MATÉRIAS ===== */
-    .materias-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .materia-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      height: 140px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: var(--shadow);
-    }
-
-    .materia-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      border-color: var(--primary);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-    }
-
-    .materia-emoji { font-size: 2rem; }
-
-    .materia-nome {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text-main);
-    }
-
-    /* Grid Layout */
-    .temas-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .tema-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      transition: all 0.3s ease;
-    }
-
-    .tema-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
-      border-color: #cbd5e1;
-    }
-
-    .tema-header {
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      cursor: pointer;
-      user-select: none;
-      background: #fff;
-    }
-
-    .tema-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-
-    .tema-info { flex: 1; }
-    .tema-name { font-weight: 800; font-size: 1rem; color: var(--text-main); }
-    .tema-count { font-size: 0.8rem; color: var(--text-muted); }
-
-    .tema-progress-wrap { margin-top: 0.75rem; }
-
-    .progress-outer { height: 6px; background: #f1f5f9; border-radius: 10px; }
-    .progress-inner { height: 100%; border-radius: 10px; }
-
-    .fill-blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
-    .fill-green { background: linear-gradient(90deg, #10b981, #059669); }
-    .fill-red { background: linear-gradient(90deg, #f43f5e, #e11d48); }
-
-    .tema-arrow { font-size: 0.7rem; }
-
-    .subtemas { display: none; }
-    .subtemas.open { display: block; }
-
-    .subtema-btn {
-      width: 100%;
-      padding: 0.8rem;
-      margin-bottom: 4px;
-      background: #fff;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-    }
-
-    .loading-msg { text-align: center; padding: 5rem; }
-
-    .filter-tabs {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .filter-tab.active {
-        background: #fff;
-        color: var(--primary);
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Cardiologia</title>
+<style>
+body{font-family:Arial;padding:20px}
+.subtema{padding:12px;border:1px solid #ccc;margin-bottom:8px;cursor:pointer}
+</style>
 </head>
 
 <body>
-<script src="js/auth.js"></script>
-<script src="js/sidebar.js"></script>
 
-<main class="main-content" id="main" style="display:none">
+<h1>Cardiologia</h1>
 
-  <div class="page-header" style="margin-bottom: 2.5rem;">
-    <h1 style="font-size: 2rem; font-weight: 800;">Especialidades</h1>
-    <p style="color: var(--text-muted);">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
-  </div>
-
-  <div class="filter-tabs" id="filtros">
-    <button class="filter-tab active" data-filtro="">Todas Questões</button>
-    <button class="filter-tab" data-filtro="facil">Fáceis</button>
-    <button class="filter-tab" data-filtro="media">Médias</button>
-    <button class="filter-tab" data-filtro="dificil">Difíceis</button>
-  </div>
-
-  <!-- ===== NOVOS BLOCOS ===== -->
-  <div class="materias-grid">
-    <div class="materia-card" onclick="filtrarMateria('Cardiologia')">
-      <div class="materia-emoji">❤️</div>
-      <div class="materia-nome">Cardiologia</div>
-    </div>
-
-    <div class="materia-card" onclick="filtrarMateria('Endocrinologia')">
-      <div class="materia-emoji">🧪</div>
-      <div class="materia-nome">Endocrinologia</div>
-    </div>
-
-    <div class="materia-card" onclick="filtrarMateria('Pediatria')">
-      <div class="materia-emoji">👶</div>
-      <div class="materia-nome">Pediatria</div>
-    </div>
-  </div>
-
-  <div id="loading" class="loading-msg">
-    ⚡ Organizando especialidades...
-  </div>
-
-  <div class="temas-grid" id="temas-grid" style="display:none"></div>
-</main>
+<div class="subtema" onclick="abrir('Hipertensão arterial')">Hipertensão arterial</div>
+<div class="subtema" onclick="abrir('Arritmias')">Arritmias</div>
+<div class="subtema" onclick="abrir('Miocardiopatias')">Miocardiopatias</div>
+<div class="subtema" onclick="abrir('Insuficiência cardíaca')">Insuficiência cardíaca</div>
 
 <script>
-let temasData = {};
-let filtroAtivo = '';
-
-window.addEventListener('load', async () => {
-  const session = await exigirLogin(); if(!session) return;
-  document.getElementById('main').style.display='block';
-
-  temasData = {
-    "Cardiologia": { total: 10, acertos: 7, subtemas:{} },
-    "Endocrinologia": { total: 8, acertos: 5, subtemas:{} },
-    "Pediatria": { total: 6, acertos: 4, subtemas:{} }
-  };
-
-  renderTemas(temasData);
-  document.getElementById('loading').style.display='none';
-  document.getElementById('temas-grid').style.display='grid';
-});
-
-function renderTemas(estrutura) {
-  const grid = document.getElementById('temas-grid');
-  grid.innerHTML = '';
-
-  Object.entries(estrutura).forEach(([tema, dados])=>{
-    const card = document.createElement('div');
-    card.className = 'tema-card';
-    card.innerHTML = `<div class="tema-header">${tema}</div>`;
-    grid.appendChild(card);
-  });
-}
-
-function filtrarMateria(materia) {
-  const filtrado = {};
-
-  Object.entries(temasData).forEach(([tema, dados]) => {
-    if (tema.toLowerCase().includes(materia.toLowerCase())) {
-      filtrado[tema] = dados;
-    }
-  });
-
-  renderTemas(filtrado);
+function abrir(sub){
+  window.location.href = `questoes.html?tema=Cardiologia&subtema=${encodeURIComponent(sub)}`
 }
 </script>
 
