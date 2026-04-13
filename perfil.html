@@ -40,7 +40,6 @@
     .page-header h1 { font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin: 0; }
     .page-header p { color: var(--text-secondary); margin-top: 0.4rem; font-size: 0.95rem; }
 
-    /* Layout Grid */
     .perfil-grid {
       display: grid;
       grid-template-columns: 320px 1fr;
@@ -52,7 +51,6 @@
       .perfil-grid { grid-template-columns: 1fr; }
     }
 
-    /* Card Esquerdo: Perfil Rápido */
     .perfil-card-left {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -94,10 +92,8 @@
       font-weight: 700;
       color: var(--text-main);
       text-transform: uppercase;
-      letter-spacing: 0.025em;
     }
 
-    /* Card Direito: Formulário */
     .card-form {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -115,9 +111,6 @@
       border-bottom: 1px solid var(--border-color);
     }
 
-    .section-title-wrap span { font-size: 1.25rem; }
-    .section-title-wrap h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
-
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
 
@@ -131,7 +124,6 @@
       border-radius: var(--radius-md);
       font-size: 0.9rem;
       font-family: inherit;
-      transition: all 0.2s;
       background-color: #fff;
       box-sizing: border-box;
     }
@@ -156,13 +148,11 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      transition: background 0.2s;
       margin-top: 1rem;
     }
 
     .btn-save:hover { background: var(--primary-hover); }
 
-    /* Danger Zone */
     .danger-zone {
       margin-top: 2rem;
       background: #fff5f5;
@@ -170,18 +160,6 @@
       border-radius: var(--radius-lg);
       padding: 1.5rem;
     }
-
-    .danger-zone h3 {
-      color: #991b1b;
-      font-size: 1rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .danger-zone p { font-size: 0.85rem; color: #b91c1c; line-height: 1.5; margin-bottom: 1.25rem; }
 
     .btn-danger-outline {
       background: transparent;
@@ -193,12 +171,8 @@
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      transition: all 0.2s;
     }
 
-    .btn-danger-outline:hover { background: #fee2e2; border-color: #ef4444; }
-
-    /* Alert Success */
     .alert-custom {
       display: none;
       padding: 1rem;
@@ -210,6 +184,7 @@
     }
     .alert-custom.show { display: block; animation: fadeIn 0.3s ease; }
     .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -221,7 +196,7 @@
 <main class="main-content" id="main" style="display:none">
   <div class="page-header">
     <h1>Meu Perfil</h1>
-    <p>Mantenha seus dados acadêmicos atualizados para estatísticas precisas.</p>
+    <p>Gerencie suas informações pessoais e acadêmicas.</p>
   </div>
 
   <div class="perfil-grid">
@@ -231,7 +206,7 @@
         <div class="perfil-nome" id="pf-nome">—</div>
         <div class="perfil-email" id="pf-email">—</div>
         <div class="perfil-status-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:#10b981"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:#10b981; margin-right: 5px;"><path d="M20 6L9 17l-5-5"/></svg>
             Conta Ativa
         </div>
       </div>
@@ -240,8 +215,18 @@
     <section>
       <div class="card-form">
         <div class="section-title-wrap">
+          <span>👤</span>
+          <h2 style="margin:0; font-size:1.1rem; font-weight:700">Dados Pessoais</h2>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nome Completo</label>
+          <input class="form-input" id="pf-nome-input" placeholder="Como você quer ser chamado?">
+        </div>
+
+        <div class="section-title-wrap" style="margin-top: 2rem;">
           <span>🎓</span>
-          <h2>Informações Acadêmicas</h2>
+          <h2 style="margin:0; font-size:1.1rem; font-weight:700">Informações Acadêmicas</h2>
         </div>
         
         <div class="form-grid">
@@ -263,7 +248,7 @@
 
         <div class="form-group">
           <label class="form-label">Instituição de Ensino</label>
-          <input class="form-input" id="pf-univ" placeholder="Digite o nome da sua universidade">
+          <input class="form-input" id="pf-univ" placeholder="Ex: USP, UFMG, Unicamp...">
         </div>
 
         <div class="form-group">
@@ -271,17 +256,17 @@
           <input class="form-input" type="number" id="pf-form" placeholder="Ex: 2026">
         </div>
 
-        <button class="btn-save" onclick="salvarPerfil()">
+        <button class="btn-save" id="btn-salvar" onclick="salvarPerfil()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Atualizar Perfil
+          Salvar Alterações
         </button>
 
-        <div id="msg-pf" class="alert-custom alert-success">Perfil atualizado com sucesso!</div>
+        <div id="msg-pf" class="alert-custom"></div>
       </div>
 
       <div class="danger-zone">
-        <h3>⚠️ Zona de Segurança</h3>
-        <p>A exclusão da conta removerá permanentemente seu histórico de simulados, estatísticas e progresso. Esta ação não pode ser desfeita.</p>
+        <h3 style="color: #991b1b; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">⚠️ Zona de Perigo</h3>
+        <p style="font-size: 0.85rem; color: #b91c1c; line-height: 1.5; margin-bottom: 1.25rem;">A exclusão da conta removerá permanentemente seu histórico de simulados e anotações.</p>
         <button class="btn-danger-outline" onclick="excluirConta()">Excluir minha conta permanentemente</button>
       </div>
     </section>
@@ -290,41 +275,82 @@
 
 <script>
 window.addEventListener('load', async()=>{
-  const session=await exigirLogin(); if(!session) return;
+  const session = await exigirLogin(); if(!session) return;
   document.getElementById('main').style.display='block';
-  const sb=window.supabaseClient, uid=session.user.id;
-  const nome=session.user.user_metadata?.nome||session.user.email.split('@');
   
-  document.getElementById('pf-av').textContent=nome.charAt(0).toUpperCase();
-  document.getElementById('pf-nome').textContent=nome;
-  document.getElementById('pf-email').textContent=session.user.email;
+  const sb = window.supabaseClient;
+  const uid = session.user.id;
   
-  const {data:pf}=await sb.from('perfis').select('*').eq('id',uid).single();
+  // Corrigindo a extração do nome do metadado ou e-mail
+  const nomeMeta = session.user.user_metadata?.nome;
+  const nomeEmail = session.user.email.split('@');
+  const nomeDisplay = nomeMeta || nomeEmail;
+
+  // Atualiza UI lateral
+  document.getElementById('pf-av').textContent = nomeDisplay.charAt(0).toUpperCase();
+  document.getElementById('pf-nome').textContent = nomeDisplay;
+  document.getElementById('pf-email').textContent = session.user.email;
+  
+  // Preenche o input de nome
+  document.getElementById('pf-nome-input').value = nomeMeta || "";
+  
+  // Busca dados adicionais na tabela 'perfis'
+  const {data:pf} = await sb.from('perfis').select('*').eq('id',uid).single();
   if(pf){
-    if(pf.idade) document.getElementById('pf-idade').value=pf.idade;
-    if(pf.nivel) document.getElementById('pf-nivel').value=pf.nivel;
-    if(pf.universidade) document.getElementById('pf-univ').value=pf.universidade;
-    if(pf.ano_formatura) document.getElementById('pf-form').value=pf.ano_formatura;
+    if(pf.idade) document.getElementById('pf-idade').value = pf.idade;
+    if(pf.nivel) document.getElementById('pf-nivel').value = pf.nivel;
+    if(pf.universidade) document.getElementById('pf-univ').value = pf.universidade;
+    if(pf.ano_formatura) document.getElementById('pf-form').value = pf.ano_formatura;
+    // Se o nome estiver na tabela mas não no meta, prioriza o input
+    if(pf.nome && !nomeMeta) document.getElementById('pf-nome-input').value = pf.nome;
   }
 });
 
 async function salvarPerfil(){
-  const sb=window.supabaseClient;
-  const {data:{session}}=await sb.auth.getSession();
-  const uid=session.user.id;
+  const btn = document.getElementById('btn-salvar');
+  const msg = document.getElementById('msg-pf');
   
-  const { error } = await sb.from('perfis').upsert({
-    id:uid,
-    idade:parseInt(document.getElementById('pf-idade').value)||null,
-    nivel:document.getElementById('pf-nivel').value||null,
-    universidade:document.getElementById('pf-univ').value.trim()||null,
-    ano_formatura:parseInt(document.getElementById('pf-form').value)||null,
-  });
+  try {
+    btn.disabled = true;
+    btn.textContent = "Salvando...";
+    
+    const sb = window.supabaseClient;
+    const {data:{session}} = await sb.auth.getSession();
+    const uid = session.user.id;
+    const novoNome = document.getElementById('pf-nome-input').value.trim();
 
-  if(!error) {
-    const el=document.getElementById('msg-pf');
-    el.classList.add('show');
-    setTimeout(()=>el.classList.remove('show'), 3000);
+    // 1. Atualiza metadados do Auth (para refletir no sistema todo)
+    const { error: authError } = await sb.auth.updateUser({
+      data: { nome: novoNome }
+    });
+    if(authError) throw authError;
+
+    // 2. Atualiza tabela de perfis
+    const { error: dbError } = await sb.from('perfis').upsert({
+      id: uid,
+      nome: novoNome,
+      idade: parseInt(document.getElementById('pf-idade').value) || null,
+      nivel: document.getElementById('pf-nivel').value || null,
+      universidade: document.getElementById('pf-univ').value.trim() || null,
+      ano_formatura: parseInt(document.getElementById('pf-form').value) || null,
+    });
+    if(dbError) throw dbError;
+
+    // Sucesso: Atualiza UI local
+    document.getElementById('pf-nome').textContent = novoNome;
+    document.getElementById('pf-av').textContent = novoNome.charAt(0).toUpperCase();
+    
+    msg.textContent = 'Perfil atualizado com sucesso!';
+    msg.className = 'alert-custom show alert-success';
+    
+  } catch (err) {
+    console.error(err);
+    msg.textContent = 'Erro ao salvar: ' + err.message;
+    msg.className = 'alert-custom show alert-error';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Atualizar Perfil`;
+    setTimeout(() => msg.classList.remove('show'), 3000);
   }
 }
 
@@ -332,12 +358,12 @@ async function excluirConta(){
   if(!confirm('Atenção: Você tem certeza que deseja excluir sua conta?')) return;
   if(!confirm('Esta é a última confirmação. Todos os seus dados serão deletados.')) return;
   
-  const sb=window.supabaseClient;
-  const {data:{session}}=await sb.auth.getSession();
+  const sb = window.supabaseClient;
+  const {data:{session}} = await sb.auth.getSession();
   
   await sb.from('perfis').delete().eq('id',session.user.id);
   await sb.auth.signOut();
-  window.location.href='index.html';
+  window.location.href = 'index.html';
 }
 </script>
 </body>
