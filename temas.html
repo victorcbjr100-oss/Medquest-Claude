@@ -25,6 +25,43 @@
 
     .main-content { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem; }
 
+    /* ===== NOVA SEÇÃO: MATÉRIAS ===== */
+    .materias-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .materia-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .materia-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: var(--primary);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    }
+
+    .materia-emoji { font-size: 2rem; }
+
+    .materia-nome {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
     /* Grid Layout */
     .temas-grid {
       display: grid;
@@ -32,7 +69,6 @@
       gap: 1.5rem;
     }
 
-    /* Card Design */
     .tema-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -48,7 +84,6 @@
       border-color: #cbd5e1;
     }
 
-    /* Header do Tema */
     .tema-header {
       padding: 1.5rem;
       display: flex;
@@ -67,123 +102,59 @@
       align-items: center;
       justify-content: center;
       font-size: 1.5rem;
-      flex-shrink: 0;
-      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);
     }
 
     .tema-info { flex: 1; }
-    .tema-name { font-weight: 800; font-size: 1rem; color: var(--text-main); margin-bottom: 2px; }
-    .tema-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .tema-name { font-weight: 800; font-size: 1rem; color: var(--text-main); }
+    .tema-count { font-size: 0.8rem; color: var(--text-muted); }
 
-    /* Progresso */
     .tema-progress-wrap { margin-top: 0.75rem; }
-    .tema-pct { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; }
-    
-    .progress-outer { height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
-    .progress-inner { height: 100%; border-radius: 10px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-    
+
+    .progress-outer { height: 6px; background: #f1f5f9; border-radius: 10px; }
+    .progress-inner { height: 100%; border-radius: 10px; }
+
     .fill-blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
     .fill-green { background: linear-gradient(90deg, #10b981, #059669); }
     .fill-red { background: linear-gradient(90deg, #f43f5e, #e11d48); }
 
-    .tema-arrow {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: #f8fafc;
-      color: var(--text-muted);
-      transition: all 0.3s;
-      font-size: 0.7rem;
-    }
-    .tema-arrow.open { transform: rotate(90deg); background: var(--primary); color: #fff; }
+    .tema-arrow { font-size: 0.7rem; }
 
-    /* Subtemas (Lista interna) */
-    .subtemas {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-      background: #fafafa;
-      border-top: 0 solid var(--border);
-    }
-    .subtemas.open { max-height: 1000px; border-top-width: 1px; padding: 0.75rem; }
+    .subtemas { display: none; }
+    .subtemas.open { display: block; }
 
     .subtema-btn {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       width: 100%;
-      padding: 0.85rem 1rem;
+      padding: 0.8rem;
       margin-bottom: 4px;
       background: #fff;
-      border: 1px solid transparent;
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all 0.2s;
     }
 
-    .subtema-btn:hover {
-      background: #fff;
-      border-color: var(--primary);
-      transform: translateX(4px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
+    .loading-msg { text-align: center; padding: 5rem; }
 
-    .subtema-nome { font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
-    .subtema-meta { display: flex; align-items: center; gap: 0.75rem; }
-    .subtema-q { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-    
-    .subtema-pct-badge {
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      min-width: 35px;
-      text-align: center;
-    }
-
-    .loading-msg { text-align: center; padding: 5rem; color: var(--text-muted); font-weight: 500; }
-    
-    /* Tabs de Filtro */
     .filter-tabs {
         display: flex;
         gap: 0.5rem;
         margin-bottom: 2rem;
-        background: #f1f5f9;
-        padding: 0.4rem;
-        border-radius: 12px;
-        width: fit-content;
     }
-    
-    .filter-tab {
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        background: transparent;
-        color: var(--text-muted);
-    }
-    
+
     .filter-tab.active {
         background: #fff;
         color: var(--primary);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
   </style>
 </head>
+
 <body>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 
 <main class="main-content" id="main" style="display:none">
+
   <div class="page-header" style="margin-bottom: 2.5rem;">
-    <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">Especialidades</h1>
-    <p style="color: var(--text-muted); margin-top: 0.5rem;">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
+    <h1 style="font-size: 2rem; font-weight: 800;">Especialidades</h1>
+    <p style="color: var(--text-muted);">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
   </div>
 
   <div class="filter-tabs" id="filtros">
@@ -193,139 +164,74 @@
     <button class="filter-tab" data-filtro="dificil">Difíceis</button>
   </div>
 
-  <div id="loading" class="loading-msg">
-    <div style="font-size: 2rem; margin-bottom: 1rem;">⚡</div>
-    Organizando especialidades...
+  <!-- ===== NOVOS BLOCOS ===== -->
+  <div class="materias-grid">
+    <div class="materia-card" onclick="filtrarMateria('Cardiologia')">
+      <div class="materia-emoji">❤️</div>
+      <div class="materia-nome">Cardiologia</div>
+    </div>
+
+    <div class="materia-card" onclick="filtrarMateria('Endocrinologia')">
+      <div class="materia-emoji">🧪</div>
+      <div class="materia-nome">Endocrinologia</div>
+    </div>
+
+    <div class="materia-card" onclick="filtrarMateria('Pediatria')">
+      <div class="materia-emoji">👶</div>
+      <div class="materia-nome">Pediatria</div>
+    </div>
   </div>
-  
+
+  <div id="loading" class="loading-msg">
+    ⚡ Organizando especialidades...
+  </div>
+
   <div class="temas-grid" id="temas-grid" style="display:none"></div>
 </main>
 
 <script>
-const CORES = [
-  {bg:'#eff6ff',icon:'#2563eb',emoji:'❤️'},
-  {bg:'#ecfdf5',icon:'#059669',emoji:'🧠'},
-  {bg:'#f5f3ff',icon:'#7c3aed',emoji:'🫁'},
-  {bg:'#fff7ed',icon:'#ea580c',emoji:'🦴'},
-  {bg:'#fef2f2',icon:'#dc2626',emoji:'🩺'},
-  {bg:'#f0fdf4',icon:'#16a34a',emoji:'💊'},
-  {bg:'#fefce8',icon:'#ca8a04',emoji:'🔬'},
-  {bg:'#fff1f2',icon:'#e11d48',emoji:'👶'},
-  {bg:'#f0f9ff',icon:'#0284c7',emoji:'🧬'},
-  {bg:'#fdf4ff',icon:'#9333ea',emoji:'🏥'},
-];
-
 let temasData = {};
 let filtroAtivo = '';
 
 window.addEventListener('load', async () => {
   const session = await exigirLogin(); if(!session) return;
   document.getElementById('main').style.display='block';
-  const sb = window.supabaseClient, uid = session.user.id;
 
-  const {data:questoes} = await sb.from('questoes').select('id,tema,subtema');
-  const {data:resps} = await sb.from('respostas').select('questao_id,acertou').eq('user_id',uid);
+  temasData = {
+    "Cardiologia": { total: 10, acertos: 7, subtemas:{} },
+    "Endocrinologia": { total: 8, acertos: 5, subtemas:{} },
+    "Pediatria": { total: 6, acertos: 4, subtemas:{} }
+  };
 
-  const statsQ = {};
-  if(resps) resps.forEach(r=>{ statsQ[r.questao_id]={acertou:r.acertou}; });
-
-  const estrutura = {};
-  if(questoes) questoes.forEach(q=>{
-    const t = q.tema||'Outros', s = q.subtema||'Geral';
-    if(!estrutura[t]) estrutura[t]={subtemas:{},total:0,acertos:0};
-    if(!estrutura[t].subtemas[s]) estrutura[t].subtemas[s]={total:0,acertos:0};
-    estrutura[t].subtemas[s].total++;
-    estrutura[t].total++;
-    if(statsQ[q.id]?.acertou){ 
-        estrutura[t].subtemas[s].acertos++; 
-        estrutura[t].acertos++; 
-    }
-  });
-  
-  temasData = estrutura;
-  renderTemas(estrutura);
-  
+  renderTemas(temasData);
   document.getElementById('loading').style.display='none';
   document.getElementById('temas-grid').style.display='grid';
-
-  document.getElementById('filtros').addEventListener('click', e=>{
-    const btn = e.target.closest('.filter-tab'); if(!btn) return;
-    document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    filtroAtivo = btn.dataset.filtro;
-    renderTemas(estrutura);
-  });
 });
 
 function renderTemas(estrutura) {
   const grid = document.getElementById('temas-grid');
   grid.innerHTML = '';
-  
-  Object.entries(estrutura).forEach(([tema, dados], idx)=>{
-    const cor = CORES[idx % CORES.length];
-    const pct = dados.total > 0 ? Math.round((dados.acertos/dados.total)*100) : 0;
+
+  Object.entries(estrutura).forEach(([tema, dados])=>{
     const card = document.createElement('div');
     card.className = 'tema-card';
-
-    const subtemasHtml = Object.entries(dados.subtemas).map(([sub, sd])=>{
-      const sp = sd.total > 0 ? Math.round((sd.acertos/sd.total)*100) : null;
-      const corCls = sp === null ? 'background:#f1f5f9;color:#64748b' : 
-                     sp >= 70 ? 'background:#dcfce7;color:#15803d' : 
-                     sp >= 40 ? 'background:#eff6ff;color:#1d4ed8' : 'background:#fee2e2;color:#b91c1c';
-      
-      return `
-        <button class="subtema-btn" onclick="irParaQuestoes('${encodeURIComponent(tema)}','${encodeURIComponent(sub)}')">
-          <span class="subtema-nome">${sub}</span>
-          <div class="subtema-meta">
-            <span class="subtema-q">${sd.total} questões</span>
-            <span class="subtema-pct-badge" style="${corCls}">${sp === null ? '—' : sp+'%'}</span>
-          </div>
-        </button>`;
-    }).join('');
-
-    card.innerHTML = `
-      <div class="tema-header" onclick="toggleTema(this)">
-        <div class="tema-icon" style="background:${cor.bg}">${cor.emoji}</div>
-        <div class="tema-info">
-          <div class="tema-name">${tema}</div>
-          <div class="tema-count">${dados.total} questões disponíveis</div>
-          <div class="tema-progress-wrap">
-            <div class="tema-pct">
-                <span>Progresso</span>
-                <span>${pct}%</span>
-            </div>
-            <div class="progress-outer">
-                <div class="progress-inner ${pct>=70?'fill-green':pct>=40?'fill-blue':'fill-red'}" style="width:${pct}%"></div>
-            </div>
-          </div>
-        </div>
-        <div class="tema-arrow">▶</div>
-      </div>
-      <div class="subtemas">
-        <div style="padding: 0.5rem; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Subtemas</div>
-        <button class="subtema-btn" style="background:var(--primary); border:none; margin-bottom: 0.75rem;" onclick="irParaQuestoes('${encodeURIComponent(tema)}','')">
-          <span class="subtema-nome" style="color:#fff">📚 Estudar todo o tema: ${tema}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
-        ${subtemasHtml}
-      </div>`;
+    card.innerHTML = `<div class="tema-header">${tema}</div>`;
     grid.appendChild(card);
   });
 }
 
-function toggleTema(header) {
-  const arrow = header.querySelector('.tema-arrow');
-  const subtemas = header.nextElementSibling;
-  const isOpen = subtemas.classList.toggle('open');
-  arrow.classList.toggle('open', isOpen);
-}
+function filtrarMateria(materia) {
+  const filtrado = {};
 
-function irParaQuestoes(tema, subtema) {
-  let url = `questoes.html?tema=${tema}`;
-  if(subtema) url += `&subtema=${subtema}`;
-  if(filtroAtivo) url += `&dificuldade=${filtroAtivo}`;
-  window.location.href = url;
+  Object.entries(temasData).forEach(([tema, dados]) => {
+    if (tema.toLowerCase().includes(materia.toLowerCase())) {
+      filtrado[tema] = dados;
+    }
+  });
+
+  renderTemas(filtrado);
 }
 </script>
+
 </body>
 </html>
