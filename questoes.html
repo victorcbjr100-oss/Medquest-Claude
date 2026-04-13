@@ -3,17 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — Elite</title>
+<title>MedQuest — Questões</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 
-/* ================= SIDEBAR ================= */
+/* ================= LAYOUT BASE ================= */
+
 body{
   margin:0;
   font-family:Inter;
@@ -21,35 +23,10 @@ body{
   color:#0f172a;
 }
 
-.layout{
-  display:flex;
-  min-height:100vh;
-}
-
-/* SIDEBAR */
-.sidebar{
-  width:260px;
-  background:#ffffff;
-  border-right:1px solid #e5e7eb;
-  position:fixed;
-  top:0;
-  left:0;
-  bottom:0;
-  padding:18px;
-}
-
-.sidebar h2{
-  font-size:14px;
-  margin-bottom:14px;
-  color:#64748b;
-}
-
-/* MAIN */
-.main{
-  margin-left:260px;
-  width:100%;
-  padding:24px;
-  max-width:1000px;
+.main-content{
+  max-width:900px;
+  margin:0 auto;
+  padding:28px 18px;
 }
 
 /* CARD */
@@ -86,7 +63,7 @@ body{
   transition:.3s;
 }
 
-/* QUESTION */
+/* QUESTÃO */
 .question{
   font-size:18px;
   font-weight:600;
@@ -94,7 +71,7 @@ body{
   line-height:1.5;
 }
 
-/* OPTIONS */
+/* OPÇÕES */
 .option{
   display:flex;
   gap:10px;
@@ -120,31 +97,19 @@ body{
   align-items:center;
   justify-content:center;
   font-weight:700;
-  font-size:13px;
 }
 
 /* STATES */
-.selected{
-  border:2px solid #2563eb !important;
-  background:#eff6ff;
-}
+.selected{ border:2px solid #2563eb !important; background:#eff6ff; }
+.correct{ border:2px solid #16a34a !important; background:#ecfdf5; }
+.wrong{ border:2px solid #dc2626 !important; background:#fef2f2; }
 
-.correct{
-  border:2px solid #16a34a !important;
-  background:#ecfdf5;
-}
-
-.wrong{
-  border:2px solid #dc2626 !important;
-  background:#fef2f2;
-}
-
-/* BUTTONS */
+/* BOTÕES CENTRAIS */
 .actions{
   display:flex;
-  justify-content:space-between;
+  justify-content:center;
+  gap:12px;
   margin-top:18px;
-  gap:10px;
 }
 
 button{
@@ -159,9 +124,12 @@ button{
 .primary{ background:#2563eb; color:#fff; }
 .secondary{ background:#fff; border:1px solid #e5e7eb; }
 
-/* COMMENTS */
-.comments{
-  margin-top:18px;
+/* COMMENTS (inicialmente escondido) */
+.comments-wrapper{
+  display:none;
+  margin-top:20px;
+  border-top:1px solid #e5e7eb;
+  padding-top:16px;
 }
 
 .comment{
@@ -171,8 +139,8 @@ button{
 
 .comment-head{
   display:flex;
-  align-items:center;
   gap:10px;
+  align-items:center;
 }
 
 .avatar{
@@ -185,15 +153,6 @@ button{
   align-items:center;
   justify-content:center;
   font-weight:700;
-  font-size:13px;
-}
-
-.reply-btn{
-  font-size:12px;
-  color:#2563eb;
-  cursor:pointer;
-  margin-left:42px;
-  margin-top:4px;
 }
 
 /* TEXTAREA */
@@ -213,47 +172,42 @@ textarea{
 
 <body>
 
-<div class="layout">
+<!-- SIDEBAR ORIGINAL (INJETADO) -->
+<script src="js/sidebar.js"></script>
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <h2>📚 MedQuest</h2>
-    <p style="font-size:13px;color:#64748b">Navegação fixa</p>
-    <hr>
-    <p style="font-size:13px">📖 Questões</p>
-    <p style="font-size:13px">📊 Desempenho</p>
-    <p style="font-size:13px">⭐ Favoritos</p>
-  </div>
+<div class="main-content" id="main" style="display:none">
 
-  <!-- MAIN -->
-  <div class="main" id="main" style="display:none">
+  <div class="card">
 
-    <div class="card">
+    <div class="header">
+      <div id="counter">Questão</div>
+      <div id="score">0 ✓ | 0 ✗</div>
+    </div>
 
-      <div class="header">
-        <div id="counter">Questão</div>
-        <div id="score">0 ✓ | 0 ✗</div>
-      </div>
+    <div class="progress">
+      <div class="progress-fill" id="progress"></div>
+    </div>
 
-      <div class="progress">
-        <div class="progress-fill" id="progress"></div>
-      </div>
+    <div class="question" id="question"></div>
 
-      <div class="question" id="question"></div>
+    <div id="options"></div>
 
-      <div id="options"></div>
+    <!-- BOTÕES CENTRALIZADOS -->
+    <div class="actions">
+      <button class="secondary" onclick="prev()">Anterior</button>
+      <button class="secondary" onclick="next()">Próxima</button>
+      <button class="primary" onclick="submitAnswer()">Responder</button>
+    </div>
 
-      <div class="actions">
-        <button class="secondary" onclick="prev()">Anterior</button>
-        <button class="secondary" onclick="skip()">Pular</button>
-        <button class="primary" onclick="submitAnswer()">Responder</button>
-      </div>
+    <!-- COMMENTS SÓ APÓS RESPONDER -->
+    <div class="comments-wrapper" id="commentsWrapper">
 
-      <!-- COMMENTS ALWAYS BELOW -->
-      <div class="comments" id="comments"></div>
+      <div id="comments"></div>
 
       <textarea id="commentBox" placeholder="Escreva um comentário..."></textarea>
-      <button class="primary" style="margin-top:8px" onclick="sendComment()">Enviar comentário</button>
+      <button class="primary" style="margin-top:8px" onclick="sendComment()">
+        Enviar comentário
+      </button>
 
     </div>
 
@@ -292,6 +246,8 @@ function render(){
   selected=null;
   answered=false;
 
+  document.getElementById("commentsWrapper").style.display="none";
+
   document.getElementById("question").innerText=q.enunciado;
 
   document.getElementById("counter").innerText=
@@ -307,8 +263,6 @@ function render(){
         <div>${q["alternativa_"+l]}</div>
       </div>
     `).join("");
-
-  loadComments();
 }
 
 /* SELECT */
@@ -346,12 +300,14 @@ async function submitAnswer(){
   document.getElementById("score").innerText=
     `${score.c} ✓ | ${score.e} ✗`;
 
+  document.getElementById("commentsWrapper").style.display="block";
+
   loadComments();
 }
 
 /* NAV */
 function prev(){ if(index>0){ index--; render(); } }
-function skip(){ if(index<questions.length-1){ index++; render(); } }
+function next(){ if(index<questions.length-1){ index++; render(); } }
 
 /* COMMENTS */
 async function loadComments(){
@@ -393,13 +349,11 @@ function renderComments(list){
         ${c.conteudo}
       </div>
 
-      <div class="reply-btn">Responder</div>
-
     </div>
   `).join("");
 }
 
-/* SEND COMMENT */
+/* SEND */
 async function sendComment(){
 
   const q=questions[index];
@@ -413,7 +367,7 @@ async function sendComment(){
   await db.from("comentarios_questao").insert({
     questao_id:q.id,
     conteudo:text,
-    nome:user?.user_metadata?.name || user?.email
+    nome:user?.user_metadata?.nome || user.email
   });
 
   document.getElementById("commentBox").value="";
