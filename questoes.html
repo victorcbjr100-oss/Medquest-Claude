@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MedQuest — Questões</title>
+<title>MedQuest — Elite</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
@@ -12,18 +12,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+
+/* ================= SIDEBAR ================= */
 body{
   margin:0;
-  font-family:Inter, sans-serif;
+  font-family:Inter;
   background:#f6f7fb;
   color:#0f172a;
 }
 
-/* CONTAINER */
-.main-content{
-  max-width:900px;
-  margin:0 auto;
-  padding:28px 18px;
+.layout{
+  display:flex;
+  min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:#ffffff;
+  border-right:1px solid #e5e7eb;
+  position:fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  padding:18px;
+}
+
+.sidebar h2{
+  font-size:14px;
+  margin-bottom:14px;
+  color:#64748b;
+}
+
+/* MAIN */
+.main{
+  margin-left:260px;
+  width:100%;
+  padding:24px;
+  max-width:1000px;
+}
+
+/* CARD */
+.card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
 }
 
 /* HEADER */
@@ -51,57 +86,24 @@ body{
   transition:.3s;
 }
 
-/* CARD */
-.card{
-  background:#fff;
-  border:1px solid #e5e7eb;
-  border-radius:18px;
-  padding:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,.06);
-}
-
-/* BADGES */
-.badges{
-  display:flex;
-  gap:8px;
-  margin-bottom:10px;
-}
-
-.badge{
-  font-size:12px;
-  padding:4px 10px;
-  border-radius:999px;
-  border:1px solid #e5e7eb;
-  background:#fff;
-  color:#334155;
-}
-
-.badge-level{
-  border-color:#facc15;
-  background:#fffbeb;
-  color:#b45309;
-}
-
-/* QUESTÃO */
+/* QUESTION */
 .question{
   font-size:18px;
   font-weight:600;
-  line-height:1.5;
   margin:12px 0 18px;
+  line-height:1.5;
 }
 
-/* OPÇÕES */
+/* OPTIONS */
 .option{
   display:flex;
   gap:10px;
-  align-items:flex-start;
-  padding:12px 14px;
+  padding:12px;
   border:1px solid #e5e7eb;
   border-radius:14px;
   margin-top:10px;
   cursor:pointer;
   transition:.2s;
-  background:#fff;
 }
 
 .option:hover{
@@ -110,8 +112,8 @@ body{
 }
 
 .letter{
-  width:30px;
-  height:30px;
+  width:28px;
+  height:28px;
   border-radius:50%;
   border:1px solid #cbd5e1;
   display:flex;
@@ -119,22 +121,25 @@ body{
   justify-content:center;
   font-weight:700;
   font-size:13px;
-  flex-shrink:0;
-  background:#fff;
 }
 
-/* CORREÇÃO */
+/* STATES */
+.selected{
+  border:2px solid #2563eb !important;
+  background:#eff6ff;
+}
+
 .correct{
   border:2px solid #16a34a !important;
-  background:#ecfdf5 !important;
+  background:#ecfdf5;
 }
 
 .wrong{
   border:2px solid #dc2626 !important;
-  background:#fef2f2 !important;
+  background:#fef2f2;
 }
 
-/* BOTÕES */
+/* BUTTONS */
 .actions{
   display:flex;
   justify-content:space-between;
@@ -151,55 +156,23 @@ button{
   font-weight:600;
 }
 
-.btn-primary{
-  background:#2563eb;
-  color:#fff;
-}
+.primary{ background:#2563eb; color:#fff; }
+.secondary{ background:#fff; border:1px solid #e5e7eb; }
 
-.btn-secondary{
-  background:#fff;
-  border:1px solid #e5e7eb;
-}
-
-/* FEEDBACK */
-.feedback{
-  display:none;
+/* COMMENTS */
+.comments{
   margin-top:18px;
-  padding-top:16px;
-  border-top:1px solid #e5e7eb;
 }
 
-/* TABS */
-.tabs{
-  display:flex;
-  gap:8px;
-  margin-bottom:10px;
-}
-
-.tab{
-  font-size:12px;
-  padding:5px 10px;
-  border-radius:999px;
-  border:1px solid #e5e7eb;
-  cursor:pointer;
-}
-
-.tab.active{
-  background:#2563eb;
-  color:#fff;
-  border-color:#2563eb;
-}
-
-/* COMENTÁRIOS */
 .comment{
   padding:12px 0;
   border-bottom:1px solid #f1f5f9;
 }
 
-.user{
+.comment-head{
   display:flex;
-  gap:10px;
   align-items:center;
+  gap:10px;
 }
 
 .avatar{
@@ -215,6 +188,15 @@ button{
   font-size:13px;
 }
 
+.reply-btn{
+  font-size:12px;
+  color:#2563eb;
+  cursor:pointer;
+  margin-left:42px;
+  margin-top:4px;
+}
+
+/* TEXTAREA */
 textarea{
   width:100%;
   margin-top:10px;
@@ -223,136 +205,145 @@ textarea{
   border:1px solid #e5e7eb;
   font-family:Inter;
   resize:none;
-  outline:none;
 }
 
-textarea:focus{
-  border-color:#2563eb;
-  box-shadow:0 0 0 3px rgba(37,99,235,.1);
-}
 </style>
 
 </head>
 
 <body>
 
-<main class="main-content" id="main" style="display:none">
+<div class="layout">
 
-  <div class="header">
-    <div id="counter">Questão 1 de 1</div>
-    <div id="score">0 ✓ | 0 ✗</div>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>📚 MedQuest</h2>
+    <p style="font-size:13px;color:#64748b">Navegação fixa</p>
+    <hr>
+    <p style="font-size:13px">📖 Questões</p>
+    <p style="font-size:13px">📊 Desempenho</p>
+    <p style="font-size:13px">⭐ Favoritos</p>
   </div>
 
-  <div class="progress">
-    <div class="progress-fill" id="progress"></div>
-  </div>
+  <!-- MAIN -->
+  <div class="main" id="main" style="display:none">
 
-  <div class="card">
+    <div class="card">
 
-    <div class="badges">
-      <span class="badge">Tema</span>
-      <span class="badge-level">Médio</span>
-    </div>
-
-    <div class="question" id="question"></div>
-
-    <div id="options"></div>
-
-    <div class="actions">
-      <button class="btn-secondary" onclick="prev()">Anterior</button>
-      <button class="btn-secondary" onclick="skip()">Pular</button>
-      <button class="btn-primary" onclick="next()">Próxima</button>
-    </div>
-
-    <div class="feedback" id="feedback">
-
-      <div class="tabs">
-        <div class="tab active" onclick="setTab('aluno')">Alunos</div>
-        <div class="tab" onclick="setTab('prof')">Professor</div>
+      <div class="header">
+        <div id="counter">Questão</div>
+        <div id="score">0 ✓ | 0 ✗</div>
       </div>
 
-      <div id="comments"></div>
+      <div class="progress">
+        <div class="progress-fill" id="progress"></div>
+      </div>
 
-      <textarea id="commentInput" placeholder="Escreva um comentário..."></textarea>
-      <button class="btn-primary" style="margin-top:8px" onclick="sendComment()">
-        Enviar
-      </button>
+      <div class="question" id="question"></div>
+
+      <div id="options"></div>
+
+      <div class="actions">
+        <button class="secondary" onclick="prev()">Anterior</button>
+        <button class="secondary" onclick="skip()">Pular</button>
+        <button class="primary" onclick="submitAnswer()">Responder</button>
+      </div>
+
+      <!-- COMMENTS ALWAYS BELOW -->
+      <div class="comments" id="comments"></div>
+
+      <textarea id="commentBox" placeholder="Escreva um comentário..."></textarea>
+      <button class="primary" style="margin-top:8px" onclick="sendComment()">Enviar comentário</button>
 
     </div>
 
   </div>
 
-</main>
+</div>
 
 <script>
 
-let questions = [];
-let index = 0;
-let answered = false;
-let tab = "aluno";
-let score = {c:0,e:0};
+let questions=[];
+let index=0;
+let selected=null;
+let answered=false;
+let score={c:0,e:0};
 
 /* INIT */
-window.addEventListener("load", async () => {
+window.onload = async () => {
 
   const session = await exigirLogin();
   if(!session) return;
 
-  document.getElementById("main").style.display = "block";
+  document.getElementById("main").style.display="block";
 
   const { data } = await db.from("banco_questoes").select("*").limit(30);
-  questions = data || [];
+  questions=data||[];
 
   render();
-});
+};
 
 /* RENDER */
 function render(){
 
-  const q = questions[index];
+  const q=questions[index];
   if(!q) return;
 
-  answered = false;
+  selected=null;
+  answered=false;
 
-  document.getElementById("question").innerText = q.enunciado;
+  document.getElementById("question").innerText=q.enunciado;
 
-  document.getElementById("counter").innerText =
+  document.getElementById("counter").innerText=
     `Questão ${index+1} de ${questions.length}`;
 
-  document.getElementById("progress").style.width =
-    ((index+1)/questions.length)*100 + "%";
+  document.getElementById("progress").style.width=
+    ((index+1)/questions.length)*100+"%";
 
-  document.getElementById("options").innerHTML =
-    ["a","b","c","d"].map(l => `
-      <div class="option" onclick="answer('${l}', this)">
+  document.getElementById("options").innerHTML=
+    ["a","b","c","d"].map(l=>`
+      <div class="option" onclick="select('${l}',this)">
         <div class="letter">${l.toUpperCase()}</div>
         <div>${q["alternativa_"+l]}</div>
       </div>
     `).join("");
 
-  document.getElementById("feedback").style.display = "none";
+  loadComments();
 }
 
-/* ANSWER */
-async function answer(l, el){
+/* SELECT */
+function select(l,el){
 
   if(answered) return;
-  answered = true;
 
-  const q = questions[index];
-  const correct = l === q.correta;
+  selected=l;
 
-  document.getElementById("feedback").style.display = "block";
+  document.querySelectorAll(".option")
+    .forEach(o=>o.classList.remove("selected"));
+
+  el.classList.add("selected");
+}
+
+/* SUBMIT */
+async function submitAnswer(){
+
+  if(answered || !selected) return;
+
+  answered=true;
+
+  const q=questions[index];
+  const correct=selected===q.correta;
 
   document.querySelectorAll(".option").forEach(o=>{
-    const letter = o.innerText.trim()[0].toLowerCase();
-    if(letter === q.correta) o.classList.add("correct");
-    if(o === el && !correct) o.classList.add("wrong");
+    const l=o.innerText.trim()[0].toLowerCase();
+
+    if(l===q.correta) o.classList.add("correct");
+    if(l===selected && !correct) o.classList.add("wrong");
   });
 
-  correct ? score.c++ : score.e++;
+  correct?score.c++:score.e++;
 
-  document.getElementById("score").innerText =
+  document.getElementById("score").innerText=
     `${score.c} ✓ | ${score.e} ✗`;
 
   loadComments();
@@ -361,67 +352,71 @@ async function answer(l, el){
 /* NAV */
 function prev(){ if(index>0){ index--; render(); } }
 function skip(){ if(index<questions.length-1){ index++; render(); } }
-function next(){ if(index<questions.length-1){ index++; render(); } }
 
 /* COMMENTS */
-function setTab(t){
-  tab = t;
-  loadComments();
-}
-
 async function loadComments(){
 
-  const q = questions[index];
+  const q=questions[index];
 
   const { data } = await db
     .from("comentarios_questao")
     .select("*")
-    .eq("questao_id", q.id)
-    .eq("tipo", tab)
+    .eq("questao_id",q.id)
     .order("created_at",{ascending:false});
 
-  renderComments(data || []);
+  renderComments(data||[]);
 }
 
 function renderComments(list){
 
-  const box = document.getElementById("comments");
+  const box=document.getElementById("comments");
 
   if(!list.length){
-    box.innerHTML = "<p style='color:#888'>Sem comentários</p>";
+    box.innerHTML="<p style='color:#888'>Sem comentários</p>";
     return;
   }
 
-  box.innerHTML = list.map(c=>`
+  box.innerHTML=list.map(c=>`
     <div class="comment">
-      <div class="user">
-        <div class="avatar">${c.tipo==="prof"?"P":"A"}</div>
-        <div style="font-size:12px;color:#666">
-          ${new Date(c.created_at).toLocaleString()}
+
+      <div class="comment-head">
+        <div class="avatar">
+          ${(c.nome||"U").charAt(0).toUpperCase()}
+        </div>
+
+        <div style="font-size:13px;font-weight:600">
+          ${c.nome||"Usuário"}
         </div>
       </div>
+
       <div style="margin-left:42px;margin-top:6px">
         ${c.conteudo}
       </div>
+
+      <div class="reply-btn">Responder</div>
+
     </div>
   `).join("");
 }
 
-/* SEND */
+/* SEND COMMENT */
 async function sendComment(){
 
-  const q = questions[index];
-  const text = document.getElementById("commentInput").value.trim();
+  const q=questions[index];
+  const text=document.getElementById("commentBox").value.trim();
 
   if(!text) return;
 
+  const { data } = await supabase.auth.getUser();
+  const user=data.user;
+
   await db.from("comentarios_questao").insert({
-    questao_id: q.id,
-    conteudo: text,
-    tipo: tab
+    questao_id:q.id,
+    conteudo:text,
+    nome:user?.user_metadata?.name || user?.email
   });
 
-  document.getElementById("commentInput").value = "";
+  document.getElementById("commentBox").value="";
   loadComments();
 }
 
