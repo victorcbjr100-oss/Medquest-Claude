@@ -12,40 +12,108 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
-.main-content {
-  max-width: 800px;
+.main-content{
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
 
-.card {
-  background: white;
-  border: 1px solid #e2e8f0;
+.card{
+  background: #fff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 1.5rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,.05);
 }
 
-.alternativa {
+.questao-header{
+  font-weight:700;
+  font-size:1.05rem;
+  margin-bottom:1.2rem;
+}
+
+.alternativa{
   padding: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
   margin-top: 10px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: .2s;
+  background:#fff;
 }
 
-.alternativa:hover {
-  background: #f1f5f9;
+.alternativa:hover{
+  background:#f8fafc;
+  border-color:#cbd5e1;
 }
 
-.correta {
-  background: #dcfce7;
-  border-color: #16a34a;
+.correta{ background:#dcfce7; border-color:#16a34a; }
+.errada{ background:#fee2e2; border-color:#dc2626; }
+
+.botoes{
+  display:flex;
+  gap:10px;
+  margin-top:1.5rem;
 }
 
-.errada {
-  background: #fee2e2;
-  border-color: #dc2626;
+.btn{
+  padding:.55rem 1rem;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  font-family:Inter;
+}
+
+.btn-primary{ background:#2563eb; color:#fff; }
+.btn-outline{ background:#fff; border:1px solid #e5e7eb; }
+
+#feedback-area{
+  margin-top:1.5rem;
+  display:none;
+  border-top:1px solid #eee;
+  padding-top:1rem;
+}
+
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.tab{
+  padding:6px 12px;
+  border-radius:20px;
+  border:1px solid #e5e7eb;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.tab.active{
+  background:#2563eb;
+  color:#fff;
+  border-color:#2563eb;
+}
+
+.comentario{
+  padding:10px;
+  border-bottom:1px solid #eee;
+}
+
+.comentario strong{
+  font-size:13px;
+}
+
+.comentario small{
+  color:#666;
+  font-size:11px;
+}
+
+.reply{
+  margin-left:20px;
+  border-left:2px solid #eee;
+  padding-left:10px;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -57,9 +125,37 @@
 
 <main class="main-content" id="main" style="display:none">
 
-  <h1 id="titulo" style="font-weight:800; margin-bottom:1.5rem;">🧠 Questões</h1>
+  <h2 id="titulo" style="font-weight:800; margin-bottom:1rem;">Questões</h2>
 
-  <div class="card" id="questao"></div>
+  <div class="card">
+
+    <div class="questao-header" id="enunciado"></div>
+
+    <div id="alternativas"></div>
+
+    <div class="botoes">
+      <button class="btn btn-outline" onclick="voltar()">⬅️ Voltar</button>
+      <button class="btn btn-outline" onclick="pular()">⏭️ Pular</button>
+      <button class="btn btn-primary" onclick="proxima()">✔️ Próxima</button>
+    </div>
+
+    <div id="feedback-area">
+
+      <div class="tabs">
+        <div class="tab active" onclick="setTab('alunos')">Alunos</div>
+        <div class="tab" onclick="setTab('prof')">Professor</div>
+      </div>
+
+      <div id="comentarios"></div>
+
+      <div style="margin-top:10px;">
+        <textarea id="novoComentario" class="form-textarea" placeholder="Escreva um comentário..."></textarea>
+        <button class="btn btn-primary" style="margin-top:8px;" onclick="enviarComentario()">Enviar</button>
+      </div>
+
+    </div>
+
+  </div>
 
 </main>
 
@@ -67,12 +163,11 @@
 let questoes = [];
 let atual = 0;
 let respondeu = false;
-
 let tema = null;
 let subtema = null;
+let tabAtual = 'alunos';
 
-
-// 🔐 LOGIN + SIDEBAR
+// LOGIN
 window.addEventListener('load', async () => {
   const session = await exigirLogin();
   if(!session) return;
@@ -83,97 +178,54 @@ window.addEventListener('load', async () => {
   tema = params.get('tema');
   subtema = params.get('subtema');
 
-  atualizarTitulo();
   carregarQuestoes();
 });
 
-
-// 🔹 TÍTULO DINÂMICO
-function atualizarTitulo(){
-  let titulo = '🧠 Questões';
-
-  if(tema){
-    titulo = `📚 ${tema}`;
-  }
-
-  if(subtema){
-    titulo += ` — ${subtema}`;
-  }
-
-  document.getElementById('titulo').innerText = titulo;
-}
-
-
-// 🔹 CARREGAR QUESTÕES
+// QUESTÕES
 async function carregarQuestoes(){
-
   let query = db.from('banco_questoes').select('*');
 
-  if(tema){
-    query = query.ilike('tema', tema);
-  }
+  if(tema) query = query.ilike('tema', tema);
+  if(subtema) query = query.ilike('subtema', subtema);
 
-  if(subtema){
-    query = query.ilike('subtema', subtema);
-  }
+  const { data } = await query.limit(20);
 
-  const { data, error } = await query.limit(20);
-
-  console.log('QUESTÕES:', data, error);
-
-  if(error){
-    document.getElementById('questao').innerHTML = 'Erro ao carregar questões';
-    return;
-  }
-
-  if(!data || data.length === 0){
-    document.getElementById('questao').innerHTML = 'Nenhuma questão encontrada';
-    return;
-  }
-
-  questoes = data;
+  questoes = data || [];
   mostrarQuestao();
 }
 
-
-// 🔹 MOSTRAR QUESTÃO
+// MOSTRAR
 function mostrarQuestao(){
   respondeu = false;
 
   const q = questoes[atual];
 
-  document.getElementById('questao').innerHTML = `
-    <div style="font-weight:600; margin-bottom:1rem;">
-      ${q.enunciado}
-    </div>
+  document.getElementById('enunciado').innerText = q.enunciado;
 
-    ${['a','b','c','d'].map(l => `
+  document.getElementById('alternativas').innerHTML =
+    ['a','b','c','d'].map(l => `
       <div class="alternativa" onclick="responder('${l}', this)">
         ${l.toUpperCase()}) ${q['alternativa_'+l]}
       </div>
-    `).join('')}
-  `;
+    `).join('');
+
+  document.getElementById('feedback-area').style.display = 'none';
 }
 
-
-// 🔹 RESPONDER
-async function responder(letra, elemento){
+// RESPOSTA
+async function responder(letra, el){
   if(respondeu) return;
   respondeu = true;
 
   const q = questoes[atual];
   const correta = letra === q.correta;
 
-  const alternativas = document.querySelectorAll('.alternativa');
+  document.getElementById('feedback-area').style.display = 'block';
 
-  alternativas.forEach(el => {
-    const texto = el.innerText.trim()[0].toLowerCase();
-
-    if(texto === q.correta){
-      el.classList.add('correta');
-    } else if(el === elemento){
-      el.classList.add('errada');
-    }
+  document.querySelectorAll('.alternativa').forEach(div=>{
+    const l = div.innerText.trim()[0].toLowerCase();
+    if(l === q.correta) div.classList.add('correta');
+    if(div === el && !correta) div.classList.add('errada');
   });
 
   const user = (await supabase.auth.getUser()).data.user;
@@ -185,15 +237,73 @@ async function responder(letra, elemento){
     correta
   });
 
-  setTimeout(() => {
-    atual++;
+  carregarComentarios();
+}
 
-    if(atual < questoes.length){
-      mostrarQuestao();
-    } else {
-      document.getElementById('questao').innerHTML = '🎉 Fim das questões';
-    }
-  }, 1200);
+// NAVEGAÇÃO
+function voltar(){
+  if(atual > 0){
+    atual--;
+    mostrarQuestao();
+  }
+}
+
+function pular(){
+  if(atual < questoes.length - 1){
+    atual++;
+    mostrarQuestao();
+  }
+}
+
+function proxima(){
+  if(atual < questoes.length - 1){
+    atual++;
+    mostrarQuestao();
+  }
+}
+
+// COMENTÁRIOS
+function setTab(tab){
+  tabAtual = tab;
+  carregarComentarios();
+}
+
+async function carregarComentarios(){
+  const q = questoes[atual];
+
+  const { data } = await db
+    .from('comentarios_questao')
+    .select('*')
+    .eq('questao_id', q.id)
+    .order('created_at', { ascending:false });
+
+  renderComentarios(data || []);
+}
+
+function renderComentarios(comentarios){
+  document.getElementById('comentarios').innerHTML =
+    comentarios.map(c => `
+      <div class="comentario">
+        <strong>${c.tipo === 'professor' ? '👨‍🏫 Professor' : '👤 Aluno'}</strong><br>
+        <small>${new Date(c.created_at).toLocaleString()}</small>
+        <div>${c.conteudo}</div>
+      </div>
+    `).join('');
+}
+
+async function enviarComentario(){
+  const q = questoes[atual];
+  const user = (await supabase.auth.getUser()).data.user;
+
+  await db.from('comentarios_questao').insert({
+    questao_id: q.id,
+    user_id: user.id,
+    conteudo: document.getElementById('novoComentario').value,
+    tipo: 'aluno'
+  });
+
+  document.getElementById('novoComentario').value = '';
+  carregarComentarios();
 }
 </script>
 
