@@ -107,7 +107,7 @@ function atualizarTitulo(){
 // 🔹 CARREGAR QUESTÕES
 async function carregarQuestoes(){
 
-  let query = supabase.from('banco_questoes').select('*');
+  let query = db.from('banco_questoes').select('*');
 
   if(tema){
     query = query.ilike('tema', tema);
@@ -178,7 +178,7 @@ async function responder(letra, elemento){
 
   const user = (await supabase.auth.getUser()).data.user;
 
-  await supabase.from('respostas_usuario').insert({
+  await db.from('respostas_usuario').insert({
     user_id: user.id,
     questao_id: q.id,
     resposta_marcada: letra,
