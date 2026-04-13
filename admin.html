@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — MedQuest Pro</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+.main-content {
+  max-width: 1000px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+input, select {
+  padding: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+
+<main class="main-content" id="main" style="display:none">
+
+<h1>⚙️ Painel Admin</h1>
+
+<!-- USUÁRIOS -->
+<div class="section">
+  <h2>Usuários</h2>
+  <div class="card" id="usuarios"></div>
+</div>
+
+<!-- QUESTÕES -->
+<div class="section">
+  <h2>Questões</h2>
+  <div class="card" id="questoes"></div>
+</div>
+
+<!-- IMPORTAR PDF -->
+<div class="section">
+  <h2>Importar PDF</h2>
+
+  <div class="card">
+    <input type="file" id="pdfFile" accept="application/pdf">
+    <button onclick="importarPDF()">Importar</button>
+
+    <div id="preview"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+window.addEventListener('load', async () => {
+  const session = await exigirLogin();
+  if(!session) return;
+
+  const { data: user } = await supabase.from('usuarios')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+
+  if(user.role !== 'admin'){
+    alert('Acesso negado');
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  document.getElementById('main').style.display = 'block';
+
+  carregarUsuarios();
+  carregarQuestoes();
+});
+
+
+// ================== USUÁRIOS ==================
+async function carregarUsuarios(){
+  const { data } = await supabase.from('usuarios').select('*');
+
+  document.getElementById('usuarios').innerHTML =
+    data.map(u => `
+      <div style="margin-bottom:10px">
+        ${u.email} (${u.role})
+        <button onclick="deletarUsuario('${u.id}')">Excluir</button>
+      </div>
+    `).join('');
+}
+
+async function deletarUsuario(id){
+  await supabase.from('usuarios').delete().eq('id', id);
+  carregarUsuarios();
+}
+
+
+// ================== QUESTÕES ==================
+async function carregarQuestoes(){
+  const { data } = await supabase.from('questoes').select('*').limit(20);
+
+  document.getElementById('questoes').innerHTML =
+    data.map(q => `
+      <div style="margin-bottom:15px">
+        <b>${q.tema} - ${q.subtema}</b><br>
+        ${q.enunciado.substring(0,100)}...
+        <button onclick="deletarQuestao('${q.id}')">Excluir</button>
+      </div>
+    `).join('');
+}
+
+async function deletarQuestao(id){
+  await supabase.from('questoes').delete().eq('id', id);
+  carregarQuestoes();
+}
+
+
+// ================== PDF ==================
+
+async function importarPDF(){
+  const file = document.getElementById('pdfFile').files[0];
+  if(!file) return alert('Selecione um PDF');
+
+  const texto = await extrairTextoPDF(file);
+
+  const questoes = processarTexto(texto);
+
+  mostrarPreview(questoes);
+
+  // salvar automaticamente (ou você pode colocar botão confirmar)
+  await supabase.from('questoes').insert(questoes);
+
+  alert('Importado com sucesso!');
+}
+
+
+// 🔹 extrair texto
+async function extrairTextoPDF(file){
+  const arrayBuffer = await file.arrayBuffer();
+
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+
+  let texto = '';
+
+  for(let i=1;i<=pdf.numPages;i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+
+    texto += content.items.map(item => item.str).join(' ');
+  }
+
+  return texto;
+}
+
+
+// 🔹 parser simples (ajustável)
+function processarTexto(texto){
+  const blocos = texto.split(/\d+\)/);
+
+  return blocos.map(b => {
+    const alternativas = b.match(/[A-D]\)(.*?)\s/g);
+
+    return {
+      tema: 'Cardiologia',
+      subtema: 'Geral',
+      enunciado: b.substring(0,200),
+      alternativa_a: alternativas?.[0] || '',
+      alternativa_b: alternativas?.[1] || '',
+      alternativa_c: alternativas?.[2] || '',
+      alternativa_d: alternativas?.[3] || '',
+      correta: 'A'
+    }
+  }).filter(q => q.enunciado);
+}
+
+
+// 🔹 preview
+function mostrarPreview(lista){
+  document.getElementById('preview').innerHTML =
+    lista.slice(0,5).map(q => `
+      <div style="margin-top:10px">
+        <b>${q.enunciado}</b>
+      </div>
+    `).join('');
+}
+
+</script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+</body>
+</html>
