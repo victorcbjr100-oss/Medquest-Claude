@@ -1,7 +1,7 @@
 (async function () {
     const page = window.location.pathname.split('/').pop() || 'dashboard.html';
 
-    // Definição dos links do usuário com ícones SVG (Estilo MEDq)
+    // Definição dos links do usuário com ícones SVG (Estilo Clean/Dark)
     const userLinks = [
         { href: 'dashboard.html', icon: iconHome(), label: 'Página Inicial' },
         { href: 'temas.html', icon: iconTemas(), label: 'Temas' },
@@ -29,14 +29,17 @@
     const css = `
     <style>
         :root {
-            --mq-primary: #2563eb;
-            --mq-bg: #ffffff;
-            --mq-sidebar-width: 240px;
-            --mq-text-main: #334155;
-            --mq-text-muted: #64748b;
-            --mq-border: #f1f5f9;
-            --mq-hover: #f8fafc;
-            --mq-active-bg: #eff6ff;
+            /* Cores Dark Mode MEDq */
+            --mq-primary: #3b82f6; /* Azul mais brilhante para contraste no escuro */
+            --mq-sidebar-bg: #0f172a; /* Azul Marinho Muito Escuro (Slate 900) */
+            --mq-sidebar-width: 250px;
+            
+            --mq-text-main: #f1f5f9; /* Cinza Quase Branco (Slate 100) */
+            --mq-text-muted: #94a3b8; /* Cinza Médio (Slate 400) */
+            --mq-border: #1e293b; /* Azul Escuro Suave (Slate 800) */
+            
+            --mq-hover-bg: #1e293b; /* Slate 800 */
+            --mq-active-bg: rgba(59, 130, 246, 0.1); /* Azul Primário Transparente */
         }
 
         .sidebar {
@@ -45,27 +48,29 @@
             left: 0;
             width: var(--mq-sidebar-width);
             height: 100vh;
-            background: var(--mq-bg);
+            background: var(--mq-sidebar-bg);
             border-right: 1px solid var(--mq-border);
             display: flex;
             flex-direction: column;
             z-index: 1000;
             font-family: 'Inter', sans-serif;
             transition: all 0.3s ease;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
         }
 
         .sb-brand {
-            padding: 1.5rem 1.25rem;
+            padding: 1.75rem 1.5rem;
             display: flex;
             align-items: center;
             gap: 12px;
             margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--mq-border);
         }
 
         .sb-brand-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             background: var(--mq-primary);
             display: flex;
             align-items: center;
@@ -73,48 +78,50 @@
             color: #fff;
             font-weight: 800;
             font-size: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .sb-brand-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #0f172a;
-            letter-spacing: -0.02em;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #ffffff;
+            letter-spacing: -0.03em;
         }
 
         .sb-section-title {
-            padding: 1.5rem 1.25rem 0.5rem;
+            padding: 1.5rem 1.5rem 0.6rem;
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #94a3b8;
+            letter-spacing: 0.1em;
+            color: #475569; /* Slate 600 para rótulos de seção */
         }
 
         .sidebar-link {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0.7rem 1.25rem;
+            padding: 0.75rem 1.5rem;
             margin: 2px 0.75rem;
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--mq-text-main);
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.2s ease;
+            border-left: 3px solid transparent; /* Indicador de ativo lateral */
         }
 
         .sidebar-link:hover {
-            background: var(--mq-hover);
-            color: #0f172a;
+            background: var(--mq-hover-bg);
+            color: #ffffff;
         }
 
         .sidebar-link.active {
             background: var(--mq-active-bg);
             color: var(--mq-primary);
-            font-weight: 600;
+            font-weight: 700;
+            border-left-color: var(--mq-primary);
         }
 
         .sidebar-icon-wrapper {
@@ -123,24 +130,28 @@
             justify-content: center;
             width: 20px;
             height: 20px;
-            opacity: 0.7;
+            color: var(--mq-text-muted); /* Ícones padrão em cinza */
+        }
+
+        .sidebar-link:hover .sidebar-icon-wrapper {
+            color: #ffffff;
         }
 
         .sidebar-link.active .sidebar-icon-wrapper {
-            opacity: 1;
             color: var(--mq-primary);
         }
 
         .sb-divider {
             height: 1px;
             background: var(--mq-border);
-            margin: 1rem 1.25rem;
+            margin: 1.25rem 1.5rem;
         }
 
         .sb-footer {
             margin-top: auto;
             padding: 1rem;
             border-top: 1px solid var(--mq-border);
+            background: rgba(0,0,0,0.1); /* Leve destaque no fundo do rodapé */
         }
 
         .sb-user-card {
@@ -154,22 +165,21 @@
         }
 
         .sb-user-card:hover {
-            background: var(--mq-hover);
+            background: var(--mq-hover-bg);
         }
 
         .sb-avatar {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: #e2e8f0;
+            background: var(--mq-hover-bg); /* Fundo escuro para o avatar vazio */
             color: var(--mq-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.85rem;
-            border: 2px solid #fff;
-            box-shadow: 0 0 0 1px #e2e8f0;
+            font-size: 0.9rem;
+            border: 2px solid var(--mq-border);
         }
 
         .sb-user-info {
@@ -179,8 +189,8 @@
 
         .sb-user-name {
             font-size: 0.85rem;
-            font-weight: 600;
-            color: #0f172a;
+            font-weight: 700;
+            color: #ffffff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -195,22 +205,23 @@
         }
 
         .btn-logout {
-            color: #94a3b8;
+            color: var(--mq-text-muted);
             background: none;
             border: none;
-            padding: 5px;
+            padding: 6px;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             transition: all 0.2s;
         }
 
         .btn-logout:hover {
-            color: #ef4444;
-            background: #fef2f2;
+            color: #ef4444; /* Vermelho no hover do logout */
+            background: rgba(239, 68, 68, 0.1);
         }
 
+        /* Ajuste do conteúdo principal para refletir a nova largura da sidebar */
         body { padding-left: var(--mq-sidebar-width); }
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -243,7 +254,7 @@
                     <div class="sb-user-email" id="sb-user-email-el"></div>
                 </div>
                 <button class="btn-logout" title="Sair" onclick="event.stopPropagation();logout()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 </button>
             </div>
         </div>
@@ -251,7 +262,7 @@
 
     document.body.insertAdjacentHTML('afterbegin', html);
 
-    // Lógica de Autenticação e Preenchimento
+    // Lógica de Autenticação e Preenchimento (Mantida a mesma)
     const wait = ms => new Promise(r => setTimeout(r, ms));
     let attempts = 0;
     while (!window.supabaseClient && attempts++ < 40) await wait(80);
@@ -270,14 +281,13 @@
     document.getElementById('sb-user-name-el').textContent = nome;
     document.getElementById('sb-user-email-el').textContent = user.email;
 
-    // Checagem de Admin
     const { data: profile } = await window.supabaseClient.from('perfis').select('role').eq('id', user.id).single();
     if (profile?.role === 'admin') {
         document.getElementById('sb-admin-wrap').style.display = 'block';
     }
 })();
 
-/* Ícones SVG - Estilo Clean MedQuest */
+/* Ícones SVG - Mantidos os mesmos da versão clean, funcionam bem no Dark */
 function iconHome() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`; }
 function iconTemas() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`; }
 function iconSimulado() { return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`; }
