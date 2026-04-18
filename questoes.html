@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Questões — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
@@ -157,346 +156,426 @@
 </main>
 
 <script>
-// ── Estado global ──
-let sessao=null, todasQ=[], filtradas=[], favsSet=new Set(), respondidas={};
-const POR_PAGINA=8;
-let pagAtual=1, modoAtual='lista';
-let seqIdx=0, seqC=0, seqE=0;
-const selecoes={};
-const LETRAS=['A','B','C','D','E'];
+/* ─────────────────────────────────────────────
+   ESTADO GLOBAL
+───────────────────────────────────────────── */
+let SB = null;           // supabaseClient
+let UID = null;          // user id (string)
+let todasQ = [];         // questões normalizadas
+let filtradas = [];
+const favsSet = new Set();
+const respondidas = {};  // id → {acertou, opcao}
+const selecoes = {};     // id → índice selecionado
+const QM = {};           // id → questão normalizada
 
-// ── Normalização: suporta formato legado E novo ──
-function normQ(q){
+const POR_PAGINA = 8;
+let pagAtual = 1;
+let modoAtual = 'lista';
+let seqIdx = 0, seqC = 0, seqE = 0;
+const LETRAS = ['A','B','C','D','E'];
+
+/* ─────────────────────────────────────────────
+   NORMALIZAÇÃO — suporta formato legado E novo
+───────────────────────────────────────────── */
+function normQ(q) {
   let enunciado, opcoes, respIdx, comentario;
-  if(q.pergunta){
-    enunciado=q.pergunta;
-    opcoes=parseOps(q.opcoes);
-    respIdx=Number.isInteger(q.resposta)?q.resposta:parseInt(q.resposta)||0;
-    comentario=q.comentario||'';
+
+  if (q.pergunta) {
+    // Formato novo: pergunta + opcoes array + resposta índice
+    enunciado  = q.pergunta;
+    opcoes     = parseOps(q.opcoes);
+    respIdx    = Number.isInteger(q.resposta) ? q.resposta : (parseInt(q.resposta) || 0);
+    comentario = q.comentario || '';
   } else {
-    enunciado=q.enunciado||'[Sem enunciado]';
-    comentario=q.comentario||q.gabarito||'';
-    const m={A:0,B:1,C:2,D:3,E:4};
-    const letra=String(q.correta||'A').toUpperCase().charAt(0);
-    respIdx=m[letra]??0;
-    opcoes=['a','b','c','d','e'].map(l=>q['alternativa_'+l]).filter(Boolean);
-    if(!opcoes.length) opcoes=parseOps(q.opcoes);
+    // Formato legado: enunciado + alternativa_a/b/c/d + correta letra
+    enunciado  = q.enunciado || '[Sem enunciado]';
+    comentario = q.comentario || q.gabarito || '';
+    const m    = {A:0,B:1,C:2,D:3,E:4};
+    const l    = String(q.correta || 'A').toUpperCase().charAt(0);
+    respIdx    = m[l] ?? 0;
+    opcoes     = ['a','b','c','d','e'].map(x => q['alternativa_' + x]).filter(Boolean);
+    if (!opcoes.length) opcoes = parseOps(q.opcoes);
   }
-  // FIX filtro: normalize subtema/tema para string consistente
-  return {
-    _raw:q.id,
-    id:q.id,
+
+  // Normaliza strings para evitar bugs de filtro
+  const n = {
+    id:          q.id,
     enunciado,
     opcoes,
     respIdx,
     comentario,
-    tema:   String(q.tema   ||'').trim(),
-    subtema:String(q.subtema||'').trim(),
-    dificuldade:q.dificuldade||'media',
-    banca:  String(q.banca  ||'').trim(),
-    ano:    q.ano||''
+    tema:        (q.tema    || '').trim(),
+    subtema:     (q.subtema || '').trim(),
+    dificuldade: q.dificuldade || 'media',
+    banca:       (q.banca   || '').trim(),
+    ano:         q.ano || ''
   };
+  QM[q.id] = n;   // registra no mapa global para callbacks
+  return n;
 }
 
-function parseOps(o){
-  if(Array.isArray(o)) return o;
-  if(typeof o==='string'){try{return JSON.parse(o);}catch{return o.split(',').map(s=>s.trim()).filter(Boolean);}}
+function parseOps(o) {
+  if (Array.isArray(o)) return o;
+  if (typeof o === 'string') { try { return JSON.parse(o); } catch { return o.split(',').map(s => s.trim()).filter(Boolean); } }
   return [];
 }
 
-// ── Init ──
-window.addEventListener('load', async()=>{
-  sessao=await exigirLogin(); if(!sessao) return;
-  document.getElementById('main').style.display='block';
-  const sb=window.supabaseClient, uid=sessao.user.id;
+/* ─────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────── */
+window.addEventListener('load', async () => {
+  const session = await exigirLogin();
+  if (!session) return;
 
-  const params=new URLSearchParams(window.location.search);
-  const temaP  = params.get('tema')      ? decodeURIComponent(params.get('tema'))      : '';
-  const subP   = params.get('subtema')   ? decodeURIComponent(params.get('subtema'))   : '';
-  const difP   = params.get('dificuldade')|| '';
+  SB  = window.supabaseClient;
+  UID = session.user.id;
+  document.getElementById('main').style.display = 'block';
 
-  if(temaP){
-    document.getElementById('titulo-pagina').textContent=temaP;
-    document.getElementById('sub-pagina').textContent=subP||'Todas as questões';
+  // Parâmetros URL
+  const p     = new URLSearchParams(window.location.search);
+  const temaP = p.get('tema')       ? decodeURIComponent(p.get('tema'))      : '';
+  const subP  = p.get('subtema')    ? decodeURIComponent(p.get('subtema'))   : '';
+  const difP  = p.get('dificuldade') || '';
+
+  if (temaP) {
+    document.getElementById('titulo-pagina').textContent = temaP;
+    document.getElementById('sub-pagina').textContent    = subP || 'Todas as questões';
   }
 
-  const [favR,respR,qR]=await Promise.all([
-    sb.from('favoritos').select('questao_id').eq('user_id',uid),
-    sb.from('respostas').select('questao_id,acertou,opcao_escolhida').eq('user_id',uid),
-    sb.from('questoes').select('*').order('id',{ascending:true})
+  // Carrega tudo em paralelo
+  const [favR, respR, qR] = await Promise.all([
+    SB.from('favoritos').select('questao_id').eq('user_id', UID),
+    SB.from('respostas').select('questao_id,acertou,opcao_escolhida').eq('user_id', UID),
+    SB.from('questoes').select('*').order('id', { ascending: true })
   ]);
 
-  if(favR.data) favR.data.forEach(f=>favsSet.add(f.questao_id));
-  if(respR.data) respR.data.forEach(r=>{ respondidas[r.questao_id]={acertou:r.acertou,opcao:r.opcao_escolhida}; });
-  todasQ=(qR.data||[]).map(normQ);
+  if (favR.data)  favR.data.forEach(f => favsSet.add(f.questao_id));
+  if (respR.data) respR.data.forEach(r => {
+    respondidas[r.questao_id] = { acertou: r.acertou, opcao: r.opcao_escolhida };
+  });
+  todasQ = (qR.data || []).map(normQ);
 
   // Preenche filtros
-  const temas=[...new Set(todasQ.map(q=>q.tema).filter(Boolean))].sort();
-  const bancas=[...new Set(todasQ.map(q=>q.banca).filter(Boolean))].sort();
-  const sT=document.getElementById('f-tema'),sB=document.getElementById('f-banca');
-  temas.forEach(t=>{const o=document.createElement('option');o.value=o.textContent=t;sT.appendChild(o);});
-  bancas.forEach(b=>{const o=document.createElement('option');o.value=o.textContent=b;sB.appendChild(o);});
+  const temas  = [...new Set(todasQ.map(q => q.tema).filter(Boolean))].sort();
+  const bancas = [...new Set(todasQ.map(q => q.banca).filter(Boolean))].sort();
+  const sT = document.getElementById('f-tema');
+  const sB = document.getElementById('f-banca');
+  temas.forEach(t  => { const o = document.createElement('option'); o.value = o.textContent = t;  sT.appendChild(o); });
+  bancas.forEach(b => { const o = document.createElement('option'); o.value = o.textContent = b;  sB.appendChild(o); });
 
-  // Aplica params URL
-  if(temaP){ sT.value=temaP; atualizarSubs(temaP); }
-  if(difP)   document.getElementById('f-dif').value=difP;
-  if(subP)   setTimeout(()=>{ document.getElementById('f-subtema').value=subP; aplicar(); }, 100);
+  if (temaP) { sT.value = temaP; atualizarSubs(temaP); }
+  if (difP)  document.getElementById('f-dif').value = difP;
+  if (subP)  setTimeout(() => { document.getElementById('f-subtema').value = subP; aplicar(); }, 80);
   else aplicar();
 
-  // Listeners
-  sT.addEventListener('change',()=>{ atualizarSubs(sT.value); aplicar(); });
-  ['f-subtema','f-dif','f-banca'].forEach(id=>document.getElementById(id).addEventListener('change',aplicar));
+  sT.addEventListener('change', () => { atualizarSubs(sT.value); aplicar(); });
+  ['f-subtema','f-dif','f-banca'].forEach(id => document.getElementById(id).addEventListener('change', aplicar));
 });
 
-function atualizarSubs(tema){
-  const sel=document.getElementById('f-subtema');
-  sel.innerHTML='<option value="">Todos os subtemas</option>';
-  const subs=[...new Set(todasQ.filter(q=>q.tema===tema).map(q=>q.subtema).filter(Boolean))].sort();
-  subs.forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o);});
+/* ─────────────────────────────────────────────
+   FILTROS
+───────────────────────────────────────────── */
+function atualizarSubs(tema) {
+  const sel = document.getElementById('f-subtema');
+  sel.innerHTML = '<option value="">Todos os subtemas</option>';
+  const subs = [...new Set(todasQ.filter(q => q.tema === tema).map(q => q.subtema).filter(Boolean))].sort();
+  subs.forEach(s => { const o = document.createElement('option'); o.value = o.textContent = s; sel.appendChild(o); });
 }
 
-function limparFiltros(){
-  ['f-tema','f-subtema','f-dif','f-banca'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-subtema').innerHTML='<option value="">Todos os subtemas</option>';
-  document.getElementById('titulo-pagina').textContent='Questões';
-  document.getElementById('sub-pagina').textContent='Pratique e aprimore seu conhecimento médico';
+function limparFiltros() {
+  ['f-tema','f-subtema','f-dif','f-banca'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-subtema').innerHTML = '<option value="">Todos os subtemas</option>';
+  document.getElementById('titulo-pagina').textContent = 'Questões';
+  document.getElementById('sub-pagina').textContent    = 'Pratique e aprimore seu conhecimento médico';
   aplicar();
 }
 
-function aplicar(){
-  const t=document.getElementById('f-tema').value;
-  const s=document.getElementById('f-subtema').value;
-  const d=document.getElementById('f-dif').value;
-  const b=document.getElementById('f-banca').value;
-  // FIX: comparação estrita com strings normalizadas
-  filtradas=todasQ.filter(q=>{
-    if(t && q.tema!==t) return false;
-    if(s && q.subtema!==s) return false;
-    if(d && q.dificuldade!==d) return false;
-    if(b && q.banca!==b) return false;
+function aplicar() {
+  const t = document.getElementById('f-tema').value;
+  const s = document.getElementById('f-subtema').value;
+  const d = document.getElementById('f-dif').value;
+  const b = document.getElementById('f-banca').value;
+
+  // FIX: filtro com comparação de strings normalizadas
+  filtradas = todasQ.filter(q => {
+    if (t && q.tema      !== t) return false;
+    if (s && q.subtema   !== s) return false;
+    if (d && q.dificuldade !== d) return false;
+    if (b && q.banca     !== b) return false;
     return true;
   });
-  document.getElementById('info-count').textContent=
-    `${filtradas.length} questão${filtradas.length!==1?'ões':''} encontrada${filtradas.length!==1?'s':''}`;
-  pagAtual=1; seqIdx=0; seqC=0; seqE=0;
-  modoAtual==='lista'?renderLista():renderSeq();
+
+  document.getElementById('info-count').textContent =
+    `${filtradas.length} questão${filtradas.length !== 1 ? 'ões' : ''} encontrada${filtradas.length !== 1 ? 's' : ''}`;
+  pagAtual = 1; seqIdx = 0; seqC = 0; seqE = 0;
+  modoAtual === 'lista' ? renderLista() : renderSeq();
 }
 
-// ── Modo ──
-function setModo(m){
-  modoAtual=m;
-  document.getElementById('modo-lista').style.display=m==='lista'?'block':'none';
-  document.getElementById('modo-sequencial').style.display=m==='sequencial'?'block':'none';
-  document.getElementById('tab-lista').classList.toggle('active',m==='lista');
-  document.getElementById('tab-seq').classList.toggle('active',m==='sequencial');
-  if(m==='sequencial'){seqIdx=0;seqC=0;seqE=0;renderSeq();}
+/* ─────────────────────────────────────────────
+   MODO
+───────────────────────────────────────────── */
+function setModo(m) {
+  modoAtual = m;
+  document.getElementById('modo-lista').style.display      = m === 'lista'      ? 'block' : 'none';
+  document.getElementById('modo-sequencial').style.display = m === 'sequencial' ? 'block' : 'none';
+  document.getElementById('tab-lista').classList.toggle('active', m === 'lista');
+  document.getElementById('tab-seq').classList.toggle('active',   m === 'sequencial');
+  if (m === 'sequencial') { seqIdx = 0; seqC = 0; seqE = 0; renderSeq(); }
   else renderLista();
 }
 
-// ── Lista ──
-function renderLista(){
-  const inicio=(pagAtual-1)*POR_PAGINA;
-  const slice=filtradas.slice(inicio,inicio+POR_PAGINA);
-  const lista=document.getElementById('lista-questoes');
-  if(!slice.length){
-    lista.innerHTML='<div class="empty">😔 Nenhuma questão encontrada com esses filtros.</div>';
-    document.getElementById('paginacao').innerHTML='';
+/* ─────────────────────────────────────────────
+   LISTA
+───────────────────────────────────────────── */
+function renderLista() {
+  const inicio = (pagAtual - 1) * POR_PAGINA;
+  const slice  = filtradas.slice(inicio, inicio + POR_PAGINA);
+  const lista  = document.getElementById('lista-questoes');
+  if (!slice.length) {
+    lista.innerHTML = '<div class="empty">😔 Nenhuma questão encontrada com esses filtros.</div>';
+    document.getElementById('paginacao').innerHTML = '';
     return;
   }
-  lista.innerHTML=slice.map((q,i)=>buildCard(q,inicio+i,false)).join('');
-  buildPag(Math.ceil(filtradas.length/POR_PAGINA));
-  slice.forEach(q=>{ if(respondidas[q.id]) reaplicar(q,respondidas[q.id].opcao,respondidas[q.id].acertou); });
+  lista.innerHTML = slice.map((q, i) => buildCard(q, inicio + i, false)).join('');
+  buildPag(Math.ceil(filtradas.length / POR_PAGINA));
+  slice.forEach(q => { if (respondidas[q.id]) reaplicar(q, respondidas[q.id].opcao, respondidas[q.id].acertou); });
 }
 
-function buildPag(total){
-  const el=document.getElementById('paginacao');
-  if(total<=1){el.innerHTML='';return;}
-  let h='';
-  if(pagAtual>1) h+=`<button class="pag-btn" onclick="irPag(${pagAtual-1})">‹</button>`;
-  for(let i=Math.max(1,pagAtual-2);i<=Math.min(total,pagAtual+2);i++)
-    h+=`<button class="pag-btn ${i===pagAtual?'active':''}" onclick="irPag(${i})">${i}</button>`;
-  if(pagAtual<total) h+=`<button class="pag-btn" onclick="irPag(${pagAtual+1})">›</button>`;
-  el.innerHTML=h;
+function buildPag(total) {
+  const el = document.getElementById('paginacao');
+  if (total <= 1) { el.innerHTML = ''; return; }
+  let h = '';
+  if (pagAtual > 1) h += `<button class="pag-btn" onclick="irPag(${pagAtual - 1})">‹</button>`;
+  for (let i = Math.max(1, pagAtual - 2); i <= Math.min(total, pagAtual + 2); i++)
+    h += `<button class="pag-btn ${i === pagAtual ? 'active' : ''}" onclick="irPag(${i})">${i}</button>`;
+  if (pagAtual < total) h += `<button class="pag-btn" onclick="irPag(${pagAtual + 1})">›</button>`;
+  el.innerHTML = h;
 }
-function irPag(n){pagAtual=n;renderLista();window.scrollTo({top:0,behavior:'smooth'});}
+function irPag(n) { pagAtual = n; renderLista(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-// ── Sequencial ──
-function renderSeq(){
+/* ─────────────────────────────────────────────
+   SEQUENCIAL
+───────────────────────────────────────────── */
+function renderSeq() {
   document.getElementById('resultado-final').classList.remove('show');
-  if(!filtradas.length){
-    document.getElementById('questao-seq').innerHTML='<div class="empty">Nenhuma questão neste filtro.</div>';
-    return;
-  }
-  if(seqIdx>=filtradas.length){mostrarFinal();return;}
-  const q=filtradas[seqIdx], total=filtradas.length;
-  document.getElementById('prog-num').textContent=`${seqIdx+1} / ${total}`;
-  document.getElementById('prog-fill').style.width=Math.round((seqIdx/total)*100)+'%';
-  document.getElementById('prog-c').textContent=seqC;
-  document.getElementById('prog-e').textContent=seqE;
-  document.getElementById('questao-seq').innerHTML=buildCard(q,seqIdx,true);
-  if(respondidas[q.id]) reaplicar(q,respondidas[q.id].opcao,respondidas[q.id].acertou);
+  if (!filtradas.length) { document.getElementById('questao-seq').innerHTML = '<div class="empty">Nenhuma questão neste filtro.</div>'; return; }
+  if (seqIdx >= filtradas.length) { mostrarFinal(); return; }
+  const q = filtradas[seqIdx], total = filtradas.length;
+  document.getElementById('prog-num').textContent   = `${seqIdx + 1} / ${total}`;
+  document.getElementById('prog-fill').style.width  = Math.round((seqIdx / total) * 100) + '%';
+  document.getElementById('prog-c').textContent     = seqC;
+  document.getElementById('prog-e').textContent     = seqE;
+  document.getElementById('questao-seq').innerHTML  = buildCard(q, seqIdx, true);
+  if (respondidas[q.id]) reaplicar(q, respondidas[q.id].opcao, respondidas[q.id].acertou);
 }
-function proxSeq(){seqIdx++;renderSeq();window.scrollTo({top:0,behavior:'smooth'});}
-function reiniciarSeq(){seqIdx=0;seqC=0;seqE=0;document.getElementById('resultado-final').classList.remove('show');renderSeq();}
-function mostrarFinal(){
-  document.getElementById('questao-seq').innerHTML='';
-  const r=document.getElementById('resultado-final'); r.classList.add('show');
-  const total=seqC+seqE, pct=total>0?Math.round((seqC/total)*100):0;
-  const cor=pct>=70?'#10b981':pct>=50?'#f59e0b':'#ef4444';
-  document.getElementById('res-pct').textContent=pct+'%';
-  document.getElementById('res-pct').style.color=cor;
-  document.getElementById('res-total').textContent=total;
-  document.getElementById('res-certas').textContent=seqC;
-  document.getElementById('res-erradas').textContent=seqE;
+function proxSeq() { seqIdx++; renderSeq(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function reiniciarSeq() { seqIdx = 0; seqC = 0; seqE = 0; document.getElementById('resultado-final').classList.remove('show'); renderSeq(); }
+function mostrarFinal() {
+  document.getElementById('questao-seq').innerHTML = '';
+  const r = document.getElementById('resultado-final'); r.classList.add('show');
+  const total = seqC + seqE, pct = total > 0 ? Math.round((seqC / total) * 100) : 0;
+  const cor = pct >= 70 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+  document.getElementById('res-pct').textContent  = pct + '%';
+  document.getElementById('res-pct').style.color  = cor;
+  document.getElementById('res-total').textContent   = total;
+  document.getElementById('res-certas').textContent  = seqC;
+  document.getElementById('res-erradas').textContent = seqE;
 }
 
-// ── Build card: usa índice local para callbacks, evita problemas de tipo ──
-function buildCard(q, idx, isSeq){
-  // FIX: registra q no mapa para callbacks não passarem parâmetros pelo inline HTML
-  QS_MAP[q.id]=q;
-  const seqFlag=isSeq?1:0; // 1 ou 0, nunca string "true"/"false"
-  const fav=favsSet.has(q.id);
-  const dL={facil:'Fácil',media:'Média',dificil:'Difícil'}[q.dificuldade]||'Média';
-  const dC={facil:'badge-green',media:'badge-yellow',dificil:'badge-red'}[q.dificuldade]||'badge-yellow';
-  const opsHtml=q.opcoes.map((op,i)=>`
-    <div class="opcao" id="op-${q.id}-${i}" data-qid="${q.id}" data-oi="${i}" onclick="handleOp(this)">
+/* ─────────────────────────────────────────────
+   BUILD CARD — usa data-attributes, sem parâmetros inline
+───────────────────────────────────────────── */
+function buildCard(q, idx, isSeq) {
+  const fav = favsSet.has(q.id);
+  const dL  = {facil:'Fácil', media:'Média', dificil:'Difícil'}[q.dificuldade] || 'Média';
+  const dC  = {facil:'badge-green', media:'badge-yellow', dificil:'badge-red'}[q.dificuldade] || 'badge-yellow';
+
+  const opsHtml = q.opcoes.map((op, i) => `
+    <div class="opcao" data-qid="${q.id}" data-oi="${i}" onclick="opClick(this)">
       <div class="opcao-letra">${LETRAS[i]}</div>
       <div class="opcao-texto">${op}</div>
     </div>`).join('');
 
-  return `<div class="questao-card" id="card-${q.id}" data-seq="${seqFlag}">
+  return `<div class="questao-card" id="card-${q.id}" data-seq="${isSeq ? 1 : 0}">
     <div class="q-header">
       <div class="q-badges">
-        ${q.tema?`<span class="badge badge-blue">${q.tema}</span>`:''}
-        ${q.subtema?`<span class="badge badge-gray">${q.subtema}</span>`:''}
+        ${q.tema    ? `<span class="badge badge-blue">${q.tema}</span>`   : ''}
+        ${q.subtema ? `<span class="badge badge-gray">${q.subtema}</span>`: ''}
         <span class="badge ${dC}">${dL}</span>
-        ${q.banca?`<span class="badge badge-purple">${q.banca}${q.ano?' '+q.ano:''}</span>`:''}
+        ${q.banca   ? `<span class="badge badge-purple">${q.banca}${q.ano ? ' ' + q.ano : ''}</span>` : ''}
       </div>
-      <div class="q-numero">Q${idx+1}</div>
+      <div class="q-numero">Q${idx + 1}</div>
     </div>
     <div class="q-enunciado">${q.enunciado}</div>
     <div id="ops-${q.id}">${opsHtml}</div>
     <div class="feedback-banner" id="fb-${q.id}"></div>
-    <button class="btn-confirmar" id="btn-${q.id}" data-qid="${q.id}" onclick="handleConfirmar(this)" disabled>Confirmar Resposta</button>
-    ${q.comentario?`<div class="gabarito-box" id="gab-${q.id}"><div class="gabarito-titulo">💡 Gabarito comentado</div>${q.comentario}</div>`:''}
+    <button class="btn-confirmar" id="btn-${q.id}" data-qid="${q.id}" onclick="confirmarClick(this)" disabled>Confirmar Resposta</button>
+    ${q.comentario ? `<div class="gabarito-box" id="gab-${q.id}"><div class="gabarito-titulo">💡 Gabarito comentado</div>${q.comentario}</div>` : ''}
     <div class="q-acoes">
-      <button class="btn-acao ${fav?'ativo':''}" id="fav-${q.id}" data-qid="${q.id}" onclick="handleFav(this)">${fav?'★ Favoritada':'☆ Favoritar'}</button>
-      <button class="btn-acao" id="cbn-${q.id}" data-qid="${q.id}" onclick="handleCom(this)">💬 Comentários</button>
-      ${isSeq?`<button class="btn-acao" onclick="proxSeq()" style="margin-left:auto">Próxima →</button>`:''}
+      <button class="btn-acao ${fav ? 'ativo' : ''}" id="fav-${q.id}" data-qid="${q.id}" onclick="favClick(this)">${fav ? '★ Favoritada' : '☆ Favoritar'}</button>
+      <button class="btn-acao" data-qid="${q.id}" onclick="comClick(this)">💬 Comentários</button>
+      ${isSeq ? `<button class="btn-acao" onclick="proxSeq()" style="margin-left:auto">Próxima →</button>` : ''}
     </div>
     <div class="coments-sec" id="csec-${q.id}">
       <div id="clist-${q.id}" style="margin-bottom:.5rem"></div>
       <div class="coment-form">
-        <input type="text" id="cinput-${q.id}" data-qid="${q.id}" placeholder="Escreva um comentário...">
-        <button data-qid="${q.id}" onclick="handleEnviarCom(this)">Enviar</button>
+        <input type="text" id="cinput-${q.id}" placeholder="Escreva um comentário...">
+        <button data-qid="${q.id}" onclick="comEnviar(this)">Enviar</button>
       </div>
     </div>
   </div>`;
 }
 
-// ── Mapa de questões para callbacks via data-attribute ──
-const QS_MAP={};
-
-// FIX principal: usa data-attributes ao invés de parâmetros inline
-function handleOp(el){
-  const qId=el.dataset.qid, oi=parseInt(el.dataset.oi);
-  const card=document.getElementById(`card-${qId}`); if(card.dataset.r) return;
-  document.querySelectorAll(`[id^="op-${qId}-"]`).forEach(e=>e.classList.remove('selecionada'));
+/* ─────────────────────────────────────────────
+   HANDLERS — leem dados via data-attributes
+───────────────────────────────────────────── */
+function opClick(el) {
+  const qId = el.dataset.qid;
+  const oi  = parseInt(el.dataset.oi);
+  const card = document.getElementById('card-' + qId);
+  if (card.dataset.r) return;           // já respondida
+  // Remove seleção anterior
+  document.querySelectorAll('[data-qid="' + qId + '"].opcao').forEach(e => e.classList.remove('selecionada'));
   el.classList.add('selecionada');
-  selecoes[qId]=oi;
-  const btn=document.getElementById(`btn-${qId}`); if(btn) btn.disabled=false;
+  selecoes[qId] = oi;
+  const btn = document.getElementById('btn-' + qId);
+  if (btn) btn.disabled = false;
 }
 
-function handleConfirmar(btn){
-  const qId=btn.dataset.qid;
-  const card=document.getElementById(`card-${qId}`); if(!card||card.dataset.r) return;
-  const op=selecoes[qId]; if(op===undefined) return;
-  const q=QS_MAP[qId]; if(!q) return;
-  const isSeq=card.dataset.seq==='1';
-  card.dataset.r='1';
-  const ok=op===q.respIdx;
-  document.querySelectorAll(`[id^="op-${qId}-"]`).forEach((el,i)=>{
+function confirmarClick(btn) {
+  const qId  = btn.dataset.qid;
+  const card = document.getElementById('card-' + qId);
+  if (!card || card.dataset.r) return;
+  const op = selecoes[qId];
+  if (op === undefined) return;
+  const q  = QM[qId];
+  if (!q) return;
+
+  card.dataset.r = '1';
+  const ok = (op === q.respIdx);
+
+  // Marca opções
+  document.querySelectorAll('[data-qid="' + qId + '"].opcao').forEach((el, i) => {
     el.classList.add('bloqueada');
-    if(i===q.respIdx) el.classList.add('correta');
-    else if(i===op&&!ok) el.classList.add('errada');
+    if (i === q.respIdx)      el.classList.add('correta');
+    else if (i === op && !ok) el.classList.add('errada');
   });
-  const fb=document.getElementById(`fb-${qId}`);
-  if(fb){
-    fb.className=`feedback-banner show ${ok?'acerto':'erro'}`;
-    fb.innerHTML=ok?'✅ Parabéns! Resposta correta!':`❌ Resposta incorreta. A correta era <strong>${LETRAS[q.respIdx]}</strong>.`;
+
+  // Feedback
+  const fb = document.getElementById('fb-' + qId);
+  if (fb) {
+    fb.className = 'feedback-banner show ' + (ok ? 'acerto' : 'erro');
+    fb.innerHTML = ok
+      ? '✅ Parabéns! Resposta correta!'
+      : '❌ Resposta incorreta. A correta era <strong>' + LETRAS[q.respIdx] + '</strong>.';
   }
-  btn.style.display='none';
-  const gab=document.getElementById(`gab-${qId}`); if(gab) gab.classList.add('show');
-  if(isSeq){
-    if(ok) seqC++; else seqE++;
-    document.getElementById('prog-c').textContent=seqC;
-    document.getElementById('prog-e').textContent=seqE;
+  btn.style.display = 'none';
+  const gab = document.getElementById('gab-' + qId);
+  if (gab) gab.classList.add('show');
+
+  // Modo sequencial
+  if (card.dataset.seq === '1') {
+    if (ok) seqC++; else seqE++;
+    document.getElementById('prog-c').textContent = seqC;
+    document.getElementById('prog-e').textContent = seqE;
   }
-  respondidas[qId]={acertou:ok,opcao:op};
-  window.supabaseClient.from('respostas').insert({
-    user_id:sessao.user.id, questao_id:qId,
-    opcao_escolhida:op, acertou:ok, modo:'normal'
-  }).then(({error})=>{ if(error) console.warn('Erro ao salvar resposta:',error.message); });
+
+  respondidas[qId] = { acertou: ok, opcao: op };
+
+  // FIX comentários: usa SB/UID do closure correto
+  SB.from('respostas').insert({
+    user_id:         UID,
+    questao_id:      qId,
+    opcao_escolhida: op,
+    acertou:         ok,
+    modo:            'normal'
+  }).then(({ error }) => { if (error) console.warn('Erro ao salvar resposta:', error.message); });
 }
 
-function reaplicar(q,op,ok){
-  const card=document.getElementById(`card-${q.id}`); if(!card||card.dataset.r) return;
-  card.dataset.r='1';
-  document.querySelectorAll(`[id^="op-${q.id}-"]`).forEach((el,i)=>{
+function reaplicar(q, op, ok) {
+  const card = document.getElementById('card-' + q.id);
+  if (!card || card.dataset.r) return;
+  card.dataset.r = '1';
+  document.querySelectorAll('[data-qid="' + q.id + '"].opcao').forEach((el, i) => {
     el.classList.add('bloqueada');
-    if(i===q.respIdx) el.classList.add('correta');
-    else if(i===op&&!ok) el.classList.add('errada');
+    if (i === q.respIdx)      el.classList.add('correta');
+    else if (i === op && !ok) el.classList.add('errada');
   });
-  const btn=document.getElementById(`btn-${q.id}`); if(btn) btn.style.display='none';
-  const gab=document.getElementById(`gab-${q.id}`); if(gab) gab.classList.add('show');
-  const fb=document.getElementById(`fb-${q.id}`);
-  if(fb){
-    fb.className=`feedback-banner show ${ok?'acerto':'erro'}`;
-    fb.innerHTML=ok?'✅ Você acertou esta questão.':`❌ Você errou. Correta: <strong>${LETRAS[q.respIdx]}</strong>.`;
+  const btn = document.getElementById('btn-' + q.id); if (btn) btn.style.display = 'none';
+  const gab = document.getElementById('gab-' + q.id); if (gab) gab.classList.add('show');
+  const fb  = document.getElementById('fb-'  + q.id);
+  if (fb) {
+    fb.className = 'feedback-banner show ' + (ok ? 'acerto' : 'erro');
+    fb.innerHTML = ok
+      ? '✅ Você acertou esta questão.'
+      : '❌ Você errou. Correta: <strong>' + LETRAS[q.respIdx] + '</strong>.';
   }
 }
 
-function handleFav(btn){
-  const qId=btn.dataset.qid;
-  const sb=window.supabaseClient, uid=sessao.user.id;
-  if(favsSet.has(qId)){
-    sb.from('favoritos').delete().eq('user_id',uid).eq('questao_id',qId)
-      .then(({error})=>{ if(error){alert('Erro ao remover favorito');return;} });
-    favsSet.delete(qId); btn.className='btn-acao'; btn.textContent='☆ Favoritar';
+/* ─── FAVORITAR ─── FIX: usa SB/UID do escopo global */
+function favClick(btn) {
+  const qId = btn.dataset.qid;
+  if (favsSet.has(qId)) {
+    SB.from('favoritos').delete().eq('user_id', UID).eq('questao_id', qId)
+      .then(({ error }) => {
+        if (error) { console.warn('Erro ao desfavoritar:', error.message); return; }
+        favsSet.delete(qId);
+        btn.className   = 'btn-acao';
+        btn.textContent = '☆ Favoritar';
+      });
   } else {
-    sb.from('favoritos').insert({user_id:uid,questao_id:qId})
-      .then(({error})=>{ if(error){alert('Erro ao favoritar');return;} });
-    favsSet.add(qId); btn.className='btn-acao ativo'; btn.textContent='★ Favoritada';
+    SB.from('favoritos').insert({ user_id: UID, questao_id: qId })
+      .then(({ error }) => {
+        if (error) { console.warn('Erro ao favoritar:', error.message); return; }
+        favsSet.add(qId);
+        btn.className   = 'btn-acao ativo';
+        btn.textContent = '★ Favoritada';
+      });
   }
 }
 
-function handleCom(btn){
-  const qId=btn.dataset.qid;
-  const sec=document.getElementById(`csec-${qId}`);
-  const aberta=sec.classList.contains('aberta');
-  sec.classList.toggle('aberta',!aberta);
-  btn.classList.toggle('ativo-c',!aberta);
-  if(!aberta) carregarCom(qId);
+/* ─── COMENTÁRIOS ─── FIX: usa SB/UID do escopo global */
+function comClick(btn) {
+  const qId  = btn.dataset.qid;
+  const sec  = document.getElementById('csec-' + qId);
+  const open = sec.classList.contains('aberta');
+  sec.classList.toggle('aberta', !open);
+  btn.classList.toggle('ativo-c', !open);
+  if (!open) carregarCom(qId);
 }
 
-async function carregarCom(qId){
-  const {data}=await window.supabaseClient.from('comentarios')
-    .select('texto,criado_em,perfis(nome)').eq('questao_id',qId).order('criado_em',{ascending:true});
-  document.getElementById(`clist-${qId}`).innerHTML=
-    (!data||!data.length)?'<p style="font-size:.8rem;color:#94a3b8">Sem comentários ainda.</p>':
-    data.map(c=>`<div class="coment-item">
-      <div class="coment-autor">${c.perfis?.nome||'Usuário'} · ${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div>
-      <div class="coment-texto">${c.texto}</div>
-    </div>`).join('');
+async function carregarCom(qId) {
+  const { data, error } = await SB
+    .from('comentarios')
+    .select('id, texto, criado_em, perfis(nome)')
+    .eq('questao_id', qId)
+    .order('criado_em', { ascending: true });
+
+  if (error) { console.warn('Erro ao carregar comentários:', error.message); return; }
+
+  const lista = document.getElementById('clist-' + qId);
+  lista.innerHTML = (!data || !data.length)
+    ? '<p style="font-size:.8rem;color:#94a3b8">Sem comentários ainda.</p>'
+    : data.map(c => `
+        <div class="coment-item">
+          <div class="coment-autor">${c.perfis?.nome || 'Usuário'} · ${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div>
+          <div class="coment-texto">${c.texto}</div>
+        </div>`).join('');
 }
 
-function handleEnviarCom(btn){
-  const qId=btn.dataset.qid;
-  const input=document.getElementById(`cinput-${qId}`);
-  const texto=input.value.trim(); if(!texto) return;
-  window.supabaseClient.from('comentarios')
-    .insert({user_id:sessao.user.id,questao_id:qId,texto})
-    .then(()=>{ input.value=''; carregarCom(qId); });
+function comEnviar(btn) {
+  const qId   = btn.dataset.qid;
+  const input = document.getElementById('cinput-' + qId);
+  const texto = input.value.trim();
+  if (!texto) return;
+
+  // FIX: usa SB e UID globais (não window.supabaseClient)
+  SB.from('comentarios').insert({ user_id: UID, questao_id: qId, texto })
+    .then(({ error }) => {
+      if (error) { console.warn('Erro ao salvar comentário:', error.message); return; }
+      input.value = '';
+      carregarCom(qId);
+    });
 }
 </script>
 </body>

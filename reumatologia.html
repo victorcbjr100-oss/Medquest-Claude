@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cardiologia — MedQuest Pro</title>
+<title>Reumatologia — MedQuest Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,18 +28,18 @@ body{background:var(--bg-body);font-family:'Inter',sans-serif}
 <script src="js/sidebar.js"></script>
 <main class="main-content" id="main" style="display:none">
   <div class="page-header" style="margin-bottom:2.5rem">
-    <h1 style="font-size:2rem;font-weight:800">❤️ Cardiologia</h1>
+    <h1 style="font-size:2rem;font-weight:800">🦴 Reumatologia</h1>
     <p style="color:var(--text-muted);margin-top:.4rem">Escolha um subtema para treinar questões</p>
   </div>
   <div class="subtemas-grid" id="grid"></div>
 </main>
 <script>
-const SUBTEMAS=[{"nome": "Hipertensão arterial sistêmica", "emoji": "🩸"}, {"nome": "Insuficiência cardíaca", "emoji": "🫀"}, {"nome": "Doença arterial coronariana", "emoji": "⚠️"}, {"nome": "Síndromes coronarianas agudas", "emoji": "🚑"}, {"nome": "Arritmias cardíacas", "emoji": "💓"}, {"nome": "Valvopatias", "emoji": "🔊"}, {"nome": "Miocardiopatias", "emoji": "📉"}, {"nome": "Pericardite e miocardite", "emoji": "🧊"}, {"nome": "Endocardite infecciosa", "emoji": "🦠"}, {"nome": "Hipertensão pulmonar", "emoji": "🌬️"}, {"nome": "Tromboembolismo pulmonar", "emoji": "🫁"}, {"nome": "Doenças da aorta", "emoji": "🪢"}];
+const SUBTEMAS=[{"nome": "Artrite reumatoide", "emoji": "🤲"}, {"nome": "Lúpus eritematoso sistêmico", "emoji": "🦋"}, {"nome": "Artrite psoriásica", "emoji": "🩹"}, {"nome": "Espondiloartrites", "emoji": "🦴"}, {"nome": "Gota", "emoji": "🍷"}, {"nome": "Síndrome de Sjögren", "emoji": "💧"}, {"nome": "Esclerose sistêmica", "emoji": "🧱"}, {"nome": "Polimiosite e dermatomiosite", "emoji": "💪"}, {"nome": "Vasculites", "emoji": "🩸"}, {"nome": "Fibromialgia", "emoji": "😣"}, {"nome": "Osteoartrite", "emoji": "🦵"}];
 window.addEventListener('load', async()=>{
   const session=await exigirLogin(); if(!session) return;
   document.getElementById('main').style.display='block';
   const sb=window.supabaseClient;
-  const {data:qs}=await sb.from('questoes').select('subtema').eq('tema','Cardiologia');
+  const {data:qs}=await sb.from('questoes').select('subtema').eq('tema','Reumatologia');
   const cont={};
   (qs||[]).forEach(q=>{ const s=q.subtema||''; cont[s]=(cont[s]||0)+1; });
   const grid=document.getElementById('grid');
@@ -50,7 +50,7 @@ window.addEventListener('load', async()=>{
     card.innerHTML=`<div class="subtema-emoji">${s.emoji}</div>
       <div class="subtema-nome">${s.nome}</div>
       ${n?`<div class="subtema-count">${n} questões</div>`:''}`;
-    card.onclick=()=>window.location.href=`questoes.html?tema=${encodeURIComponent('Cardiologia')}&subtema=${encodeURIComponent(s.nome)}`;
+    card.onclick=()=>window.location.href=`questoes.html?tema=${encodeURIComponent('Reumatologia')}&subtema=${encodeURIComponent(s.nome)}`;
     grid.appendChild(card);
   });
 });
