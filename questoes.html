@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Questões — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
@@ -10,42 +10,51 @@
   <link rel="stylesheet" href="css/style.css">
   <style>
     body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
-    .main-content { flex: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .main-content { flex: 1; max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
     
-    .progresso-container { background: #fff; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .stats-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 0.9rem; color: #1e293b; }
-    .barra-bg { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
-    .barra-fill { width: 0%; height: 100%; background: #2563eb; transition: width 0.4s ease; }
+    .questao-card { 
+      background: #fff; 
+      border: 1px solid #e2e8f0; 
+      border-radius: 20px; 
+      padding: 2rem; 
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+      margin-bottom: 2rem; 
+      position: relative;
+    }
 
-    .questao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); min-height: 400px; }
-    .q-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem; color: #64748b; font-weight: 600; }
-    .badge-group { display: flex; gap: 8px; }
-    .badge { padding: 4px 12px; border-radius: 99px; background: #f1f5f9; font-size: 0.75rem; }
-    
-    .enunciado { font-size: 1.1rem; color: #1e293b; line-height: 1.7; margin-bottom: 2rem; font-weight: 500; }
+    .badge { padding: 5px 12px; border-radius: 99px; background: #eff6ff; color: #2563eb; font-size: 0.8rem; font-weight: 700; margin-right: 10px; }
+    .dificuldade { font-size: 0.8rem; font-weight: 600; color: #64748b; }
 
-    .opcao { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 14px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
-    .opcao:hover { border-color: #cbd5e1; background: #f8fafc; }
-    .opcao.selecionada { border-color: #2563eb; background: #eff6ff; }
-    .opcao.correta { border-color: #10b981; background: #ecfdf5; }
-    .opcao.errada { border-color: #ef4444; background: #fef2f2; }
-    
-    .letra { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 10px; font-weight: 700; color: #475569; }
-    .selecionada .letra { background: #2563eb; color: #fff; }
-    .correta .letra { background: #10b981; color: #fff; }
-    .errada .letra { background: #ef4444; color: #fff; }
+    .enunciado { font-size: 1.15rem; color: #1e293b; line-height: 1.6; margin: 1.5rem 0; font-weight: 500; }
 
-    .btn-confirmar { width: 100%; padding: 16px; background: #2563eb; color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; transition: all 0.2s; }
-    .btn-confirmar:disabled { opacity: 0.4; cursor: not-allowed; }
-    
-    .feedback-msg { padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: 600; text-align: center; display: none; }
+    .opcoes-container { display: flex; flex-direction: column; gap: 12px; }
+    .opcao-btn { 
+      padding: 15px 20px; 
+      border: 2px solid #f1f5f9; 
+      border-radius: 12px; 
+      background: #fff; 
+      text-align: left; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      transition: 0.2s; 
+      color: #475569;
+    }
+    .opcao-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .opcao-btn.correta { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: 600; }
+    .opcao-btn.errada { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
 
-    .acoes-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
-    .btn-nav { padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
-    .btn-nav:hover { background: #f1f5f9; }
-    .btn-nav.active-fav { color: #eab308; border-color: #eab308; background: #fefce8; }
-    
-    #btn-proxima { background: #1e293b; color: #fff; border: none; display: none; }
+    .btn-favoritar { 
+      position: absolute; top: 20px; right: 20px; 
+      background: none; border: none; font-size: 1.5rem; 
+      cursor: pointer; transition: transform 0.2s; 
+    }
+    .btn-favoritar:active { transform: scale(1.3); }
+
+    .comentario { 
+      margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; 
+      border-radius: 12px; border-left: 5px solid #0ea5e9; 
+      display: none; font-size: 0.95rem; color: #0369a1; 
+    }
   </style>
 </head>
 <body>
@@ -53,182 +62,102 @@
 <script src="js/sidebar.js"></script>
 
 <main class="main-content">
-  <div class="progresso-container">
-    <div class="stats-row">
-      <span id="txt-contador">Carregando questões...</span>
-      <div>
-        <span style="color:#10b981" id="count-acertos">0</span>
-        <span style="color:#94a3b8; margin: 0 5px;">/</span>
-        <span style="color:#ef4444" id="count-erros">0</span>
-      </div>
-    </div>
-    <div class="barra-bg">
-      <div id="progresso-fill" class="barra-fill"></div>
-    </div>
-  </div>
+  <header style="margin-bottom: 2rem;">
+    <h1 style="font-weight: 800; color: #1e293b;">Banco de Questões</h1>
+    <p style="color: #64748b;">9º Período — Preparação para Enare 2027</p>
+  </header>
 
-  <div id="area-questao"></div>
+  <div id="questoes-container">
+    </div>
 </main>
 
 <script>
-let questoes = [];
-let indexAtual = 0;
-let acertos = 0;
-let erros = 0;
-let respostaSelecionada = null;
-let jaRespondeu = false;
-
-async function iniciar() {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('questoes')
-            .select('*');
-
-        if (error) throw error;
-        questoes = data;
-        renderizarQuestao();
-    } catch (err) {
-        console.error("Erro Supabase:", err);
-    }
-}
-
-function renderizarQuestao() {
-    const container = document.getElementById('area-questao');
-    const q = questoes[indexAtual];
+async function carregarQuestoes() {
+    const container = document.getElementById('questoes-container');
     
-    if (!q) {
-        container.innerHTML = `<div class="questao-card" style="text-align:center"><h2>🎉 Simulado Concluído!</h2><button onclick="location.reload()" class="btn-confirmar">Recomeçar</button></div>`;
+    const { data: questoes, error } = await window.supabaseClient
+        .from('questoes')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        container.innerHTML = "Erro ao carregar questões.";
         return;
     }
 
-    jaRespondeu = false;
-    respostaSelecionada = null;
-    atualizarInterfaceSuperior();
+    container.innerHTML = questoes.map(q => renderizarQuestao(q)).join('');
+}
 
-    let opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
-    const letras = ['A', 'B', 'C', 'D', 'E'];
+function renderizarQuestao(q) {
+    const opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
+    const estrela = q.favorita ? '⭐' : '☆';
 
-    container.innerHTML = `
-        <div class="questao-card">
-            <div class="q-header">
-                <div class="badge-group">
-                    <span class="badge">${q.tema || 'Geral'}</span>
-                    <span class="badge" style="color:#d97706">${q.dificuldade || 'Média'}</span>
-                </div>
-                <span>Questão ${indexAtual + 1} de ${questoes.length}</span>
+    return `
+        <div class="questao-card" id="q-${q.id}">
+            <button class="btn-favoritar" id="fav-${q.id}" onclick="toggleFavorito('${q.id}', ${q.favorita})">
+                ${estrela}
+            </button>
+            <div>
+                <span class="badge">${q.tema}</span>
+                <span class="dificuldade">${q.subtema} • ${q.dificuldade.toUpperCase()}</span>
             </div>
-            
             <div class="enunciado">${q.pergunta}</div>
             
-            <div id="opcoes-list">
-                ${opcoes.map((op, i) => `
-                    <div class="opcao" onclick="selecionarOpcao(${i})" id="opt-${i}">
-                        <div class="letra">${letras[i]}</div>
-                        <div class="texto">${op}</div>
-                    </div>
+            <div class="opcoes-container">
+                ${opcoes.map((opt, index) => `
+                    <button class="opcao-btn" onclick="verificarResposta(this, ${index}, ${q.resposta}, '${q.id}')">
+                        ${opt}
+                    </button>
                 `).join('')}
             </div>
 
-            <button id="btn-confirmar" class="btn-confirmar" disabled onclick="validarResposta(${q.resposta})">
-                Confirmar Resposta
-            </button>
-
-            <div id="feedback" class="feedback-msg"></div>
-
-            <div class="acoes-footer">
-                <div style="display:flex; gap:10px">
-                    <button id="btn-fav" class="btn-nav ${q.favorita ? 'active-fav' : ''}" onclick="toggleFavorito('${q.id}')">
-                        ${q.favorita ? '★ Favoritada' : '☆ Favoritar'}
-                    </button>
-                    <button class="btn-nav" onclick="alert('Comentários: ' + '${q.comentario || 'Sem comentário disponível.'}')">💬 Comentários</button>
-                </div>
-                <button onclick="proxima()" id="btn-proxima" class="btn-nav">
-                    Próxima Questão →
-                </button>
+            <div class="comentario" id="coment-${q.id}">
+                <strong>Explicação técnica:</strong><br>
+                ${q.comentario || 'Comentário em breve.'}
             </div>
         </div>
     `;
 }
 
-function selecionarOpcao(idx) {
-    if (jaRespondeu) return;
-    respostaSelecionada = idx;
-    document.querySelectorAll('.opcao').forEach(el => el.classList.remove('selecionada'));
-    document.getElementById(`opt-${idx}`).classList.add('selecionada');
-    document.getElementById('btn-confirmar').disabled = false;
-}
-
-function validarResposta(corretaIdx) {
-    if (jaRespondeu || respostaSelecionada === null) return;
-    jaRespondeu = true;
+async function toggleFavorito(id, statusAtual) {
+    const novoStatus = !statusAtual;
     
-    const btnConf = document.getElementById('btn-confirmar');
-    const feedback = document.getElementById('feedback');
-    const btnProx = document.getElementById('btn-proxima');
-    const opts = document.querySelectorAll('.opcao');
-
-    btnConf.style.display = 'none';
-    btnProx.style.display = 'flex';
-    feedback.style.display = 'block';
-
-    if (respostaSelecionada === corretaIdx) {
-        acertos++;
-        opts[respostaSelecionada].classList.add('correta');
-        feedback.innerHTML = "✓ Correto, Dr. Victor!";
-        feedback.style.background = "#ecfdf5";
-        feedback.style.color = "#065f46";
-    } else {
-        erros++;
-        opts[respostaSelecionada].classList.add('errada');
-        opts[corretaIdx].classList.add('correta');
-        feedback.innerHTML = "✗ Resposta incorreta.";
-        feedback.style.background = "#fef2f2";
-        feedback.style.color = "#991b1b";
-    }
-    atualizarInterfaceSuperior();
-}
-
-async function toggleFavorito(id) {
-    const q = questoes.find(item => item.id == id);
-    const btn = document.getElementById('btn-fav');
-    
-    // Inverte o estado localmente
-    q.favorita = !q.favorita;
-
-    // Atualiza Visual
-    if(q.favorita) {
-        btn.classList.add('active-fav');
-        btn.innerHTML = '★ Favoritada';
-    } else {
-        btn.classList.remove('active-fav');
-        btn.innerHTML = '☆ Favoritar';
-    }
-
-    // Tenta salvar no Supabase (silenciosamente)
+    // Atualiza no Banco
     const { error } = await window.supabaseClient
         .from('questoes')
-        .update({ favorita: q.favorita })
+        .update({ favorita: novoStatus })
         .eq('id', id);
 
-    if (error) console.error("Erro ao favoritar:", error);
-}
-
-function proxima() {
-    indexAtual++;
-    renderizarQuestao();
-}
-
-function atualizarInterfaceSuperior() {
-    document.getElementById('txt-contador').innerText = `Questão ${indexAtual + 1} / ${questoes.length}`;
-    document.getElementById('count-acertos').innerText = acertos;
-    document.getElementById('count-erros').innerText = erros;
-    const fill = document.getElementById('progresso-fill');
-    if(fill && questoes.length > 0) {
-        fill.style.width = `${(indexAtual / questoes.length) * 100}%`;
+    if (!error) {
+        // Atualiza o ícone e a função para o próximo clique
+        const btn = document.getElementById(`fav-${id}`);
+        btn.innerText = novoStatus ? '⭐' : '☆';
+        btn.setAttribute('onclick', `toggleFavorito('${id}', ${novoStatus})`);
+        console.log(`Questão ${id} atualizada para: ${novoStatus}`);
+    } else {
+        alert("Erro ao favoritar. Verifique sua conexão.");
     }
 }
 
-window.onload = iniciar;
+function verificarResposta(btn, indexEscolhido, indexCorreto, id) {
+    const container = btn.parentElement;
+    const botoes = container.querySelectorAll('.opcao-btn');
+    const comentario = document.getElementById(`coment-${id}`);
+
+    botoes.forEach(b => b.disabled = true); // Trava as opções
+
+    if (indexEscolhido === indexCorreto) {
+        btn.classList.add('correta');
+    } else {
+        btn.classList.add('errada');
+        botoes[indexCorreto].classList.add('correta');
+    }
+
+    comentario.style.display = 'block';
+}
+
+window.onload = carregarQuestoes;
 </script>
+
 </body>
 </html>
