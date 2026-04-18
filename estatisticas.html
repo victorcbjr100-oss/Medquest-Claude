@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body { background: #f8fafc; }
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; }
     .main-content { max-width: 1050px; margin: 0 auto; padding: 2rem 1.5rem; }
 
     /* Header com badge de nível */
@@ -37,8 +37,8 @@
     .stat-box-label { font-size: .78rem; color: #64748b; font-weight: 600; }
     .stat-box-sub { font-size: .72rem; color: #94a3b8; margin-top: .3rem; }
     .stat-box-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
-    .ic-blue   { background: #eff6ff; } .ic-green { background: #ecfdf5; }
-    .ic-purple { background: #f5f3ff; } .ic-yellow{ background: #fffbeb; }
+    .ic-blue   { background: #eff6ff; color: #2563eb; } .ic-green { background: #ecfdf5; color: #059669; }
+    .ic-purple { background: #f5f3ff; color: #7c3aed; } .ic-yellow{ background: #fffbeb; color: #ea580c; }
 
     /* Card genérico */
     .card-panel {
@@ -50,59 +50,34 @@
 
     /* Tabs de tema */
     .tema-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .tema-tab { padding: .4rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 20px; font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .15s; background: #fff; color: #64748b; font-family: 'Inter',sans-serif; }
+    .tema-tab { padding: .4rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 20px; font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .15s; background: #fff; color: #64748b; }
     .tema-tab.active { background: #2563eb; border-color: #2563eb; color: #fff; }
 
     /* Donut */
-    .donut-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto; }
-    .donut-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; pointer-events: none; }
+    .donut-wrap { position: relative; width: 140px; height: 140px; margin: 0 auto; }
+    .donut-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; pointer-events: none; }
 
     /* Áreas para melhorar */
     .area-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .9rem; }
     .area-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .area-nome { font-size: .875rem; font-weight: 600; min-width: 140px; color: #1e293b; }
-    .area-bar-bg { flex: 1; height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+    .area-nome { font-size: .875rem; font-weight: 600; min-width: 140px; color: #1e293b; flex: 1; }
+    .area-bar-bg { flex: 2; height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
     .area-bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
     .area-pct { font-size: .82rem; font-weight: 700; min-width: 38px; text-align: right; }
-    .area-q   { font-size: .75rem; color: #94a3b8; min-width: 75px; text-align: right; }
 
     /* Calendário */
-    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
     .cal-dow  { font-size: .7rem; font-weight: 700; color: #94a3b8; text-align: center; padding: .25rem 0; }
-    .cal-day  { aspect-ratio:1; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 500; transition: background .15s; }
-    .cal-day.vazio    { background: transparent; color: transparent; }
-    .cal-day.sem      { background: #f1f5f9; color: #94a3b8; }
-    .cal-day.ativo    { background: #bfdbfe; color: #1d4ed8; font-weight: 700; }
+    .cal-day  { aspect-ratio:1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 500; }
+    .cal-day.sem      { background: #f1f5f9; color: #cbd5e1; }
+    .cal-day.ativo    { background: #dbeafe; color: #2563eb; font-weight: 700; }
     .cal-day.intenso  { background: #2563eb; color: #fff; font-weight: 800; }
     .cal-nav { display: flex; align-items: center; gap: .75rem; }
-    .cal-nav button { width: 28px; height: 28px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center; transition: background .12s; }
-    .cal-nav button:hover { background: #f1f5f9; }
-    .cal-legenda { display: flex; gap: 1.25rem; margin-top: .75rem; flex-wrap: wrap; }
-    .cal-leg { display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: #64748b; }
-    .cal-leg-dot { width: 12px; height: 12px; border-radius: 3px; }
+    .cal-nav button { width: 30px; height: 30px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; cursor: pointer; }
 
-    /* Gráfico de progresso — tabs */
-    .prog-tabs { display: flex; gap: .4rem; }
-    .prog-tab { padding: .3rem .8rem; border: 1px solid #e2e8f0; border-radius: 99px; background: #fff; font-size: .78rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all .15s; font-family: 'Inter',sans-serif; }
-    .prog-tab.active { background: #2563eb; border-color: #2563eb; color: #fff; }
-    .chart-wrap { position: relative; height: 200px; margin-top: .75rem; }
-    .chart-wrap-sm { position: relative; height: 160px; margin-top: .75rem; }
-
-    /* Mapa de estudos */
-    .mapa-row { display: flex; justify-content: space-between; align-items: center; padding: .6rem 0; border-bottom: 1px solid #f8fafc; }
-    .mapa-row:last-child { border-bottom: none; }
-    .mapa-label { font-size: .875rem; color: #64748b; }
-    .mapa-val   { font-size: .9rem; font-weight: 800; }
-
-    /* Incidência legenda */
-    .inc-item { display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; font-size: .8rem; }
-    .inc-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-    /* Skeleton loading */
-    .skeleton { background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size:200% 100%; animation: shim 1.4s infinite; border-radius: 8px; }
-    @keyframes shim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-    @media(max-width:768px){ .main-content{padding:1.25rem .75rem} }
+    .chart-wrap { position: relative; height: 220px; }
+    .mapa-row { display: flex; justify-content: space-between; padding: .6rem 0; border-bottom: 1px solid #f1f5f9; font-size: .85rem; }
+    .mapa-val { font-weight: 700; color: #1e293b; }
   </style>
 </head>
 <body>
@@ -111,33 +86,30 @@
 
 <main class="main-content" id="main" style="display:none">
 
-  <!-- Header -->
   <div class="stats-header">
     <div>
       <h1 style="font-size:1.75rem;font-weight:800;color:#1e293b;margin:0">Painel de Métricas</h1>
-      <p style="color:#64748b;margin-top:.3rem;font-size:.9rem">Acompanhe sua evolução e desempenho</p>
+      <p style="color:#64748b;margin-top:.3rem;font-size:.9rem">Acompanhe sua evolução e desempenho médico</p>
     </div>
     <div style="display:flex;align-items:center;gap:.75rem;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:.75rem 1.25rem">
       <div id="hdr-av" style="width:38px;height:38px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem">?</div>
       <div>
         <div id="hdr-nome" style="font-weight:700;font-size:.9rem;color:#1e293b">—</div>
-        <div class="nivel-badge nivel-intermediario" id="hdr-nivel">—</div>
+        <div class="nivel-badge nivel-iniciante" id="hdr-nivel">Iniciante</div>
       </div>
     </div>
   </div>
 
-  <!-- Tabs por tema -->
   <div class="tema-tabs" id="tema-tabs">
-    <button class="tema-tab active" data-tema="" onclick="mudarTema('',this)">Geral</button>
+    <button class="tema-tab active" onclick="mudarTema('',this)">Geral</button>
   </div>
 
-  <!-- Métricas principais -->
-  <div class="cards-2" style="margin-bottom:1.25rem">
+  <div class="cards-2">
     <div class="stat-box">
       <div>
-        <div class="stat-box-label">Total de questões respondidas</div>
+        <div class="stat-box-label">Total de Questões</div>
         <div class="stat-box-val" id="m-total">0</div>
-        <div class="stat-box-sub">Sua performance na plataforma</div>
+        <div class="stat-box-sub">Registradas na plataforma</div>
       </div>
       <div class="stat-box-icon ic-blue">✓</div>
     </div>
@@ -145,285 +117,276 @@
       <div>
         <div class="stat-box-label">Total de Simulados</div>
         <div class="stat-box-val" id="m-simulados">0</div>
-        <div class="stat-box-sub">Simulados cronometrados concluídos</div>
+        <div class="stat-box-sub">Concluídos com sucesso</div>
       </div>
       <div class="stat-box-icon ic-purple">📊</div>
     </div>
   </div>
 
-  <!-- 3 cards com donuts -->
   <div class="cards-3">
     <div class="card-panel">
-      <div class="card-title">Porcentagem de acertos</div>
-      <div class="card-sub">Seu percentual de assertividade</div>
-      <div class="donut-wrap"><canvas id="ch-acertos"></canvas><div class="donut-label" id="lbl-acertos" style="color:#2563eb">0%</div></div>
+      <div class="card-title">Porcentagem de Acertos</div>
+      <div class="card-sub">Desempenho total acumulado</div>
+      <div class="donut-wrap">
+        <canvas id="ch-acertos"></canvas>
+        <div class="donut-label" id="lbl-acertos" style="color:#2563eb">0%</div>
+      </div>
     </div>
     <div class="card-panel">
-      <div class="card-title">Melhor desempenho</div>
-      <div class="card-sub">Área com maior taxa de acertos</div>
-      <div class="donut-wrap"><canvas id="ch-melhor"></canvas><div class="donut-label" id="lbl-melhor" style="color:#059669">—</div></div>
-      <div id="lbl-melhor-nome" style="text-align:center;font-size:.78rem;color:#64748b;margin-top:.5rem">—</div>
+      <div class="card-title">Melhor Desempenho</div>
+      <div class="card-sub" id="lbl-melhor-nome">Aguardando dados...</div>
+      <div class="donut-wrap">
+        <canvas id="ch-melhor"></canvas>
+        <div class="donut-label" id="lbl-melhor-pct" style="color:#059669">0%</div>
+      </div>
     </div>
     <div class="card-panel">
-      <div class="card-title">Mapa de estudos</div>
-      <div class="card-sub">Incidência de cada assunto</div>
-      <div id="mapa-estudos" style="margin-top:.5rem"></div>
+      <div class="card-title">Mapa de Estudos</div>
+      <div class="card-sub">Visão geral do conhecimento</div>
+      <div id="mapa-estudos"></div>
     </div>
   </div>
 
-  <!-- Incidência + Progresso -->
-  <div class="cards-2" style="margin-bottom:1.25rem">
-    <div class="card-panel" style="margin-bottom:0">
-      <div class="card-title">Incidência de assuntos</div>
-      <div class="card-sub">Distribuição das questões respondidas</div>
-      <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
-        <div style="width:150px;height:150px;flex-shrink:0;position:relative">
-          <canvas id="ch-inc"></canvas>
-        </div>
-        <div id="inc-legend" style="flex:1"></div>
-      </div>
+  <div class="cards-2">
+    <div class="card-panel">
+      <div class="card-title">Incidência de Assuntos</div>
+      <div class="card-sub">Distribuição do seu estudo</div>
+      <div style="height:200px"><canvas id="ch-inc"></canvas></div>
     </div>
-    <div class="card-panel" style="margin-bottom:0">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
-        <div><div class="card-title">Gráfico de progresso</div><div class="card-sub">Questões e acertos ao longo do tempo</div></div>
-        <div class="prog-tabs">
-          <button class="prog-tab active" onclick="mudarPeriodo(7,this)">Semana</button>
-          <button class="prog-tab" onclick="mudarPeriodo(30,this)">30 dias</button>
-          <button class="prog-tab" onclick="mudarPeriodo(90,this)">90 dias</button>
+    <div class="card-panel">
+      <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+        <div class="card-title">Progresso Diário</div>
+        <div class="cal-nav">
+          <button onclick="mudarPeriodo(7)">7d</button>
+          <button onclick="mudarPeriodo(30)">30d</button>
         </div>
       </div>
       <div class="chart-wrap"><canvas id="ch-prog"></canvas></div>
     </div>
   </div>
 
-  <!-- Calendário -->
   <div class="card-panel">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
-      <div><div class="card-title">Calendário de atividades</div><div class="card-sub">Acompanhe seus dias de estudo</div></div>
-      <div class="cal-nav">
-        <button onclick="navMes(-1)">‹</button>
-        <span style="font-size:.9rem;font-weight:700;min-width:130px;text-align:center" id="cal-titulo">—</span>
-        <button onclick="navMes(1)">›</button>
-      </div>
+    <div class="card-title">Calendário de Atividade</div>
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+       <div class="card-sub" id="cal-titulo">Mês Atual</div>
+       <div class="cal-nav">
+         <button onclick="navMes(-1)">‹</button>
+         <button onclick="navMes(1)">›</button>
+       </div>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-legenda">
-      <div class="cal-leg"><div class="cal-leg-dot" style="background:#f1f5f9"></div>Sem atividade</div>
-      <div class="cal-leg"><div class="cal-leg-dot" style="background:#bfdbfe"></div>Ativo</div>
-      <div class="cal-leg"><div class="cal-leg-dot" style="background:#2563eb"></div>Muito ativo (10+)</div>
-    </div>
   </div>
 
-  <!-- Áreas para melhorar -->
   <div class="card-panel">
-    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem">
-      <span style="font-size:1.2rem">🎯</span>
-      <div><div class="card-title" style="margin-bottom:0">Áreas para Melhorar</div></div>
-    </div>
-    <div id="areas-melhorar"><p style="color:#94a3b8;font-size:.875rem">Responda mais questões para ver suas áreas de melhoria.</p></div>
+    <div class="card-title">Áreas para Melhorar</div>
+    <div class="card-sub">Foque nestes temas para aumentar sua média</div>
+    <div id="areas-melhorar"></div>
   </div>
 
 </main>
 
 <script>
-// ════ ESTADO ════
-let respsGlobal=[], temaFiltro='', calMes, calAno, progChart=null, ativData={}, periodoAtivo=7;
-const CORES=['#2563eb','#059669','#ea580c','#7c3aed','#dc2626','#0284c7','#ca8a04','#e11d48','#16a34a','#9333ea','#db2777','#0891b2'];
-const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+let respsGlobal = [], temaFiltro = '', periodoAtivo = 7;
+let calMes = new Date().getMonth(), calAno = new Date().getFullYear();
+let charts = {};
 
-// ════ INIT ════
-window.addEventListener('load', async()=>{
-  const session=await exigirLogin(); if(!session) return;
-  document.getElementById('main').style.display='block';
-  const sb=window.supabaseClient, uid=session.user.id;
-  const nome=session.user.user_metadata?.nome||session.user.email.split('@')[0];
-  document.getElementById('hdr-av').textContent=nome.charAt(0).toUpperCase();
-  document.getElementById('hdr-nome').textContent=nome;
+async function carregarDados() {
+  const session = await exigirLogin();
+  if(!session) return;
+  
+  document.getElementById('main').style.display = 'block';
+  const sb = window.supabaseClient;
+  const uid = session.user.id;
+  
+  // Update UI User
+  const nome = session.user.user_metadata?.nome || "Usuário";
+  document.getElementById('hdr-nome').textContent = nome;
+  document.getElementById('hdr-av').textContent = nome.toUpperCase();
 
-  const now=new Date(); calMes=now.getMonth(); calAno=now.getFullYear();
+  // Busca respostas e faz Join com questoes para pegar o tema
+  const { data, error } = await sb.from('respostas')
+    .select('acertou, modo, respondido_em, questoes(tema)')
+    .eq('user_id', uid);
 
-  // Busca respostas completas com dados da questão
-  const {data:resps}=await sb.from('respostas')
-    .select('acertou,modo,respondido_em,questoes(tema,subtema)')
-    .eq('user_id',uid);
+  if (error) { console.error(error); return; }
+  respsGlobal = data || [];
 
-  respsGlobal=resps||[];
+  renderizarAbas();
+  atualizarDashboard();
+}
 
-  // Atividade por dia
-  respsGlobal.forEach(r=>{
-    const d=r.respondido_em?.substring(0,10);
-    if(d) ativData[d]=(ativData[d]||0)+1;
+function renderizarAbas() {
+  const temas = [...new Set(respsGlobal.map(r => r.questoes?.tema).filter(Boolean))].sort();
+  const container = document.getElementById('tema-tabs');
+  temas.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tema-tab';
+    btn.textContent = t;
+    btn.onclick = () => mudarTema(t, btn);
+    container.appendChild(btn);
   });
+}
 
-  // Tabs de tema
-  const temas=[...new Set(respsGlobal.map(r=>r.questoes?.tema).filter(Boolean))].sort();
-  const tabs=document.getElementById('tema-tabs');
-  temas.forEach(t=>{
-    const btn=document.createElement('button');
-    btn.className='tema-tab'; btn.dataset.tema=t; btn.textContent=t;
-    btn.onclick=()=>mudarTema(t,btn);
-    tabs.appendChild(btn);
-  });
+function mudarTema(tema, btn) {
+  temaFiltro = tema;
+  document.querySelectorAll('.tema-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  atualizarDashboard();
+}
 
-  renderTudo();
+function mudarPeriodo(dias) {
+  periodoAtivo = dias;
+  renderProgresso();
+}
+
+function atualizarDashboard() {
+  const filtrados = temaFiltro ? respsGlobal.filter(r => r.questoes?.tema === temaFiltro) : respsGlobal;
+  
+  const total = filtrados.length;
+  const acertos = filtrados.filter(r => r.acertou).length;
+  const pctTotal = total > 0 ? Math.round((acertos / total) * 100) : 0;
+  
+  document.getElementById('m-total').textContent = total;
+  document.getElementById('m-simulados').textContent = filtrados.filter(r => r.modo === 'simulado').length;
+  document.getElementById('lbl-acertos').textContent = pctTotal + '%';
+
+  // Badge de Nível baseado em % geral
+  const nb = document.getElementById('hdr-nivel');
+  if(pctTotal < 40) { nb.textContent = 'Iniciante'; nb.className = 'nivel-badge nivel-iniciante'; }
+  else if(pctTotal < 60) { nb.textContent = 'Básico'; nb.className = 'nivel-badge nivel-basico'; }
+  else if(pctTotal < 80) { nb.textContent = 'Intermediário'; nb.className = 'nivel-badge nivel-intermediario'; }
+  else { nb.textContent = 'Expert'; nb.className = 'nivel-badge nivel-expert'; }
+
+  renderDonut('ch-acertos', pctTotal, '#2563eb');
+  processarTemas();
+  renderProgresso();
   renderCalendario();
-});
-
-function mudarTema(tema,btn){
-  temaFiltro=tema;
-  document.querySelectorAll('.tema-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTudo();
 }
 
-function filtrar(){
-  return temaFiltro?respsGlobal.filter(r=>r.questoes?.tema===temaFiltro):respsGlobal;
-}
-
-// ════ RENDERIZAÇÃO PRINCIPAL ════
-function renderTudo(){
-  const resps=filtrar();
-  const total=resps.length;
-  const acertos=resps.filter(r=>r.acertou).length;
-  const simulados=resps.filter(r=>r.modo==='simulado').length;
-  const taxa=total>0?Math.round((acertos/total)*100):0;
-
-  document.getElementById('m-total').textContent=total;
-  document.getElementById('m-simulados').textContent=simulados;
-  document.getElementById('lbl-acertos').textContent=taxa+'%';
-
-  // Nível
-  const [nLabel,nClass]=taxa<30?['Iniciante','nivel-iniciante']:taxa<50?['Básico','nivel-basico']:taxa<70?['Intermediário','nivel-intermediario']:taxa<85?['Avançado','nivel-avancado']:['Expert','nivel-expert'];
-  const nb=document.getElementById('hdr-nivel'); nb.textContent=nLabel; nb.className='nivel-badge '+nClass;
-
-  // Agrupa por tema
-  const porTema={};
-  resps.forEach(r=>{
-    const t=r.questoes?.tema||'Outros';
-    if(!porTema[t]) porTema[t]={total:0,acertos:0};
-    porTema[t].total++; if(r.acertou) porTema[t].acertos++;
+function processarTemas() {
+  const stats = {};
+  respsGlobal.forEach(r => {
+    const t = r.questoes?.tema || 'Outros';
+    if(!stats[t]) stats[t] = { total: 0, acertos: 0 };
+    stats[t].total++;
+    if(r.acertou) stats[t].acertos++;
   });
-  const temasArr=Object.entries(porTema).sort((a,b)=>b[1].total-a[1].total);
 
-  // Melhor desempenho
-  const melhor=temasArr.length>0?temasArr.reduce((a,b)=>(b[1].acertos/b[1].total)>(a[1].acertos/a[1].total)?b:a):null;
-  const melhorPct=melhor?Math.round((melhor[1].acertos/melhor[1].total)*100):0;
-  document.getElementById('lbl-melhor').textContent=melhorPct+'%';
-  document.getElementById('lbl-melhor-nome').textContent=melhor?melhor[0]:'—';
+  const temasArr = Object.entries(stats).map(([nome, d]) => ({
+    nome, total: d.total, acertos: d.acertos, pct: Math.round((d.acertos/d.total)*100)
+  })).sort((a,b) => b.pct - a.pct);
 
-  // Mapa de estudos
-  const totalTemas=document.querySelectorAll('.tema-tab').length-1;
-  const c70=temasArr.filter(([,d])=>d.total>0&&(d.acertos/d.total)>=.7).length;
-  const rev=temasArr.filter(([,d])=>d.total>0&&(d.acertos/d.total)<.5).length;
-  document.getElementById('mapa-estudos').innerHTML=`
-    <div class="mapa-row"><span class="mapa-label">Total de assuntos</span><span class="mapa-val">${totalTemas}</span></div>
-    <div class="mapa-row"><span class="mapa-label">Assuntos respondidos</span><span class="mapa-val" style="color:#2563eb">${temasArr.length}</span></div>
-    <div class="mapa-row"><span class="mapa-label">Com acerto ≥ 70%</span><span class="mapa-val" style="color:#059669">${c70}</span></div>
-    <div class="mapa-row"><span class="mapa-label">Precisam revisão (&lt;50%)</span><span class="mapa-val" style="color:#dc2626">${rev}</span></div>`;
+  // Melhor tema
+  if(temasArr.length > 0) {
+    const melhor = temasArr;
+    document.getElementById('lbl-melhor-nome').textContent = melhor.nome;
+    document.getElementById('lbl-melhor-pct').textContent = melhor.pct + '%';
+    renderDonut('ch-melhor', melhor.pct, '#059669');
+  }
 
-  renderDonut('ch-acertos', taxa, 100-taxa, ['#2563eb','#e2e8f0']);
-  renderDonut('ch-melhor', melhorPct, 100-melhorPct, ['#059669','#e2e8f0']);
+  // Mapa de Estudos
+  document.getElementById('mapa-estudos').innerHTML = `
+    <div class="mapa-row"><span>Assuntos Estudados</span><span class="mapa-val">${temasArr.length}</span></div>
+    <div class="mapa-row"><span>Média Superior a 80%</span><span class="mapa-val">${temasArr.filter(t => t.pct >= 80).length}</span></div>
+    <div class="mapa-row"><span>Precisa de Revisão</span><span class="mapa-val">${temasArr.filter(t => t.pct < 50).length}</span></div>
+  `;
+
+  // Incidência (Doughnut)
   renderIncidencia(temasArr);
-  renderProgresso(periodoAtivo);
-  renderAreas(temasArr);
+  
+  // Áreas para melhorar (Piores temas)
+  const piores = [...temasArr].sort((a,b) => a.pct - b.pct).slice(0, 4);
+  document.getElementById('areas-melhorar').innerHTML = piores.map(t => `
+    <div class="area-row">
+      <div class="area-dot" style="background:${t.pct < 50 ? '#ef4444' : '#f59e0b'}"></div>
+      <div class="area-nome">${t.nome}</div>
+      <div class="area-bar-bg"><div class="area-bar-fill" style="width:${t.pct}%; background:${t.pct < 50 ? '#ef4444' : '#f59e0b'}"></div></div>
+      <div class="area-pct">${t.pct}%</div>
+    </div>
+  `).join('');
 }
 
-// ════ CHARTS ════
-function renderDonut(id,val,resto,colors){
-  const ctx=document.getElementById(id)?.getContext('2d'); if(!ctx) return;
-  if(ctx._ch) ctx._ch.destroy();
-  ctx._ch=new Chart(ctx,{
-    type:'doughnut',
-    data:{datasets:[{data:[val,resto],backgroundColor:colors,borderWidth:0}]},
-    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:600}}
+function renderDonut(id, pct, color) {
+  if(charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }] },
+    options: { cutout: '80%', plugins: { tooltip: { enabled: false } } }
   });
 }
 
-function renderIncidencia(entries){
-  const ctx=document.getElementById('ch-inc')?.getContext('2d'); if(!ctx) return;
-  if(ctx._ch) ctx._ch.destroy();
-  const top=entries.slice(0,8);
-  const vals=top.map(([,d])=>d.total);
-  const totalInc=vals.reduce((a,b)=>a+b,0)||1;
-  ctx._ch=new Chart(ctx,{
-    type:'doughnut',
-    data:{labels:top.map(([t])=>t),datasets:[{data:vals,backgroundColor:CORES,borderWidth:2,borderColor:'#fff'}]},
-    options:{cutout:'50%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${Math.round(c.raw/totalInc*100)}%`}}},animation:{duration:600}}
+function renderIncidencia(temas) {
+  if(charts['ch-inc']) charts['ch-inc'].destroy();
+  const ctx = document.getElementById('ch-inc').getContext('2d');
+  charts['ch-inc'] = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: temas.map(t => t.nome),
+      datasets: [{ data: temas.map(t => t.total), backgroundColor: ['#2563eb','#059669','#ea580c','#7c3aed','#dc2626','#0891b2'] }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
   });
-  document.getElementById('inc-legend').innerHTML=top.map(([t,d],i)=>{
-    const p=Math.round(d.total/totalInc*100);
-    return `<div class="inc-item"><div class="inc-dot" style="background:${CORES[i]}"></div><span style="flex:1">${t}</span><span style="font-weight:700">${p}%</span></div>`;
-  }).join('');
 }
 
-function renderProgresso(dias){
-  periodoAtivo=dias;
-  const ctx=document.getElementById('ch-prog')?.getContext('2d'); if(!ctx) return;
-  if(progChart) progChart.destroy();
-  const labels=[], qArr=[], aArr=[];
-  const now=new Date();
-  for(let i=dias-1;i>=0;i--){
-    const d=new Date(now); d.setDate(d.getDate()-i);
-    const key=d.toISOString().substring(0,10);
-    const lab=i===0?'Hoje':`${d.getDate()}/${d.getMonth()+1}`;
-    labels.push(lab);
-    const dayR=respsGlobal.filter(r=>r.respondido_em?.startsWith(key));
-    qArr.push(dayR.length);
-    aArr.push(dayR.filter(r=>r.acertou).length);
+function renderProgresso() {
+  if(charts['ch-prog']) charts['ch-prog'].destroy();
+  const ctx = document.getElementById('ch-prog').getContext('2d');
+  
+  const labels = [], dataAcertos = [], dataTotal = [];
+  const hoje = new Date();
+
+  for(let i = periodoAtivo - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(hoje.getDate() - i);
+    const str = d.toISOString().split('T');
+    labels.push(d.getDate() + '/' + (d.getMonth() + 1));
+    
+    const diaResps = respsGlobal.filter(r => r.respondido_em.startsWith(str));
+    dataTotal.push(diaResps.length);
+    dataAcertos.push(diaResps.filter(r => r.acertou).length);
   }
-  progChart=new Chart(ctx,{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Questões',data:qArr,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',tension:.3,fill:true,pointRadius:3,pointBackgroundColor:'#2563eb'},
-      {label:'Acertos', data:aArr,borderColor:'#059669',backgroundColor:'rgba(5,150,105,.08)',tension:.3,fill:true,pointRadius:3,pointBackgroundColor:'#059669'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:12}}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'#f1f5f9'}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+
+  charts['ch-prog'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Total', data: dataTotal, borderColor: '#cbd5e1', tension: 0.3 },
+        { label: 'Acertos', data: dataAcertos, borderColor: '#2563eb', tension: 0.3, fill: true, backgroundColor: 'rgba(37,99,235,0.1)' }
+      ]
+    },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
   });
 }
 
-function mudarPeriodo(dias,btn){
-  document.querySelectorAll('.prog-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderProgresso(dias);
-}
+function renderCalendario() {
+  const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  document.getElementById('cal-titulo').textContent = `${mesesNomes[calMes]} de ${calAno}`;
+  
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = ['D','S','T','Q','Q','S','S'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  
+  const primeiroDia = new Date(calAno, calMes, 1).getDay();
+  const totalDias = new Date(calAno, calMes + 1, 0).getDate();
 
-// ════ ÁREAS PARA MELHORAR ════
-function renderAreas(entries){
-  const el=document.getElementById('areas-melhorar');
-  if(!entries.length){el.innerHTML='<p style="color:#94a3b8;font-size:.875rem">Responda mais questões para ver suas áreas de melhoria.</p>';return;}
-  const sorted=[...entries].sort((a,b)=>(a[1].acertos/a[1].total)-(b[1].acertos/b[1].total));
-  el.innerHTML=sorted.map(([tema,d])=>{
-    const pct=Math.round((d.acertos/d.total)*100);
-    const cor=pct>=70?'#10b981':pct>=50?'#f59e0b':'#ef4444';
-    return `<div class="area-row">
-      <div class="area-dot" style="background:${cor}"></div>
-      <div class="area-nome">${tema}</div>
-      <div class="area-bar-bg"><div class="area-bar-fill" style="width:${pct}%;background:${cor}"></div></div>
-      <span class="area-pct" style="color:${cor}">${pct}%</span>
-      <span class="area-q">${d.total} questões</span>
-    </div>`;
-  }).join('');
-}
+  for(let i=0; i<primeiroDia; i++) grid.innerHTML += '<div></div>';
 
-// ════ CALENDÁRIO ════
-function navMes(delta){calMes+=delta;if(calMes>11){calMes=0;calAno++;}if(calMes<0){calMes=11;calAno--;}renderCalendario();}
-
-function renderCalendario(){
-  document.getElementById('cal-titulo').textContent=`${MESES[calMes]} ${calAno}`;
-  const grid=document.getElementById('cal-grid');
-  const DOW=['D','S','T','Q','Q','S','S'];
-  let html=DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');
-  const primeiro=new Date(calAno,calMes,1).getDay();
-  const dias=new Date(calAno,calMes+1,0).getDate();
-  for(let i=0;i<primeiro;i++) html+=`<div class="cal-day vazio"></div>`;
-  for(let d=1;d<=dias;d++){
-    const key=`${calAno}-${String(calMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const n=ativData[key]||0;
-    const cls=n===0?'sem':n>=10?'intenso':'ativo';
-    html+=`<div class="cal-day ${cls}" title="${n} questões respondidas">${d}</div>`;
+  for(let dia=1; dia<=totalDias; dia++) {
+    const dataStr = `${calAno}-${String(calMes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+    const qtd = respsGlobal.filter(r => r.respondido_em.startsWith(dataStr)).length;
+    let classe = qtd === 0 ? 'sem' : (qtd > 10 ? 'intenso' : 'ativo');
+    grid.innerHTML += `<div class="cal-day ${classe}" title="${qtd} questões">${dia}</div>`;
   }
-  grid.innerHTML=html;
 }
+
+function navMes(n) {
+  calMes += n;
+  if(calMes > 11) { calMes = 0; calAno++; }
+  if(calMes < 0) { calMes = 11; calAno--; }
+  renderCalendario();
+}
+
+window.onload = carregarDados;
 </script>
 </body>
 </html>
