@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Favoritas — MedQuest Pro</title>
+  <title>Minhas Favoritas — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,15 +12,25 @@
     body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
     .main-content { flex: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
     .header-favoritas { margin-bottom: 2rem; }
-    .header-favoritas h1 { color: #1e293b; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .header-favoritas p { color: #64748b; font-weight: 500; }
-    .questao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-bottom: 2rem; position: relative; }
+    .header-favoritas h1 { color: #1e293b; font-size: 1.8rem; font-weight: 800; }
+    
+    .questao-card { 
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; 
+      padding: 2rem; margin-bottom: 1.5rem; position: relative;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
     .badge { padding: 4px 12px; border-radius: 99px; background: #f1f5f9; font-size: 0.75rem; color: #64748b; font-weight: 600; }
-    .enunciado { font-size: 1.1rem; color: #1e293b; line-height: 1.7; margin: 1.5rem 0; font-weight: 500; }
-    .btn-remover { position: absolute; top: 20px; right: 20px; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: 0.2s; }
-    .btn-remover:hover { background: #ef4444; color: #fff; }
-    .empty-state { text-align: center; padding: 4rem 2rem; background: #fff; border-radius: 20px; border: 2px dashed #e2e8f0; }
-    .comentario-box { background: #f8fafc; padding: 15px; border-radius: 12px; font-size: 0.9rem; border-left: 4px solid #2563eb; margin-top: 15px; }
+    .enunciado { font-size: 1.1rem; color: #1e293b; line-height: 1.6; margin: 1rem 0; }
+    
+    .btn-remover { 
+      position: absolute; top: 20px; right: 20px; 
+      background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3;
+      padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600;
+    }
+    .btn-remover:hover { background: #e11d48; color: #fff; }
+
+    .gabarito-box { background: #f8fafc; padding: 15px; border-radius: 12px; border-left: 4px solid #2563eb; margin-top: 10px; font-size: 0.9rem; }
+    .empty-state { text-align: center; padding: 3rem; border: 2px dashed #e2e8f0; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -30,77 +40,62 @@
 <main class="main-content">
   <div class="header-favoritas">
     <h1>⭐ Questões Favoritas</h1>
-    <p id="subtitulo">Gerencie as questões que você salvou para revisão rápida.</p>
+    <p id="contador" style="color: #64748b;">Carregando sua lista de revisão...</p>
   </div>
 
   <div id="lista-favoritas">
-    <div style="text-align:center; padding: 2rem;">Buscando suas favoritas no banco de dados...</div>
-  </div>
+    </div>
 </main>
 
 <script>
 async function carregarFavoritas() {
     const container = document.getElementById('lista-favoritas');
-    const subtitulo = document.getElementById('subtitulo');
-
-    // Verifica se o cliente Supabase existe
-    if (!window.supabaseClient) {
-        container.innerHTML = "<b style='color:red'>Erro: Cliente Supabase não inicializado. Verifique o arquivo js/supabase.js</b>";
-        return;
-    }
+    const contador = document.getElementById('contador');
 
     try {
+        // FORÇAR BUSCA FRESCA: Adicionamos um select que garante o estado atual
         const { data, error } = await window.supabaseClient
             .from('questoes')
             .select('*')
-            .eq('favorita', true);
+            .eq('favorita', true)
+            .order('id', { ascending: false });
 
-        if (error) {
-            console.error("Erro na Query:", error);
-            container.innerHTML = `<div class='empty-state'><h3>Erro ao carregar</h3><p>${error.message}</p></div>`;
-            return;
-        }
+        if (error) throw error;
 
         if (!data || data.length === 0) {
+            contador.innerText = "Você ainda não tem questões salvas.";
             container.innerHTML = `
                 <div class="empty-state">
-                    <span style="font-size:3rem">⭐</span>
-                    <h3>Nenhuma favorita ainda</h3>
-                    <p>Marque questões com a estrela para que elas apareçam aqui.</p>
-                    <br>
-                    <a href="questoes.html" style="color:#2563eb; font-weight:700; text-decoration:none">Voltar para Questões</a>
-                </div>
-            `;
+                    <p>Nenhuma questão favoritada encontrada.</p>
+                    <a href="questoes.html" style="color:#2563eb; font-weight:700; text-decoration:none;">Ir para o Banco de Questões</a>
+                </div>`;
             return;
         }
 
-        subtitulo.innerText = `Você tem ${data.length} questões salvas para revisão.`;
+        contador.innerText = `Você tem ${data.length} questões para revisar.`;
 
         container.innerHTML = data.map(q => {
-            // Tratamento seguro para JSON de opções
             const opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
-            
             return `
                 <div class="questao-card" id="card-${q.id}">
-                    <button class="btn-remover" onclick="desfavoritar('${q.id}')">Remover</button>
-                    <div class="badge">${q.tema || 'Geral'}</div>
+                    <button class="btn-remover" onclick="removerFavorito('${q.id}')">Remover</button>
+                    <span class="badge">${q.tema}</span>
                     <div class="enunciado">${q.pergunta}</div>
-                    <div class="comentario-box">
-                        <strong>Gabarito:</strong> ${opcoes[q.resposta]}
-                        <br><br>
-                        <strong>Comentário do Dr:</strong> ${q.comentario || 'Sem comentário cadastrado.'}
+                    <div class="gabarito-box">
+                        <strong>Gabarito:</strong> ${opcoes[q.resposta]}<br><br>
+                        <strong>Comentário:</strong> ${q.comentario || 'Sem comentário.'}
                     </div>
                 </div>
             `;
         }).join('');
 
     } catch (err) {
-        console.error("Erro Crítico:", err);
-        container.innerHTML = "Ocorreu um erro inesperado ao processar os dados.";
+        console.error("Erro ao carregar:", err);
+        container.innerHTML = "<p style='color:red'>Erro ao conectar com o banco de dados.</p>";
     }
 }
 
-async function desfavoritar(id) {
+async function removerFavorito(id) {
     const { error } = await window.supabaseClient
         .from('questoes')
         .update({ favorita: false })
@@ -108,15 +103,13 @@ async function desfavoritar(id) {
 
     if (!error) {
         const card = document.getElementById(`card-${id}`);
-        card.style.transform = "scale(0.9)";
-        card.style.opacity = "0";
-        setTimeout(() => {
-            card.remove();
-            carregarFavoritas(); // Atualiza contador
-        }, 300);
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.95)';
+        setTimeout(() => carregarFavoritas(), 300);
     }
 }
 
+// Executa ao abrir a página
 window.onload = carregarFavoritas;
 </script>
 </body>
