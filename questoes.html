@@ -18,57 +18,73 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --radius-lg: 16px;
+            --radius-xl: 24px;
         }
         body { background: var(--bg-body); font-family: 'Inter', sans-serif; }
         
-        /* Ajuste para o conteúdo não ficar colado na sidebar */
+        /* Layout */
         .main-content { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
         
-        /* Estética Premium dos Cards de Questões */
+        /* Estética Premium dos Cards */
         .question-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
             margin-bottom: 2rem;
-            transition: 0.25s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
         }
-        .question-card:hover { border-color: var(--primary); box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
-        
+        .question-card:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08); 
+            border-color: #cbd5e1;
+        }
+
+        /* Alternativas com Círculos */
         .circle-letter {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background: #f1f5f9;
-            color: var(--text-muted);
+            color: #64748b;
             font-weight: 800;
+            font-size: 1.1rem;
             margin-right: 1.25rem;
             flex-shrink: 0;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
         
         .opt-btn {
             width: 100%;
             display: flex;
             align-items: center;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid transparent;
-            background: transparent;
+            padding: 1.25rem;
+            margin-bottom: 0.5rem;
+            border-radius: 18px;
+            border: 1px solid #f1f5f9;
+            background: #fff;
             cursor: pointer;
-            text-align: left;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
-        .opt-btn:hover { background: #f8fafc; border-color: var(--border); }
-        .opt-btn:hover .circle-letter { background: var(--primary); color: #fff; }
+        .opt-btn:hover:not(:disabled) { 
+            background: #f8fafc; 
+            border-color: var(--primary); 
+        }
+        .opt-btn:hover:not(:disabled) .circle-letter { 
+            background: var(--primary); 
+            color: #fff; 
+        }
 
-        /* Feedback Colors */
-        .is-correct { background: #dcfce7 !important; color: #166534 !important; }
-        .is-wrong { background: #fee2e2 !important; color: #991b1b !important; }
+        /* Status de Resposta */
+        .is-correct { background: #22c55e !important; color: #fff !important; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
+        .is-wrong { background: #ef4444 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -76,19 +92,21 @@
     <script src="js/sidebar.js"></script>
 
     <main class="main-content" id="main" style="display:none">
-        <div class="page-header" style="margin-bottom: 2.5rem">
-            <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main)">Banco de Questões</h1>
-            <p id="subtitulo-filtro" style="color: var(--text-muted)">Resolva os casos clínicos e acompanhe seu desempenho.</p>
-        </div>
+        <header class="mb-10">
+            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Questões</h1>
+            <p id="subtitulo-filtro" class="text-slate-500 mt-2 text-lg font-medium">Pratique com foco em casos clínicos reais.</p>
+        </header>
 
-        <div id="questoes-container">
-            <div class="text-center py-10 text-gray-400">Sincronizando banco de dados...</div>
+        <div id="questoes-container" class="space-y-6">
+            <div id="loading" class="text-center py-20 bg-white rounded-[24px] border border-dashed border-slate-300">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                <p class="text-slate-400 font-bold">Sincronizando banco de dados...</p>
+            </div>
         </div>
     </main>
 
     <script>
         window.addEventListener('load', async () => {
-            // Segue o padrão exigido pelas suas páginas
             const session = await exigirLogin(); 
             if(!session) return;
             document.getElementById('main').style.display = 'block';
@@ -96,82 +114,83 @@
             const sb = window.supabaseClient;
             const container = document.getElementById('questoes-container');
             
-            // Filtros da URL
             const params = new URLSearchParams(window.location.search);
             const tema = params.get('tema');
             const subtema = params.get('subtema');
 
-            if(tema) document.getElementById('subtitulo-filtro').innerText = `Focando em: ${tema} ${subtema ? '> ' + subtema : ''}`;
+            if(tema) {
+                document.getElementById('subtitulo-filtro').innerHTML = 
+                    `<span class="text-blue-600">Filtro:</span> ${tema} ${subtema ? '• ' + subtema : ''}`;
+            }
 
             let query = sb.from('questoes').select('*');
             if(tema) query = query.eq('tema', tema);
             if(subtema) query = query.eq('subtema', subtema);
 
-            const { data: questoes, error } = await query.order('id', { ascending: false });
+            const { data, error } = await query.order('id', { ascending: false });
 
-            if(error || !questoes || questoes.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 color: var(--text-muted)">Nenhuma questão encontrada.</div>`;
+            if(error || !data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="p-10 bg-white rounded-[24px] border border-slate-200 text-center shadow-sm">
+                        <p class="text-slate-500 font-bold">Nenhuma questão encontrada para este tema.</p>
+                        <a href="questoes.html" class="text-blue-600 font-black mt-4 inline-block hover:underline">Ver todas as questões</a>
+                    </div>`;
                 return;
             }
 
             container.innerHTML = '';
 
-            questoes.forEach(q => {
-                const div = document.createElement('div');
-                div.className = 'question-card';
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem">
-                        <span style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px">
+            data.forEach(q => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
                             ${q.tema} | ${q.subtema}
                         </span>
-                        <span style="font-size: 0.7rem; color: var(--text-muted)">ID #${q.id}</span>
+                        <span class="text-xs font-mono text-slate-300">ID #${q.id}</span>
                     </div>
                     
-                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); line-height: 1.5; margin-bottom: 2rem">
-                        ${q.pergunta}
-                    </h3>
+                    <h3 class="text-slate-800 font-bold mb-10 text-xl leading-relaxed">${q.pergunta}</h3>
 
-                    <div id="opcoes-${q.id}" style="display: flex; flex-direction: column; gap: 0.75rem">
+                    <div id="box-${q.id}" class="space-y-3">
                         ${q.opcoes.map((opt, i) => `
                             <button class="opt-btn" onclick="verificar(${q.id}, ${i}, ${parseInt(q.resposta)})">
                                 <div class="circle-letter" id="letter-${q.id}-${i}">${String.fromCharCode(65 + i)}</div>
-                                <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem">${opt}</div>
+                                <div class="text-slate-700 font-bold text-lg">${opt}</div>
                             </button>
                         `).join('')}
                     </div>
-                    <div id="fb-${q.id}" style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem"></div>
+                    <div id="fb-${q.id}" class="mt-8 hidden p-6 rounded-2xl font-black text-center animate-fadeIn border-2"></div>
                 `;
-                container.appendChild(div);
+                container.appendChild(card);
             });
         });
 
         function verificar(id, userIdx, correctIdx) {
-            const btns = document.querySelectorAll(`#opcoes-${id} .opt-btn`);
+            const btns = document.querySelectorAll(`#box-${id} .opt-btn`);
             const fb = document.getElementById(`fb-${id}`);
-            
             btns.forEach(b => b.disabled = true);
-            fb.style.display = 'block';
+            fb.classList.remove('hidden');
 
             if(userIdx === correctIdx) {
-                fb.style.background = '#dcfce7';
-                fb.style.color = '#166534';
-                fb.innerText = '✅ Resposta correta!';
-                paint(id, userIdx, 'correct');
+                fb.className = "mt-8 p-6 rounded-2xl bg-green-50 text-green-700 border-green-100 font-black text-center block animate-bounce-short";
+                fb.innerHTML = "✨ RESPOSTA CORRETA!";
+                paint(id, userIdx, 'win');
             } else {
-                fb.style.background = '#fee2e2';
-                fb.style.color = '#991b1b';
-                fb.innerText = `❌ Incorreto. A correta era a letra ${String.fromCharCode(65 + correctIdx)}.`;
-                paint(id, userIdx, 'wrong');
-                paint(id, correctIdx, 'correct');
+                fb.className = "mt-8 p-6 rounded-2xl bg-red-50 text-red-700 border-red-100 font-black text-center block";
+                fb.innerHTML = `✖ INCORRETO. A RESPOSTA É A LETRA ${String.fromCharCode(65 + correctIdx)}.`;
+                paint(id, userIdx, 'lose');
+                paint(id, correctIdx, 'win');
             }
         }
 
-        function paint(id, idx, status) {
-            const letter = document.getElementById(`letter-${id}-${idx}`);
-            if(status === 'correct') {
-                letter.classList.add('is-correct');
+        function paint(id, idx, type) {
+            const circle = document.getElementById(`letter-${id}-${idx}`);
+            if(type === 'win') {
+                circle.classList.add('is-correct');
             } else {
-                letter.classList.add('is-wrong');
+                circle.classList.add('is-wrong');
             }
         }
     </script>
