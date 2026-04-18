@@ -1,292 +1,530 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>MedQuest — Questões</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Questões — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f8fafc; }
+    .main-content { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/sidebar.js" defer></script>
+    /* Filtros */
+    .filtros-wrap {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+      display: flex; gap: .75rem; flex-wrap: wrap; align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .filtros-wrap select {
+      padding: .5rem .85rem; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-family: 'Inter',sans-serif; font-size: .85rem; color: #1e293b;
+      background: #f8fafc; outline: none; cursor: pointer; transition: border-color .15s;
+    }
+    .filtros-wrap select:focus { border-color: #2563eb; background: #fff; }
+    .btn-limpar {
+      padding: .5rem 1rem; background: transparent; border: 1.5px solid #e2e8f0;
+      border-radius: 8px; font-size: .82rem; font-weight: 600; color: #64748b;
+      cursor: pointer; transition: all .15s;
+    }
+    .btn-limpar:hover { border-color: #ef4444; color: #ef4444; }
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    /* Info bar */
+    .info-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem;
+    }
+    .info-bar-left { font-size: .85rem; color: #64748b; font-weight: 500; }
+    .modo-tabs { display: flex; gap: .4rem; }
+    .modo-tab {
+      padding: .4rem .9rem; border: 1.5px solid #e2e8f0; border-radius: 20px;
+      font-size: .8rem; font-weight: 600; cursor: pointer; transition: all .15s;
+      background: #fff; color: #64748b;
+    }
+    .modo-tab.active { background: #2563eb; border-color: #2563eb; color: #fff; }
 
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
-            display: flex;
-        }
+    /* Card questão */
+    .questao-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+      padding: 2rem 2.25rem; box-shadow: 0 4px 12px rgba(0,0,0,.06);
+      margin-bottom: 1.25rem;
+    }
 
-        /* ÁREA PRINCIPAL: O margin-left reserva o espaço para a sidebar injetada pelo seu JS */
-        #app {
-            margin-left: 260px;
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 40px 20px;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
+    /* Header */
+    .q-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem;
+    }
+    .q-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: .2rem .7rem; border-radius: 99px; font-size: .72rem; font-weight: 700;
+    }
+    .badge-blue   { background: #eff6ff; color: #2563eb; }
+    .badge-green  { background: #ecfdf5; color: #059669; }
+    .badge-yellow { background: #fffbeb; color: #d97706; }
+    .badge-red    { background: #fef2f2; color: #dc2626; }
+    .badge-gray   { background: #f1f5f9; color: #64748b; }
+    .badge-purple { background: #f5f3ff; color: #7c3aed; }
+    .q-numero { font-size: .75rem; font-weight: 800; color: #94a3b8; }
 
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
+    /* Enunciado */
+    .q-enunciado {
+      font-size: 1rem; font-weight: 500; line-height: 1.75;
+      color: #1e293b; margin-bottom: 1.5rem;
+    }
 
-        .card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 40px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
+    /* Opções */
+    .opcao {
+      display: flex; align-items: flex-start; gap: .9rem;
+      padding: .9rem 1.1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      margin-bottom: .6rem; cursor: pointer; transition: all .18s;
+      background: #fff; user-select: none;
+    }
+    .opcao:hover:not(.bloqueada) { border-color: #93c5fd; background: #f0f7ff; }
+    .opcao.selecionada { border-color: #2563eb; background: #eff6ff; }
+    .opcao.correta  { border-color: #10b981 !important; background: #ecfdf5 !important; }
+    .opcao.errada   { border-color: #ef4444 !important; background: #fef2f2 !important; }
+    .opcao.bloqueada { cursor: default; }
 
-        /* TOPBAR DA QUESTÃO */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #64748b;
-            font-weight: 500;
-        }
+    .opcao-letra {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 800; color: #64748b;
+      flex-shrink: 0; transition: all .18s;
+    }
+    .opcao.selecionada .opcao-letra { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .opcao.correta .opcao-letra  { background: #10b981; border-color: #10b981; color: #fff; }
+    .opcao.errada  .opcao-letra  { background: #ef4444; border-color: #ef4444; color: #fff; }
+    .opcao-texto { font-size: .93rem; line-height: 1.6; color: #1e293b; flex: 1; padding-top: 3px; }
 
-        .question {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
+    /* Botão confirmar */
+    .btn-confirmar {
+      width: 100%; padding: .85rem; background: #2563eb; color: #fff;
+      border: none; border-radius: 10px; font-family: 'Inter',sans-serif;
+      font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .2s; margin-top: .75rem;
+    }
+    .btn-confirmar:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .btn-confirmar:disabled { opacity: .35; cursor: not-allowed; transform: none; }
 
-        .option {
-            padding: 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            margin-top: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-        }
+    /* Feedback */
+    .feedback-banner {
+      display: none; margin-top: 1rem; padding: .8rem 1.1rem; border-radius: 10px;
+      font-size: .9rem; font-weight: 600; align-items: center; gap: .6rem;
+    }
+    .feedback-banner.show { display: flex; animation: sd .25s ease; }
+    .feedback-banner.acerto { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+    .feedback-banner.erro   { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    @keyframes sd { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
 
-        .option:hover { background: #f1f5f9; }
-        .option.selected { border-color: #2563eb; background: #eff6ff; }
-        .option.correct { border: 2px solid #10b981 !important; background: #ecfdf5; color: #065f46; }
-        .option.wrong { border: 2px solid #ef4444 !important; background: #fef2f2; color: #991b1b; }
+    /* Gabarito */
+    .gabarito-box {
+      margin-top: 1.25rem; padding: 1.25rem 1.5rem;
+      background: #f0f9ff; border-left: 4px solid #2563eb;
+      border-radius: 0 10px 10px 0; font-size: .9rem; line-height: 1.75;
+      color: #1e293b; display: none;
+    }
+    .gabarito-box.show { display: block; animation: sd .3s ease; }
+    .gabarito-titulo {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .06em; color: #2563eb; margin-bottom: .5rem;
+    }
 
-        /* AÇÕES E BOTÕES */
-        .actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
+    /* Ações */
+    .q-acoes {
+      display: flex; gap: .6rem; margin-top: 1.25rem;
+      padding-top: 1rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; align-items: center;
+    }
+    .btn-acao {
+      display: flex; align-items: center; gap: .4rem; padding: .45rem .9rem;
+      border: 1.5px solid #e2e8f0; border-radius: 8px; background: transparent;
+      color: #64748b; font-family: 'Inter',sans-serif; font-size: .8rem; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+    }
+    .btn-acao:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+    .btn-acao.ativo { border-color: #f59e0b; color: #d97706; background: #fffbeb; }
+    .btn-acao.ativo-c { border-color: #8b5cf6; color: #7c3aed; background: #f5f3ff; }
 
-        button {
-            font-family: inherit;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 24px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+    /* Comentários */
+    .coments-sec { display: none; margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
+    .coments-sec.aberta { display: block; animation: sd .25s ease; }
+    .coment-item { padding: .75rem 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: .5rem; }
+    .coment-autor { font-size: .72rem; font-weight: 700; color: #64748b; margin-bottom: .25rem; }
+    .coment-texto { font-size: .875rem; color: #1e293b; line-height: 1.6; }
+    .coment-form { display: flex; gap: .5rem; margin-top: .75rem; }
+    .coment-form input {
+      flex: 1; padding: .6rem .9rem; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-family: 'Inter',sans-serif; font-size: .85rem; outline: none; transition: border-color .15s;
+    }
+    .coment-form input:focus { border-color: #2563eb; }
+    .coment-form button {
+      padding: .6rem 1.1rem; background: #2563eb; color: #fff; border: none; border-radius: 8px;
+      font-family: 'Inter',sans-serif; font-size: .82rem; font-weight: 700; cursor: pointer;
+    }
 
-        .primary { background: #2563eb; color: white; }
-        .primary:hover { background: #1d4ed8; }
-        .secondary { background: #f1f5f9; color: #475569; }
+    /* Modo sequencial */
+    .prog-bar-wrap {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 1rem 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    }
+    .prog-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; flex-wrap: wrap; gap: .5rem; }
+    .prog-num { font-size: 1rem; font-weight: 800; color: #1e293b; }
+    .prog-scores { display: flex; gap: 1.5rem; }
+    .prog-score span { font-size: 1.1rem; font-weight: 800; }
+    .prog-score small { font-size: .68rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; }
+    .prog-bar { height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: #2563eb; border-radius: 99px; transition: width .5s ease; }
 
-        textarea {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            min-height: 90px;
-            box-sizing: border-box;
-            font-family: inherit;
-            margin-top: 15px;
-            resize: vertical;
-        }
+    /* Resultado */
+    .resultado-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+      padding: 2.5rem 2rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,.07);
+      display: none;
+    }
+    .resultado-card.show { display: block; animation: sd .4s ease; }
+    .res-pct { font-size: 4rem; font-weight: 900; color: #2563eb; line-height: 1; }
+    .res-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin: 1.5rem 0; }
+    .res-stat { background: #f8fafc; border-radius: 10px; padding: 1rem; }
+    .res-stat strong { display: block; font-size: 1.5rem; font-weight: 800; }
+    .res-stat small { font-size: .7rem; text-transform: uppercase; font-weight: 700; color: #64748b; }
+    .btn-res { width: 100%; padding: .85rem; border-radius: 10px; font-family: 'Inter',sans-serif; font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .2s; border: none; margin-bottom: .5rem; }
 
-        @media (max-width: 900px) {
-            #app { margin-left: 0; }
-        }
-    </style>
+    /* Paginação */
+    .pag-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid #e2e8f0;
+      background: #fff; color: #64748b; font-size: .85rem; cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .pag-btn:hover, .pag-btn.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+    .empty { text-align: center; padding: 3rem; color: #94a3b8; font-size: .9rem; }
+
+    @media (max-width: 768px) {
+      .questao-card { padding: 1.25rem 1rem; }
+      .main-content { padding: 1.25rem .75rem; }
+    }
+  </style>
 </head>
 <body>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
 
-    <main id="app" style="display:none">
-        <div class="container">
-            <div class="card">
-                
-                <div class="topbar">
-                    <div id="counter">Questão 0 / 0</div>
-                    <div id="status" style="text-transform: uppercase; letter-spacing: 0.5px;">Carregando...</div>
-                </div>
+<main class="main-content" id="main" style="display:none">
 
-                <div class="question" id="question">Buscando questão no banco...</div>
-                
-                <div id="options"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+    <div>
+      <h1 id="titulo-pagina" style="font-size:1.75rem;font-weight:800;color:#1e293b;margin:0">Questões</h1>
+      <p id="sub-pagina" style="color:#64748b;margin-top:.3rem;font-size:.9rem">Pratique e aprimore seu conhecimento médico</p>
+    </div>
+  </div>
 
-                <div class="actions">
-                    <div style="display:flex; gap:10px;">
-                        <button class="secondary" onclick="prev()">Anterior</button>
-                        <button class="secondary" onclick="next()">Próxima</button>
-                    </div>
-                    <button class="primary" id="btnResponder" onclick="confirm()">Responder</button>
-                </div>
+  <!-- Filtros -->
+  <div class="filtros-wrap">
+    <select id="f-tema"><option value="">Todos os temas</option></select>
+    <select id="f-subtema"><option value="">Todos os subtemas</option></select>
+    <select id="f-dif">
+      <option value="">Qualquer dificuldade</option>
+      <option value="facil">Fácil</option>
+      <option value="media">Média</option>
+      <option value="dificil">Difícil</option>
+    </select>
+    <select id="f-banca"><option value="">Qualquer banca</option></select>
+    <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
+  </div>
 
-                <div id="feedback" style="display:none">
-                    <hr style="margin:35px 0; border:0; border-top:1px solid #e2e8f0;">
-                    <h3 style="color: #1e293b; font-size: 18px;">Discussão</h3>
-                    
-                    <div id="comments" style="margin-bottom: 20px;"></div>
+  <!-- Info bar -->
+  <div class="info-bar">
+    <div class="info-bar-left" id="info-count">Carregando...</div>
+    <div class="modo-tabs">
+      <button class="modo-tab active" id="tab-lista"       onclick="setModo('lista')">☰ Lista</button>
+      <button class="modo-tab"        id="tab-sequencial"  onclick="setModo('sequencial')">▶ Uma por vez</button>
+    </div>
+  </div>
 
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <textarea id="newComment" placeholder="Escreva seu comentário ou dúvida técnica..."></textarea>
-                        <button class="primary" style="align-self:flex-end" onclick="sendComment()">Enviar Comentário</button>
-                    </div>
-                </div>
+  <!-- MODO LISTA -->
+  <div id="modo-lista">
+    <div id="lista-questoes"></div>
+    <div id="paginacao" style="display:flex;justify-content:center;gap:.4rem;margin-top:1.5rem;flex-wrap:wrap"></div>
+  </div>
 
-            </div>
+  <!-- MODO SEQUENCIAL -->
+  <div id="modo-sequencial" style="display:none">
+    <div class="prog-bar-wrap" id="prog-wrap">
+      <div class="prog-top">
+        <div class="prog-num" id="prog-num">1 / 0</div>
+        <div class="prog-scores">
+          <div class="prog-score" style="text-align:center">
+            <span id="prog-certas" style="color:#10b981">0</span>
+            <small>Certas</small>
+          </div>
+          <div class="prog-score" style="text-align:center">
+            <span id="prog-erradas" style="color:#ef4444">0</span>
+            <small>Erradas</small>
+          </div>
         </div>
-    </main>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div id="questao-seq"></div>
+    <div class="resultado-card" id="resultado-final">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">🎉</div>
+      <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:.4rem">Sessão concluída!</h2>
+      <p style="color:#64748b;font-size:.9rem;margin-bottom:1.5rem">Você completou todas as questões desta seleção.</p>
+      <div class="res-pct" id="res-pct">0%</div>
+      <div class="res-stats">
+        <div class="res-stat"><strong id="res-total"   style="color:#2563eb">0</strong><small>Total</small></div>
+        <div class="res-stat"><strong id="res-certas"  style="color:#10b981">0</strong><small>Certas</small></div>
+        <div class="res-stat"><strong id="res-erradas" style="color:#ef4444">0</strong><small>Erradas</small></div>
+      </div>
+      <button class="btn-res" style="background:#2563eb;color:#fff" onclick="reiniciarSeq()">Recomeçar sessão</button>
+      <button class="btn-res" style="background:transparent;color:#2563eb;border:2px solid #2563eb" onclick="setModo('lista')">Voltar para lista</button>
+    </div>
+  </div>
+
+</main>
 
 <script>
-    // Gerenciamento de Estado da Aplicação
-    const state = {
-        qs: [],
-        i: 0,
-        selected: null,
-        answered: false
-    };
+let sessao=null, todasQ=[], filtradas=[], favsSet=new Set(), respondidas={};
+const POR_PAGINA=8; let paginaAtual=1, modoAtual='lista';
+let seqIdx=0, seqCertas=0, seqErradas=0;
+const selecoes={};
+const LETRAS=['A','B','C','D','E'];
 
-    // Definição da instância do Supabase baseada no seu projeto
-    const supa = window.db || window.supabaseClient || window.supabase;
+window.addEventListener('load', async()=>{
+  sessao=await exigirLogin(); if(!sessao) return;
+  document.getElementById('main').style.display='block';
+  const sb=window.supabaseClient, uid=sessao.user.id;
+  const params=new URLSearchParams(window.location.search);
+  const temaP=params.get('tema')?decodeURIComponent(params.get('tema')):'';
+  const subP=params.get('subtema')?decodeURIComponent(params.get('subtema')):'';
+  const difP=params.get('dificuldade')||'';
+  if(temaP){document.getElementById('titulo-pagina').textContent=temaP;document.getElementById('sub-pagina').textContent=subP||'Todas as questões';}
+  const [favR,respR,qR]=await Promise.all([
+    sb.from('favoritos').select('questao_id').eq('user_id',uid),
+    sb.from('respostas').select('questao_id,acertou,opcao_escolhida').eq('user_id',uid),
+    sb.from('questoes').select('*').order('id',{ascending:true})
+  ]);
+  if(favR.data) favR.data.forEach(f=>favsSet.add(f.questao_id));
+  if(respR.data) respR.data.forEach(r=>{ respondidas[r.questao_id]={acertou:r.acertou,opcao:r.opcao_escolhida}; });
+  todasQ=qR.data||[];
+  montarFiltros();
+  if(temaP){document.getElementById('f-tema').value=temaP; atualizarSubtemas(temaP);}
+  if(difP) document.getElementById('f-dif').value=difP;
+  if(subP) setTimeout(()=>document.getElementById('f-subtema').value=subP,60);
+  document.getElementById('f-tema').addEventListener('change',()=>{atualizarSubtemas(document.getElementById('f-tema').value);aplicarFiltros();});
+  document.getElementById('f-subtema').addEventListener('change',aplicarFiltros);
+  document.getElementById('f-dif').addEventListener('change',aplicarFiltros);
+  document.getElementById('f-banca').addEventListener('change',aplicarFiltros);
+  aplicarFiltros();
+});
 
-    window.addEventListener("load", async () => {
-        // Validação de segurança do MedQuest
-        if (typeof exigirLogin === "function") await exigirLogin();
-        
-        document.getElementById("app").style.display = "flex";
-        await loadQuestions();
-    });
+function montarFiltros(){
+  const temas=[...new Set(todasQ.map(q=>q.tema).filter(Boolean))].sort();
+  const bancas=[...new Set(todasQ.map(q=>q.banca).filter(Boolean))].sort();
+  const sT=document.getElementById('f-tema'), sB=document.getElementById('f-banca');
+  temas.forEach(t=>{const o=document.createElement('option');o.value=o.textContent=t;sT.appendChild(o);});
+  bancas.forEach(b=>{const o=document.createElement('option');o.value=o.textContent=b;sB.appendChild(o);});
+}
 
-    async function loadQuestions() {
-        try {
-            const { data, error } = await supa.from("banco_questoes").select("*").limit(50);
-            if (error) throw error;
+function atualizarSubtemas(tema){
+  const sel=document.getElementById('f-subtema');
+  sel.innerHTML='<option value="">Todos os subtemas</option>';
+  const subs=[...new Set(todasQ.filter(q=>q.tema===tema).map(q=>q.subtema).filter(Boolean))].sort();
+  subs.forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o);});
+}
 
-            state.qs = data || [];
-            if (state.qs.length > 0) render();
-            else document.getElementById("question").innerText = "Nenhuma questão encontrada no banco.";
+function limparFiltros(){
+  ['f-tema','f-subtema','f-dif','f-banca'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-subtema').innerHTML='<option value="">Todos os subtemas</option>';
+  aplicarFiltros();
+}
 
-        } catch (e) {
-            console.error("Erro ao carregar dados:", e);
-            document.getElementById("question").innerText = "Erro na conexão com o banco de dados.";
-        }
-    }
+function aplicarFiltros(){
+  const t=document.getElementById('f-tema').value, s=document.getElementById('f-subtema').value;
+  const d=document.getElementById('f-dif').value, b=document.getElementById('f-banca').value;
+  filtradas=todasQ.filter(q=>(!t||q.tema===t)&&(!s||q.subtema===s)&&(!d||q.dificuldade===d)&&(!b||q.banca===b));
+  document.getElementById('info-count').textContent=`${filtradas.length} questão${filtradas.length!==1?'ões':''} encontrada${filtradas.length!==1?'s':''}`;
+  paginaAtual=1; seqIdx=0; seqCertas=0; seqErradas=0;
+  if(modoAtual==='lista') renderLista(); else renderSeq();
+}
 
-    function render() {
-        const q = state.qs[state.i];
-        state.selected = null;
-        state.answered = false;
+function setModo(modo){
+  modoAtual=modo;
+  document.getElementById('modo-lista').style.display=modo==='lista'?'block':'none';
+  document.getElementById('modo-sequencial').style.display=modo==='sequencial'?'block':'none';
+  document.getElementById('tab-lista').classList.toggle('active',modo==='lista');
+  document.getElementById('tab-sequencial').classList.toggle('active',modo==='sequencial');
+  if(modo==='sequencial'){seqIdx=0;seqCertas=0;seqErradas=0;renderSeq();}
+  else renderLista();
+}
 
-        // Reset de UI
-        document.getElementById("btnResponder").style.display = "block";
-        document.getElementById("feedback").style.display = "none";
-        
-        // Conteúdo
-        document.getElementById("question").innerText = q.enunciado;
-        document.getElementById("counter").innerText = `Questão ${state.i + 1} de ${state.qs.length}`;
-        document.getElementById("status").innerText = q.categoria || "Clínica Geral";
+/* ─── LISTA ─── */
+function renderLista(){
+  const inicio=(paginaAtual-1)*POR_PAGINA, slice=filtradas.slice(inicio,inicio+POR_PAGINA);
+  const lista=document.getElementById('lista-questoes');
+  if(!slice.length){lista.innerHTML='<div class="empty">😔 Nenhuma questão encontrada com esses filtros.</div>';document.getElementById('paginacao').innerHTML='';return;}
+  lista.innerHTML=slice.map((q,i)=>renderCard(q,inicio+i,false)).join('');
+  renderPag(Math.ceil(filtradas.length/POR_PAGINA));
+  slice.forEach(q=>{if(respondidas[q.id]) reaplicar(q,respondidas[q.id].opcao,respondidas[q.id].acertou);});
+}
 
-        // Alternativas dinâmicas
-        document.getElementById("options").innerHTML = ["a","b","c","d"].map(l => `
-            <div class="option" data-letter="${l}" onclick="selectOpt('${l}', this)">
-                <strong>${l.toUpperCase()})</strong>&nbsp; ${q["alternativa_"+l]}
-            </div>
-        `).join("");
-    }
+function renderPag(total){
+  const el=document.getElementById('paginacao');
+  if(total<=1){el.innerHTML='';return;}
+  let h='';
+  if(paginaAtual>1) h+=`<button class="pag-btn" onclick="irPag(${paginaAtual-1})">‹</button>`;
+  for(let i=Math.max(1,paginaAtual-2);i<=Math.min(total,paginaAtual+2);i++) h+=`<button class="pag-btn ${i===paginaAtual?'active':''}" onclick="irPag(${i})">${i}</button>`;
+  if(paginaAtual<total) h+=`<button class="pag-btn" onclick="irPag(${paginaAtual+1})">›</button>`;
+  el.innerHTML=h;
+}
+function irPag(n){paginaAtual=n;renderLista();window.scrollTo({top:0,behavior:'smooth'});}
 
-    function selectOpt(letter, el) {
-        if (state.answered) return;
-        state.selected = { letter, el };
-        document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
-        el.classList.add("selected");
-    }
+/* ─── SEQUENCIAL ─── */
+function renderSeq(){
+  document.getElementById('resultado-final').classList.remove('show');
+  if(!filtradas.length){document.getElementById('questao-seq').innerHTML='<div class="empty">Nenhuma questão neste filtro.</div>';return;}
+  if(seqIdx>=filtradas.length){mostrarFinal();return;}
+  const q=filtradas[seqIdx], total=filtradas.length;
+  document.getElementById('prog-num').textContent=`${seqIdx+1} / ${total}`;
+  document.getElementById('prog-fill').style.width=Math.round((seqIdx/total)*100)+'%';
+  document.getElementById('prog-certas').textContent=seqCertas;
+  document.getElementById('prog-erradas').textContent=seqErradas;
+  document.getElementById('questao-seq').innerHTML=renderCard(q,seqIdx,true);
+  if(respondidas[q.id]) reaplicar(q,respondidas[q.id].opcao,respondidas[q.id].acertou);
+}
 
-    async function confirm() {
-        if (!state.selected || state.answered) return;
-        state.answered = true;
+function proxSeq(){seqIdx++;renderSeq();window.scrollTo({top:0,behavior:'smooth'});}
+function reiniciarSeq(){seqIdx=0;seqCertas=0;seqErradas=0;document.getElementById('resultado-final').classList.remove('show');renderSeq();}
 
-        const q = state.qs[state.i];
-        const correct = state.selected.letter === q.correta;
+function mostrarFinal(){
+  document.getElementById('questao-seq').innerHTML='';
+  const r=document.getElementById('resultado-final'); r.classList.add('show');
+  const total=seqCertas+seqErradas;
+  const pct=total>0?Math.round((seqCertas/total)*100):0;
+  const cor=pct>=70?'#10b981':pct>=50?'#f59e0b':'#ef4444';
+  document.getElementById('res-pct').textContent=pct+'%'; document.getElementById('res-pct').style.color=cor;
+  document.getElementById('res-total').textContent=total;
+  document.getElementById('res-certas').textContent=seqCertas;
+  document.getElementById('res-erradas').textContent=seqErradas;
+}
 
-        // Feedback Visual
-        document.querySelectorAll(".option").forEach(o => {
-            const letter = o.getAttribute("data-letter");
-            if (letter === q.correta) o.classList.add("correct");
-            if (o === state.selected.el && !correct) o.classList.add("wrong");
-        });
+/* ─── CARD ─── */
+function renderCard(q,idx,seq){
+  const ops=parseOpcoes(q.opcoes);
+  const fav=favsSet.has(q.id);
+  const dL={facil:'Fácil',media:'Média',dificil:'Difícil'}[q.dificuldade]||'Média';
+  const dC={facil:'badge-green',media:'badge-yellow',dificil:'badge-red'}[q.dificuldade]||'badge-yellow';
+  return `<div class="questao-card" id="card-${q.id}">
+    <div class="q-header">
+      <div class="q-badges">
+        ${q.tema?`<span class="badge badge-blue">${q.tema}</span>`:''}
+        ${q.subtema?`<span class="badge badge-gray">${q.subtema}</span>`:''}
+        <span class="badge ${dC}">${dL}</span>
+        ${q.banca?`<span class="badge badge-purple">${q.banca}${q.ano?' '+q.ano:''}</span>`:''}
+      </div>
+      <div class="q-numero">Q${idx+1}</div>
+    </div>
+    <div class="q-enunciado">${q.pergunta}</div>
+    <div id="ops-${q.id}">
+      ${ops.map((op,i)=>`<div class="opcao" id="op-${q.id}-${i}" onclick="selOp(${q.id},${i},${q.resposta},${seq})"><div class="opcao-letra">${LETRAS[i]}</div><div class="opcao-texto">${op}</div></div>`).join('')}
+    </div>
+    <div class="feedback-banner" id="fb-${q.id}"></div>
+    <button class="btn-confirmar" id="btn-${q.id}" onclick="confirmar(${q.id},${q.resposta},${seq})" disabled>Confirmar Resposta</button>
+    ${q.comentario?`<div class="gabarito-box" id="gab-${q.id}"><div class="gabarito-titulo">💡 Gabarito comentado</div>${q.comentario}</div>`:''}
+    <div class="q-acoes">
+      <button class="btn-acao ${fav?'ativo':''}" id="fav-${q.id}" onclick="toggleFav(${q.id},this)">${fav?'★ Favoritada':'☆ Favoritar'}</button>
+      <button class="btn-acao" id="cbn-${q.id}" onclick="toggleCom(${q.id},this)">💬 Comentários</button>
+      ${seq?`<button class="btn-acao" onclick="proxSeq()" style="margin-left:auto">Próxima →</button>`:''}
+    </div>
+    <div class="coments-sec" id="csec-${q.id}">
+      <div id="clist-${q.id}" style="margin-bottom:.5rem"></div>
+      <div class="coment-form">
+        <input type="text" id="cinput-${q.id}" placeholder="Escreva um comentário...">
+        <button onclick="enviarCom(${q.id})">Enviar</button>
+      </div>
+    </div>
+  </div>`;
+}
 
-        document.getElementById("btnResponder").style.display = "none";
-        document.getElementById("feedback").style.display = "block";
-        
-        loadComments();
-    }
+/* ─── SELECIONAR / CONFIRMAR ─── */
+function selOp(qId,opIdx,correta,seq){
+  const card=document.getElementById(`card-${qId}`);
+  if(card.dataset.r) return;
+  document.querySelectorAll(`[id^="op-${qId}-"]`).forEach(el=>el.classList.remove('selecionada'));
+  document.getElementById(`op-${qId}-${opIdx}`).classList.add('selecionada');
+  selecoes[qId]=opIdx;
+  const btn=document.getElementById(`btn-${qId}`);
+  if(btn) btn.disabled=false;
+}
 
-    function prev() { if (state.i > 0) { state.i--; render(); } }
-    function next() { if (state.i < state.qs.length - 1) { state.i++; render(); } }
+async function confirmar(qId,correta,seq){
+  const card=document.getElementById(`card-${qId}`);
+  if(card.dataset.r) return;
+  const op=selecoes[qId]; if(op===undefined) return;
+  card.dataset.r='1';
+  const ok=op===correta;
+  document.querySelectorAll(`[id^="op-${qId}-"]`).forEach((el,i)=>{
+    el.classList.add('bloqueada'); el.onclick=null;
+    if(i===correta) el.classList.add('correta');
+    else if(i===op&&!ok) el.classList.add('errada');
+  });
+  const fb=document.getElementById(`fb-${qId}`);
+  if(fb){fb.className=`feedback-banner show ${ok?'acerto':'erro'}`;fb.innerHTML=ok?'✅ Parabéns! Resposta correta!':`❌ Resposta incorreta. Correta: <strong>${LETRAS[correta]}</strong>.`;}
+  const btn=document.getElementById(`btn-${qId}`); if(btn) btn.style.display='none';
+  const gab=document.getElementById(`gab-${qId}`); if(gab) gab.classList.add('show');
+  if(seq){if(ok)seqCertas++;else seqErradas++;document.getElementById('prog-certas').textContent=seqCertas;document.getElementById('prog-erradas').textContent=seqErradas;}
+  respondidas[qId]={acertou:ok,opcao:op};
+  try{ await window.supabaseClient.from('respostas').insert({user_id:sessao.user.id,questao_id:qId,opcao_escolhida:op,acertou:ok,modo:'normal'}); }catch(e){console.warn(e);}
+}
 
-    async function loadComments() {
-        const q = state.qs[state.i];
-        const { data } = await supa.from("comentarios_questao")
-            .select("*")
-            .eq("questao_id", q.id)
-            .order("created_at", { ascending: false });
+function reaplicar(q,op,ok){
+  const card=document.getElementById(`card-${q.id}`); if(!card||card.dataset.r) return;
+  card.dataset.r='1';
+  document.querySelectorAll(`[id^="op-${q.id}-"]`).forEach((el,i)=>{
+    el.classList.add('bloqueada'); el.onclick=null;
+    if(i===q.resposta) el.classList.add('correta');
+    else if(i===op&&!ok) el.classList.add('errada');
+  });
+  const btn=document.getElementById(`btn-${q.id}`); if(btn) btn.style.display='none';
+  const gab=document.getElementById(`gab-${q.id}`); if(gab) gab.classList.add('show');
+  const fb=document.getElementById(`fb-${q.id}`);
+  if(fb){fb.className=`feedback-banner show ${ok?'acerto':'erro'}`;fb.innerHTML=ok?'✅ Você respondeu corretamente.':`❌ Resposta incorreta. Correta: <strong>${LETRAS[q.resposta]}</strong>.`;}
+}
 
-        const box = document.getElementById("comments");
-        box.innerHTML = (data || []).length 
-            ? data.map(c => `
-                <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:12px; border:1px solid #e2e8f0;">
-                    <b style="font-size:13px; color:#1e293b;">${c.user_name}</b>
-                    <p style="margin:5px 0 0; font-size:14px; color:#475569;">${c.conteudo}</p>
-                </div>
-            `).join("") 
-            : "<p style='color:#94a3b8; font-size:13px;'>Sem comentários ainda. Compartilhe seu conhecimento!</p>";
-    }
+/* ─── FAVORITAR ─── */
+async function toggleFav(qId,btn){
+  const sb=window.supabaseClient,uid=sessao.user.id;
+  if(favsSet.has(qId)){await sb.from('favoritos').delete().eq('user_id',uid).eq('questao_id',qId);favsSet.delete(qId);btn.className='btn-acao';btn.textContent='☆ Favoritar';}
+  else{await sb.from('favoritos').insert({user_id:uid,questao_id:qId});favsSet.add(qId);btn.className='btn-acao ativo';btn.textContent='★ Favoritada';}
+}
 
-    async function sendComment() {
-        const input = document.getElementById("newComment");
-        const text = input.value.trim();
-        if (!text) return;
+/* ─── COMENTÁRIOS ─── */
+async function toggleCom(qId,btn){
+  const sec=document.getElementById(`csec-${qId}`);
+  const ab=sec.classList.contains('aberta');
+  sec.classList.toggle('aberta',!ab); btn.classList.toggle('ativo-c',!ab);
+  if(!ab) await carregarCom(qId);
+}
+async function carregarCom(qId){
+  const {data}=await window.supabaseClient.from('comentarios').select('texto,criado_em,perfis(nome)').eq('questao_id',qId).order('criado_em',{ascending:true});
+  document.getElementById(`clist-${qId}`).innerHTML=(!data||!data.length)?'<p style="font-size:.8rem;color:#94a3b8;margin-bottom:.5rem">Sem comentários ainda.</p>':data.map(c=>`<div class="coment-item"><div class="coment-autor">${c.perfis?.nome||'Usuário'} · ${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div><div class="coment-texto">${c.texto}</div></div>`).join('');
+}
+async function enviarCom(qId){
+  const input=document.getElementById(`cinput-${qId}`),texto=input.value.trim(); if(!texto) return;
+  await window.supabaseClient.from('comentarios').insert({user_id:sessao.user.id,questao_id:qId,texto});
+  input.value=''; await carregarCom(qId);
+}
 
-        try {
-            const { data: { user } } = await supa.auth.getUser();
-            if (!user) return alert("Sessão expirada. Refaça o login.");
-
-            const { error } = await supa.from("comentarios_questao").insert({
-                questao_id: state.qs[state.i].id,
-                user_id: user.id,
-                user_name: user.user_metadata?.nome || user.email.split("@"),
-                conteudo: text
-            });
-
-            if (error) throw error;
-            input.value = "";
-            loadComments();
-        } catch (e) {
-            alert("Erro ao enviar: " + e.message);
-        }
-    }
+/* ─── PARSE OPCOES ─── */
+function parseOpcoes(o){
+  if(Array.isArray(o)) return o;
+  if(typeof o==='string'){try{return JSON.parse(o);}catch{return o.split(',').map(s=>s.trim());}}
+  return [];
+}
 </script>
 </body>
 </html>
