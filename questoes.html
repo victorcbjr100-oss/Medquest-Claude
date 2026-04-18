@@ -9,369 +9,204 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body{background:#f8fafc}
-    .main-content{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
-    .filtros-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-    .filtros-wrap select{padding:.5rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;color:#1e293b;background:#f8fafc;outline:none;cursor:pointer;transition:border-color .15s}
-    .filtros-wrap select:focus{border-color:#2563eb;background:#fff}
-    .btn-limpar{padding:.5rem 1rem;background:transparent;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.82rem;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s}
-    .btn-limpar:hover{border-color:#ef4444;color:#ef4444}
-    .info-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem}
-    .modo-tabs{display:flex;gap:.4rem}
-    .modo-tab{padding:.4rem .9rem;border:1.5px solid #e2e8f0;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;background:#fff;color:#64748b}
-    .modo-tab.active{background:#2563eb;border-color:#2563eb;color:#fff}
-    .questao-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:2rem 2.25rem;box-shadow:0 4px 12px rgba(0,0,0,.06);margin-bottom:1.25rem}
-    .q-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem}
-    .q-badges{display:flex;gap:.4rem;flex-wrap:wrap}
-    .badge{padding:.2rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700}
-    .badge-blue{background:#eff6ff;color:#2563eb}
-    .badge-gray{background:#f1f5f9;color:#64748b}
-    .badge-green{background:#ecfdf5;color:#059669}
-    .badge-yellow{background:#fffbeb;color:#d97706}
-    .badge-red{background:#fef2f2;color:#dc2626}
-    .badge-purple{background:#f5f3ff;color:#7c3aed}
-    .q-enunciado{font-size:1rem;font-weight:500;line-height:1.75;color:#1e293b;margin-bottom:1.5rem}
-    .opcao{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 1.1rem;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:.6rem;cursor:pointer;transition:all .18s;background:#fff}
-    .opcao:hover:not(.bloqueada){border-color:#93c5fd;background:#f0f7ff}
-    .opcao.selecionada{border-color:#2563eb;background:#eff6ff}
-    .opcao.correta{border-color:#10b981!important;background:#ecfdf5!important}
-    .opcao.errada{border-color:#ef4444!important;background:#fef2f2!important}
-    .opcao.bloqueada{cursor:default;pointer-events:none}
-    .opcao-letra{width:30px;height:30px;border-radius:8px;background:#f1f5f9;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#64748b;flex-shrink:0}
-    .opcao.selecionada .opcao-letra{background:#2563eb;color:#fff;border-color:#2563eb}
-    .btn-confirmar{width:100%;padding:.85rem;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:.75rem}
-    .btn-confirmar:disabled{opacity:.35;cursor:not-allowed}
-    .feedback-banner{display:none;margin-top:1rem;padding:.8rem 1.1rem;border-radius:10px;font-size:.9rem;font-weight:600;align-items:center;gap:.6rem}
-    .feedback-banner.show{display:flex}
-    .feedback-banner.acerto{background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7}
-    .feedback-banner.erro{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5}
-    .gabarito-box{margin-top:1.25rem;padding:1.25rem 1.5rem;background:#f0f9ff;border-left:4px solid #2563eb;border-radius:0 10px 10px 0;display:none}
-    .gabarito-box.show{display:block}
-    .q-acoes{display:flex;gap:.6rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid #f1f5f9;align-items:center}
-    .btn-acao{display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;background:transparent;color:#64748b;font-size:.8rem;font-weight:600;cursor:pointer}
-    .btn-acao.ativo{color:#d97706;border-color:#f59e0b;background:#fffbeb}
-    .coments-sec{display:none;margin-top:1rem;border-top:1px solid #f1f5f9;padding-top:1rem}
-    .coments-sec.aberta{display:block}
-    .coment-form{display:flex;gap:.5rem;margin-top:.75rem}
-    .coment-form input{flex:1;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;outline:none}
-    .prog-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.5rem;margin-bottom:1.25rem}
-    .prog-bar{height:6px;background:#f1f5f9;border-radius:99px;overflow:hidden}
-    .prog-fill{height:100%;background:#2563eb;transition:width .5s}
-    .resultado-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:2.5rem 2rem;text-align:center;display:none}
-    .resultado-card.show{display:block}
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; }
+    .main-content { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+    
+    /* Progresso Superior */
+    .progresso-container { background: #fff; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .stats-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+    .barra-bg { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+    .barra-fill { width: 0%; height: 100%; background: #2563eb; transition: width 0.4s ease; }
+
+    /* Card da Questão */
+    .questao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+    .q-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem; color: #64748b; font-weight: 600; }
+    .badge-group { display: flex; gap: 8px; }
+    .badge { padding: 4px 12px; border-radius: 99px; background: #f1f5f9; font-size: 0.75rem; }
+    
+    .enunciado { font-size: 1.1rem; color: #1e293b; line-height: 1.7; margin-bottom: 2rem; font-weight: 500; }
+
+    .opcao { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 14px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+    .opcao:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .opcao.selecionada { border-color: #2563eb; background: #eff6ff; }
+    .opcao.correta { border-color: #10b981; background: #ecfdf5; }
+    .opcao.errada { border-color: #ef4444; background: #fef2f2; }
+    
+    .letra { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 10px; font-weight: 700; color: #475569; transition: 0.2s; }
+    .selecionada .letra { background: #2563eb; color: #fff; }
+    .correta .letra { background: #10b981; color: #fff; }
+    .errada .letra { background: #ef4444; color: #fff; }
+
+    .btn-confirmar { width: 100%; padding: 16px; background: #2563eb; color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; transition: transform 0.1s, opacity 0.2s; }
+    .btn-confirmar:active { transform: scale(0.98); }
+    .btn-confirmar:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    .feedback-msg { padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: 600; text-align: center; }
+
+    .acoes-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+    .btn-nav { padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 8px; }
+    .btn-nav:hover { background: #f8fafc; border-color: #cbd5e1; }
   </style>
 </head>
 <body>
-<script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 
-<main class="main-content" id="main" style="display:none">
-  <div style="margin-bottom:1.5rem">
-    <h1 id="titulo-pagina" style="font-size:1.75rem;font-weight:800;color:#1e293b;margin:0">Questões</h1>
-    <p id="sub-pagina" style="color:#64748b;margin-top:.3rem;font-size:.9rem">Pratique e aprimore seu conhecimento médico</p>
-  </div>
-
-  <div class="filtros-wrap">
-    <select id="f-tema"><option value="">Todos os temas</option></select>
-    <select id="f-subtema"><option value="">Todos os subtemas</option></select>
-    <select id="f-dif">
-      <option value="">Qualquer dificuldade</option>
-      <option value="facil">Fácil</option>
-      <option value="media">Média</option>
-      <option value="dificil">Difícil</option>
-    </select>
-    <select id="f-banca"><option value="">Qualquer banca</option></select>
-    <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
-  </div>
-
-  <div class="info-bar">
-    <div class="info-bar-left" id="info-count">Carregando...</div>
-    <div class="modo-tabs">
-      <button class="modo-tab active" id="tab-lista" onclick="setModo('lista')">☰ Lista</button>
-      <button class="modo-tab" id="tab-seq" onclick="setModo('sequencial')">▶ Uma por vez</button>
-    </div>
-  </div>
-
-  <div id="modo-lista">
-    <div id="lista-questoes"></div>
-    <div id="paginacao" style="display:flex;justify-content:center;gap:.4rem;margin-top:1.5rem"></div>
-  </div>
-
-  <div id="modo-sequencial" style="display:none">
-    <div class="prog-wrap">
-      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
-        <span id="prog-num" style="font-weight:800">1 / 0</span>
-        <div>
-           <span id="prog-c" style="color:#10b981;font-weight:700">0</span> <small>Certas</small>
-           <span id="prog-e" style="color:#ef4444;font-weight:700;margin-left:10px">0</span> <small>Erradas</small>
-        </div>
+<main class="main-content">
+  <div class="progresso-container">
+    <div class="stats-row">
+      <span id="txt-contador">Carregando...</span>
+      <div>
+        <span style="color:#10b981" id="count-acertos">0</span>
+        <span style="color:#94a3b8; margin: 0 5px;">/</span>
+        <span style="color:#ef4444" id="count-erros">0</span>
       </div>
-      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
     </div>
-    <div id="questao-seq"></div>
-    <div class="resultado-card" id="resultado-final">
-      <h2>Sessão concluída!</h2>
-      <div id="res-pct" style="font-size:3rem;font-weight:900">0%</div>
-      <button class="btn-confirmar" onclick="reiniciarSeq()">Recomeçar</button>
+    <div class="barra-bg">
+      <div id="progresso-fill" class="barra-fill"></div>
     </div>
   </div>
+
+  <div id="area-questao"></div>
 </main>
 
 <script>
-let SB = null;
-let UID = null;
-let todasQ = [];
-let filtradas = [];
-const favsSet = new Set();
-const respondidas = {}; 
-const selecoes = {}; 
-const QM = {}; 
+let questoes = [];
+let indexAtual = 0;
+let acertos = 0;
+let erros = 0;
+let respostaSelecionada = null;
+let jaRespondeu = false;
 
-const POR_PAGINA = 8;
-let pagAtual = 1;
-let modoAtual = 'lista';
-let seqIdx = 0, seqC = 0, seqE = 0;
-const LETRAS = ['A','B','C','D','E'];
+async function iniciar() {
+    const { data, error } = await window.supabaseClient
+        .from('questoes')
+        .select('*');
 
-// Normalização para garantir que campos existam
-function normQ(q) {
-  const n = {
-    id: q.id,
-    enunciado: q.pergunta || q.enunciado || '[Sem enunciado]',
-    opcoes: Array.isArray(q.opcoes) ? q.opcoes : (typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : []),
-    respIdx: typeof q.resposta === 'number' ? q.resposta : parseInt(q.resposta) || 0,
-    comentario: q.comentario || q.gabarito || '',
-    tema: (q.tema || '').trim(),
-    subtema: (q.subtema || '').trim(),
-    dificuldade: q.dificuldade || 'media',
-    banca: (q.banca || '').trim(),
-    ano: q.ano || ''
-  };
-  QM[n.id] = n;
-  return n;
+    if (error) {
+        console.error("Erro ao carregar:", error);
+        return;
+    }
+    
+    questoes = data;
+    renderizarQuestao();
 }
 
-window.addEventListener('load', async () => {
-  const session = await exigirLogin();
-  if (!session) return;
+function renderizarQuestao() {
+    const container = document.getElementById('area-questao');
+    const q = questoes[indexAtual];
+    
+    if (!q) {
+        container.innerHTML = `<div class="questao-card" style="text-align:center"><h2>🎉 Fim das questões!</h2></div>`;
+        return;
+    }
 
-  SB = window.supabaseClient;
-  UID = session.user.id;
-  document.getElementById('main').style.display = 'block';
+    jaRespondeu = false;
+    respostaSelecionada = null;
+    atualizarInterfaceSuperior();
 
-  const [favR, respR, qR] = await Promise.all([
-    SB.from('favoritos').select('questao_id').eq('user_id', UID),
-    SB.from('respostas').select('questao_id,acertou,opcao_escolhida').eq('user_id', UID),
-    SB.from('questoes').select('*').order('id', { ascending: true })
-  ]);
+    const opcoes = JSON.parse(q.opcoes || '[]');
+    const letras = ['A', 'B', 'C', 'D', 'E'];
 
-  if (favR.data) favR.data.forEach(f => favsSet.add(f.questao_id));
-  if (respR.data) respR.data.forEach(r => respondidas[r.questao_id] = { acertou: r.acertou, opcao: r.opcao_escolhida });
-  todasQ = (qR.data || []).map(normQ);
+    container.innerHTML = `
+        <div class="questao-card">
+            <div class="q-header">
+                <div class="badge-group">
+                    <span class="badge">${q.tema || 'Medicina'}</span>
+                    <span class="badge" style="color:#d97706">${q.dificuldade || 'Média'}</span>
+                </div>
+                <span>Questão ${indexAtual + 1} de ${questoes.length}</span>
+            </div>
+            
+            <div class="enunciado">${q.pergunta}</div>
+            
+            <div id="opcoes-list">
+                ${opcoes.map((op, i) => `
+                    <div class="opcao" onclick="selecionarOpcao(${i})" id="opt-${i}">
+                        <div class="letra">${letras[i]}</div>
+                        <div class="texto">${op}</div>
+                    </div>
+                `).join('')}
+            </div>
 
-  // Preencher filtros
-  const sT = document.getElementById('f-tema');
-  [...new Set(todasQ.map(q => q.tema).filter(Boolean))].sort().forEach(t => {
-    const o = document.createElement('option'); o.value = o.textContent = t; sT.appendChild(o);
-  });
+            <button id="btn-confirmar" class="btn-confirmar" disabled onclick="validarResposta(${q.resposta})">
+                Confirmar Resposta
+            </button>
 
-  aplicar();
-  sT.addEventListener('change', () => {
-    const selS = document.getElementById('f-subtema');
-    selS.innerHTML = '<option value="">Todos os subtemas</option>';
-    [...new Set(todasQ.filter(q => q.tema === sT.value).map(q => q.subtema).filter(Boolean))].sort().forEach(s => {
-      const o = document.createElement('option'); o.value = o.textContent = s; selS.appendChild(o);
-    });
-    aplicar();
-  });
-  ['f-subtema','f-dif','f-banca'].forEach(id => document.getElementById(id).addEventListener('change', aplicar));
-});
+            <div id="feedback" class="feedback-msg" style="display:none"></div>
 
-function aplicar() {
-  const t = document.getElementById('f-tema').value;
-  const s = document.getElementById('f-subtema').value;
-  const d = document.getElementById('f-dif').value;
-  const b = document.getElementById('f-banca').value;
-
-  filtradas = todasQ.filter(q => {
-    if (t && q.tema !== t) return false;
-    if (s && q.subtema !== s) return false;
-    if (d && q.dificuldade !== d) return false;
-    if (b && q.banca !== b) return false;
-    return true;
-  });
-
-  document.getElementById('info-count').textContent = `${filtradas.length} questões encontradas`;
-  pagAtual = 1; seqIdx = 0;
-  modoAtual === 'lista' ? renderLista() : renderSeq();
+            <div class="acoes-footer">
+                <div style="display:flex; gap:10px">
+                    <button class="btn-nav">⭐ Favoritar</button>
+                    <button class="btn-nav">💬 Comentários</button>
+                </div>
+                <button onclick="proxima()" id="btn-proxima" class="btn-nav" style="background:#1e293b; color:#fff; display:none">
+                    Próxima Questão →
+                </button>
+            </div>
+        </div>
+    `;
 }
 
-function setModo(m) {
-  modoAtual = m;
-  document.getElementById('modo-lista').style.display = m === 'lista' ? 'block' : 'none';
-  document.getElementById('modo-sequencial').style.display = m === 'sequencial' ? 'block' : 'none';
-  document.getElementById('tab-lista').classList.toggle('active', m === 'lista');
-  document.getElementById('tab-seq').classList.toggle('active', m === 'sequencial');
-  m === 'sequencial' ? renderSeq() : renderLista();
+function selecionarOpcao(idx) {
+    if (jaRespondeu) return;
+    
+    respostaSelecionada = idx;
+    document.querySelectorAll('.opcao').forEach(el => el.classList.remove('selecionada'));
+    document.getElementById(`opt-${idx}`).classList.add('selecionada');
+    document.getElementById('btn-confirmar').disabled = false;
 }
 
-function renderLista() {
-  const inicio = (pagAtual - 1) * POR_PAGINA;
-  const slice = filtradas.slice(inicio, inicio + POR_PAGINA);
-  const lista = document.getElementById('lista-questoes');
-  lista.innerHTML = slice.map((q, i) => buildCard(q, inicio + i, false)).join('');
-  buildPag(Math.ceil(filtradas.length / POR_PAGINA));
-  slice.forEach(q => { if (respondidas[q.id]) reaplicar(q, respondidas[q.id].opcao, respondidas[q.id].acertou); });
+function validarResposta(corretaIdx) {
+    jaRespondeu = true;
+    const btnConf = document.getElementById('btn-confirmar');
+    const feedback = document.getElementById('feedback');
+    const btnProx = document.getElementById('btn-proxima');
+    
+    btnConf.style.display = 'none';
+    btnProx.style.display = 'flex';
+    feedback.style.display = 'block';
+
+    const opts = document.querySelectorAll('.opcao');
+    opts.forEach(o => o.style.cursor = 'default');
+
+    if (respostaSelecionada === corretaIdx) {
+        acertos++;
+        opts[respostaSelecionada].classList.add('correta');
+        feedback.innerHTML = "✓ Excelente, Dr. Victor! Resposta correta.";
+        feedback.style.background = "#ecfdf5";
+        feedback.style.color = "#065f46";
+    } else {
+        erros++;
+        opts[respostaSelecionada].classList.add('errada');
+        opts[corretaIdx].classList.add('correta');
+        feedback.innerHTML = "✗ Não foi dessa vez. Estude o comentário abaixo.";
+        feedback.style.background = "#fef2f2";
+        feedback.style.color = "#991b1b";
+    }
+
+    atualizarInterfaceSuperior();
 }
 
-function buildPag(total) {
-  const el = document.getElementById('paginacao');
-  el.innerHTML = '';
-  for(let i=1; i<=total; i++) {
-    const b = document.createElement('button');
-    b.className = `pag-btn ${i === pagAtual ? 'active' : ''}`;
-    b.textContent = i;
-    b.onclick = () => { pagAtual = i; renderLista(); window.scrollTo(0,0); };
-    el.appendChild(b);
-  }
+function proxima() {
+    if (indexAtual < questoes.length - 1) {
+        indexAtual++;
+        renderizarQuestao();
+    } else {
+        indexAtual++;
+        renderizarQuestao();
+    }
 }
 
-function renderSeq() {
-  if (!filtradas.length) return;
-  if (seqIdx >= filtradas.length) { 
-    document.getElementById('questao-seq').innerHTML = '';
-    document.getElementById('resultado-final').classList.add('show');
-    const pct = Math.round((seqC / (seqC + seqE)) * 100) || 0;
-    document.getElementById('res-pct').textContent = pct + '%';
-    return;
-  }
-  const q = filtradas[seqIdx];
-  document.getElementById('prog-num').textContent = `${seqIdx + 1} / ${filtradas.length}`;
-  document.getElementById('prog-fill').style.width = ((seqIdx / filtradas.length) * 100) + '%';
-  document.getElementById('questao-seq').innerHTML = buildCard(q, seqIdx, true);
-  if (respondidas[q.id]) reaplicar(q, respondidas[q.id].opcao, respondidas[q.id].acertou);
+function atualizarInterfaceSuperior() {
+    document.getElementById('txt-contador').innerText = `Questão ${indexAtual + 1} / ${questoes.length}`;
+    document.getElementById('count-acertos').innerText = acertos;
+    document.getElementById('count-erros').innerText = erros;
+    
+    const progresso = (indexAtual / questoes.length) * 100;
+    document.getElementById('progresso-fill').style.width = `${progresso}%`;
 }
 
-function buildCard(q, idx, isSeq) {
-  const fav = favsSet.has(q.id);
-  const opsHtml = q.opcoes.map((op, i) => `
-    <div class="opcao" data-qid="${q.id}" data-oi="${i}" onclick="opClick(this)">
-      <div class="opcao-letra">${LETRAS[i]}</div>
-      <div class="opcao-texto">${op}</div>
-    </div>`).join('');
-
-  return `
-  <div class="questao-card" id="card-${q.id}" data-seq="${isSeq ? 1 : 0}">
-    <div class="q-header">
-      <div class="q-badges"><span class="badge badge-blue">${q.tema}</span></div>
-      <div style="font-weight:800; color:#94a3b8">Q${idx + 1}</div>
-    </div>
-    <div class="q-enunciado">${q.enunciado}</div>
-    <div id="ops-${q.id}">${opsHtml}</div>
-    <div class="feedback-banner" id="fb-${q.id}"></div>
-    <button class="btn-confirmar" id="btn-${q.id}" data-qid="${q.id}" onclick="confirmarClick(this)" disabled>Confirmar Resposta</button>
-    <div class="gabarito-box" id="gab-${q.id}"><strong>Gabarito:</strong> ${q.comentario}</div>
-    <div class="q-acoes">
-      <button class="btn-acao ${fav?'ativo':''}" id="fav-${q.id}" data-qid="${q.id}" onclick="favClick(this)">${fav?'★ Favoritada':'☆ Favoritar'}</button>
-      <button class="btn-acao" onclick="comClick('${q.id}')">💬 Comentários</button>
-      ${isSeq ? `<button class="btn-acao" onclick="seqIdx++; renderSeq()" style="margin-left:auto">Próxima →</button>` : ''}
-    </div>
-    <div class="coments-sec" id="csec-${q.id}">
-      <div id="clist-${q.id}"></div>
-      <div class="coment-form">
-        <input type="text" id="cinp-${q.id}" placeholder="Escreva...">
-        <button class="btn-acao" onclick="comEnviar('${q.id}')">Enviar</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-function opClick(el) {
-  const qId = el.dataset.qid;
-  if (document.getElementById('card-' + qId).dataset.r) return;
-  document.querySelectorAll(`[data-qid="${qId}"].opcao`).forEach(o => o.classList.remove('selecionada'));
-  el.classList.add('selecionada');
-  selecoes[qId] = parseInt(el.dataset.oi);
-  document.getElementById('btn-' + qId).disabled = false;
-}
-
-async function confirmarClick(btn) {
-  const qId = btn.dataset.qid;
-  const op = selecoes[qId];
-  const q = QM[qId];
-  const ok = op === q.respIdx;
-  
-  reaplicar(q, op, ok);
-
-  if (document.getElementById('card-' + qId).dataset.seq === "1") {
-    ok ? seqC++ : seqE++;
-    document.getElementById('prog-c').textContent = seqC;
-    document.getElementById('prog-e').textContent = seqE;
-  }
-
-  await SB.from('respostas').upsert({ user_id: UID, questao_id: qId, opcao_escolhida: op, acertou: ok });
-}
-
-function reaplicar(q, op, ok) {
-  const card = document.getElementById('card-' + q.id);
-  card.dataset.r = "1";
-  document.querySelectorAll(`[data-qid="${q.id}"].opcao`).forEach((el, i) => {
-    el.classList.add('bloqueada');
-    if (i === q.respIdx) el.classList.add('correta');
-    else if (i === op && !ok) el.classList.add('errada');
-  });
-  document.getElementById('btn-' + q.id).style.display = 'none';
-  document.getElementById('gab-' + q.id).classList.add('show');
-  const fb = document.getElementById('fb-' + q.id);
-  fb.className = `feedback-banner show ${ok ? 'acerto' : 'erro'}`;
-  fb.innerHTML = ok ? '✅ Correto!' : `❌ Errado. Letra ${LETRAS[q.respIdx]}`;
-}
-
-async function favClick(btn) {
-  const qId = btn.dataset.qid;
-  if (favsSet.has(qId)) {
-    await SB.from('favoritos').delete().eq('user_id', UID).eq('questao_id', qId);
-    favsSet.delete(qId);
-    btn.classList.remove('ativo');
-    btn.textContent = '☆ Favoritar';
-  } else {
-    await SB.from('favoritos').insert({ user_id: UID, questao_id: qId });
-    favsSet.add(qId);
-    btn.classList.add('ativo');
-    btn.textContent = '★ Favoritada';
-  }
-}
-
-async function comClick(qId) {
-  const sec = document.getElementById('csec-' + qId);
-  sec.classList.toggle('aberta');
-  if (sec.classList.contains('aberta')) carregarCom(qId);
-}
-
-async function carregarCom(qId) {
-  const { data } = await SB.from('comentarios').select('texto, perfis(nome)').eq('questao_id', qId);
-  document.getElementById('clist-' + qId).innerHTML = data.map(c => `
-    <div style="font-size:.8rem; margin-bottom:5px"><strong>${c.perfis?.nome || 'User'}:</strong> ${c.texto}</div>
-  `).join('');
-}
-
-async function comEnviar(qId) {
-  const txt = document.getElementById('cinp-' + qId).value;
-  if (!txt) return;
-  await SB.from('comentarios').insert({ user_id: UID, questao_id: qId, texto: txt });
-  document.getElementById('cinp-' + qId).value = '';
-  carregarCom(qId);
-}
-
-function reiniciarSeq() {
-  seqIdx = 0; seqC = 0; seqE = 0;
-  document.getElementById('resultado-final').classList.remove('show');
-  renderSeq();
-}
-
-function limparFiltros() {
-  location.reload();
-}
+iniciar();
 </script>
 </body>
 </html>
