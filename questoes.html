@@ -1,163 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Questões — MedQuest Pro</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
-    .main-content { flex: 1; max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-    
-    .questao-card { 
-      background: #fff; 
-      border: 1px solid #e2e8f0; 
-      border-radius: 20px; 
-      padding: 2rem; 
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
-      margin-bottom: 2rem; 
-      position: relative;
-    }
-
-    .badge { padding: 5px 12px; border-radius: 99px; background: #eff6ff; color: #2563eb; font-size: 0.8rem; font-weight: 700; margin-right: 10px; }
-    .dificuldade { font-size: 0.8rem; font-weight: 600; color: #64748b; }
-
-    .enunciado { font-size: 1.15rem; color: #1e293b; line-height: 1.6; margin: 1.5rem 0; font-weight: 500; }
-
-    .opcoes-container { display: flex; flex-direction: column; gap: 12px; }
-    .opcao-btn { 
-      padding: 15px 20px; 
-      border: 2px solid #f1f5f9; 
-      border-radius: 12px; 
-      background: #fff; 
-      text-align: left; 
-      cursor: pointer; 
-      font-size: 1rem; 
-      transition: 0.2s; 
-      color: #475569;
-    }
-    .opcao-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
-    .opcao-btn.correta { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: 600; }
-    .opcao-btn.errada { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
-
-    .btn-favoritar { 
-      position: absolute; top: 20px; right: 20px; 
-      background: none; border: none; font-size: 1.5rem; 
-      cursor: pointer; transition: transform 0.2s; 
-    }
-    .btn-favoritar:active { transform: scale(1.3); }
-
-    .comentario { 
-      margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; 
-      border-radius: 12px; border-left: 5px solid #0ea5e9; 
-      display: none; font-size: 0.95rem; color: #0369a1; 
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões — MedQuest Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="bg-gray-50 font-sans">
 
-<script src="js/sidebar.js"></script>
+    <nav class="bg-blue-600 p-4 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">MedQuest Pro</h1>
+            <a href="dashboard.html" class="text-sm hover:underline">Voltar ao Dashboard</a>
+        </div>
+    </nav>
 
-<main class="main-content">
-  <header style="margin-bottom: 2rem;">
-    <h1 style="font-weight: 800; color: #1e293b;">Banco de Questões</h1>
-    <p style="color: #64748b;">9º Período — Preparação para Enare 2027</p>
-  </header>
+    <main class="container mx-auto p-4 max-w-4xl">
+        <header class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Banco de Questões</h2>
+            <p class="text-gray-600">Resolva os casos clínicos e acompanhe seu desempenho.</p>
+        </header>
 
-  <div id="questoes-container">
-    </div>
-</main>
-
-<script>
-async function carregarQuestoes() {
-    const container = document.getElementById('questoes-container');
-    
-    const { data: questoes, error } = await window.supabaseClient
-        .from('questoes')
-        .select('*')
-        .order('id', { ascending: false });
-
-    if (error) {
-        container.innerHTML = "Erro ao carregar questões.";
-        return;
-    }
-
-    container.innerHTML = questoes.map(q => renderizarQuestao(q)).join('');
-}
-
-function renderizarQuestao(q) {
-    const opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
-    const estrela = q.favorita ? '⭐' : '☆';
-
-    return `
-        <div class="questao-card" id="q-${q.id}">
-            <button class="btn-favoritar" id="fav-${q.id}" onclick="toggleFavorito('${q.id}', ${q.favorita})">
-                ${estrela}
-            </button>
-            <div>
-                <span class="badge">${q.tema}</span>
-                <span class="dificuldade">${q.subtema} • ${q.dificuldade.toUpperCase()}</span>
-            </div>
-            <div class="enunciado">${q.pergunta}</div>
-            
-            <div class="opcoes-container">
-                ${opcoes.map((opt, index) => `
-                    <button class="opcao-btn" onclick="verificarResposta(this, ${index}, ${q.resposta}, '${q.id}')">
-                        ${opt}
-                    </button>
-                `).join('')}
-            </div>
-
-            <div class="comentario" id="coment-${q.id}">
-                <strong>Explicação técnica:</strong><br>
-                ${q.comentario || 'Comentário em breve.'}
+        <div id="questoes-container" class="space-y-6">
+            <div class="text-center py-10">
+                <p class="text-gray-500 animate-pulse">Carregando questões...</p>
             </div>
         </div>
-    `;
-}
+    </main>
 
-async function toggleFavorito(id, statusAtual) {
-    const novoStatus = !statusAtual;
-    
-    // Atualiza no Banco
-    const { error } = await window.supabaseClient
-        .from('questoes')
-        .update({ favorita: novoStatus })
-        .eq('id', id);
+    <script>
+        // Configuração do Supabase (Substitua pelas suas credenciais se necessário)
+        const supabaseUrl = 'SUA_URL_DO_SUPABASE';
+        const supabaseKey = 'SUA_KEY_DO_SUPABASE';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    if (!error) {
-        // Atualiza o ícone e a função para o próximo clique
-        const btn = document.getElementById(`fav-${id}`);
-        btn.innerText = novoStatus ? '⭐' : '☆';
-        btn.setAttribute('onclick', `toggleFavorito('${id}', ${novoStatus})`);
-        console.log(`Questão ${id} atualizada para: ${novoStatus}`);
-    } else {
-        alert("Erro ao favoritar. Verifique sua conexão.");
-    }
-}
+        async function carregarQuestoes() {
+            const container = document.getElementById('questoes-container');
+            
+            const { data: questoes, error } = await supabase
+                .from('questoes')
+                .select('*')
+                .order('id', { ascending: false });
 
-function verificarResposta(btn, indexEscolhido, indexCorreto, id) {
-    const container = btn.parentElement;
-    const botoes = container.querySelectorAll('.opcao-btn');
-    const comentario = document.getElementById(`coment-${id}`);
+            if (error) {
+                container.innerHTML = `<p class="text-red-500">Erro ao carregar: ${error.message}</p>`;
+                return;
+            }
 
-    botoes.forEach(b => b.disabled = true); // Trava as opções
+            container.innerHTML = '';
 
-    if (indexEscolhido === indexCorreto) {
-        btn.classList.add('correta');
-    } else {
-        btn.classList.add('errada');
-        botoes[indexCorreto].classList.add('correta');
-    }
+            questoes.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-lg shadow-sm border border-gray-200";
+                
+                // Cabeçalho da Questão (Tema e Dificuldade)
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-700 rounded uppercase">
+                            ${q.tema} | ${q.subtema}
+                        </span>
+                        <span class="text-xs text-gray-400">ID: #${q.id}</span>
+                    </div>
+                    
+                    <p class="text-gray-800 font-medium mb-6 text-lg leading-relaxed">
+                        ${q.pergunta}
+                    </p>
 
-    comentario.style.display = 'block';
-}
+                    <div class="space-y-3" id="opcoes-${q.id}">
+                        ${q.opcoes.map((opcao, i) => `
+                            <button onclick="verificarResposta(${q.id}, ${i}, ${q.resposta})" 
+                                class="w-full text-left p-3 rounded-md border border-gray-100 hover:bg-gray-50 transition-colors flex items-center group">
+                                <span class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 mr-3 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                    ${String.fromCharCode(65 + i)}
+                                </span>
+                                <span class="text-gray-700">${opcao}</span>
+                            </button>
+                        `).join('')}
+                    </div>
 
-window.onload = carregarQuestoes;
-</script>
+                    <div id="feedback-${q.id}" class="mt-4 hidden p-4 rounded-md"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
 
+        function verificarResposta(questaoId, escolha, correta) {
+            const feedback = document.getElementById(`feedback-${questaoId}`);
+            const botoes = document.querySelectorAll(`#opcoes-${questaoId} button`);
+            
+            // Desabilita os botões após a escolha
+            botoes.forEach(btn => btn.disabled = true);
+
+            feedback.classList.remove('hidden');
+
+            if (escolha == correta) {
+                feedback.classList.add('bg-green-100', 'text-green-800');
+                feedback.innerHTML = `<strong>Correto!</strong> Parabéns pela análise clínica.`;
+                botoes[escolha].classList.add('bg-green-50', 'border-green-500');
+            } else {
+                feedback.classList.add('bg-red-100', 'text-red-800');
+                feedback.innerHTML = `<strong>Incorreto.</strong> A resposta certa era a alternativa ${String.fromCharCode(65 + parseInt(correta))}.`;
+                botoes[escolha].classList.add('bg-red-50', 'border-red-500');
+                botoes[correta].classList.add('bg-green-50', 'border-green-500');
+            }
+        }
+
+        carregarQuestoes();
+    </script>
 </body>
 </html>
