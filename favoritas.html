@@ -3,30 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Minhas Favoritas — MedQuest Pro</title>
+  <title>Favoritas — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Mantendo a identidade visual do MedQuest Pro */
     body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
     .main-content { flex: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
-    
     .header-favoritas { margin-bottom: 2rem; }
     .header-favoritas h1 { color: #1e293b; font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
     .header-favoritas p { color: #64748b; font-weight: 500; }
-
     .questao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-bottom: 2rem; position: relative; }
     .badge { padding: 4px 12px; border-radius: 99px; background: #f1f5f9; font-size: 0.75rem; color: #64748b; font-weight: 600; }
-    
     .enunciado { font-size: 1.1rem; color: #1e293b; line-height: 1.7; margin: 1.5rem 0; font-weight: 500; }
-    
     .btn-remover { position: absolute; top: 20px; right: 20px; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: 0.2s; }
     .btn-remover:hover { background: #ef4444; color: #fff; }
-
     .empty-state { text-align: center; padding: 4rem 2rem; background: #fff; border-radius: 20px; border: 2px dashed #e2e8f0; }
-    .empty-state i { font-size: 3rem; display: block; margin-bottom: 1rem; }
+    .comentario-box { background: #f8fafc; padding: 15px; border-radius: 12px; font-size: 0.9rem; border-left: 4px solid #2563eb; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -40,7 +34,7 @@
   </div>
 
   <div id="lista-favoritas">
-    <div style="text-align:center; padding: 2rem;">Carregando suas favoritas...</div>
+    <div style="text-align:center; padding: 2rem;">Buscando suas favoritas no banco de dados...</div>
   </div>
 </main>
 
@@ -49,23 +43,32 @@ async function carregarFavoritas() {
     const container = document.getElementById('lista-favoritas');
     const subtitulo = document.getElementById('subtitulo');
 
+    // Verifica se o cliente Supabase existe
+    if (!window.supabaseClient) {
+        container.innerHTML = "<b style='color:red'>Erro: Cliente Supabase não inicializado. Verifique o arquivo js/supabase.js</b>";
+        return;
+    }
+
     try {
-        // A mágica acontece aqui: filtramos apenas onde favorita é TRUE
         const { data, error } = await window.supabaseClient
             .from('questoes')
             .select('*')
-            .eq('favorita', true)
-            .order('created_at', { ascending: false });
+            .eq('favorita', true);
 
-        if (error) throw error;
+        if (error) {
+            console.error("Erro na Query:", error);
+            container.innerHTML = `<div class='empty-state'><h3>Erro ao carregar</h3><p>${error.message}</p></div>`;
+            return;
+        }
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <span>⭐</span>
-                    <h3>Nenhuma questão favoritada</h3>
-                    <p>As questões que você marcar como favoritas aparecerão aqui.</p>
-                    <a href="questoes.html" style="color:#2563eb; text-decoration:none; font-weight:600;">Ir para Questões</a>
+                    <span style="font-size:3rem">⭐</span>
+                    <h3>Nenhuma favorita ainda</h3>
+                    <p>Marque questões com a estrela para que elas apareçam aqui.</p>
+                    <br>
+                    <a href="questoes.html" style="color:#2563eb; font-weight:700; text-decoration:none">Voltar para Questões</a>
                 </div>
             `;
             return;
@@ -73,43 +76,44 @@ async function carregarFavoritas() {
 
         subtitulo.innerText = `Você tem ${data.length} questões salvas para revisão.`;
 
-        container.innerHTML = data.map(q => `
-            <div class="questao-card" id="card-${q.id}">
-                <button class="btn-remover" onclick="desfavoritar('${q.id}')">Remover</button>
-                <div class="badge">${q.tema || 'Geral'}</div>
-                <div class="enunciado">${q.pergunta}</div>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; font-size: 0.9rem; border-left: 4px solid #2563eb;">
-                    <strong>Gabarito:</strong> ${JSON.parse(q.opcoes)[q.resposta]}
-                    <br><br>
-                    <strong>Comentário:</strong> ${q.comentario || 'Sem comentário.'}
+        container.innerHTML = data.map(q => {
+            // Tratamento seguro para JSON de opções
+            const opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
+            
+            return `
+                <div class="questao-card" id="card-${q.id}">
+                    <button class="btn-remover" onclick="desfavoritar('${q.id}')">Remover</button>
+                    <div class="badge">${q.tema || 'Geral'}</div>
+                    <div class="enunciado">${q.pergunta}</div>
+                    <div class="comentario-box">
+                        <strong>Gabarito:</strong> ${opcoes[q.resposta]}
+                        <br><br>
+                        <strong>Comentário do Dr:</strong> ${q.comentario || 'Sem comentário cadastrado.'}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
     } catch (err) {
-        console.error("Erro ao carregar favoritas:", err);
-        container.innerHTML = "Erro ao carregar dados.";
+        console.error("Erro Crítico:", err);
+        container.innerHTML = "Ocorreu um erro inesperado ao processar os dados.";
     }
 }
 
 async function desfavoritar(id) {
-    if (!confirm("Deseja remover esta questão das favoritas?")) return;
-
     const { error } = await window.supabaseClient
         .from('questoes')
         .update({ favorita: false })
         .eq('id', id);
 
     if (!error) {
-        // Remove o card da tela com uma animação simples
         const card = document.getElementById(`card-${id}`);
-        card.style.opacity = '0';
+        card.style.transform = "scale(0.9)";
+        card.style.opacity = "0";
         setTimeout(() => {
             card.remove();
-            carregarFavoritas(); // Recarrega para atualizar o contador
+            carregarFavoritas(); // Atualiza contador
         }, 300);
-    } else {
-        alert("Erro ao remover.");
     }
 }
 
