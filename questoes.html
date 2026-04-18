@@ -12,13 +12,11 @@
     body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
     .main-content { flex: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
     
-    /* Progresso */
     .progresso-container { background: #fff; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .stats-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 0.9rem; color: #1e293b; }
     .barra-bg { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
     .barra-fill { width: 0%; height: 100%; background: #2563eb; transition: width 0.4s ease; }
 
-    /* Card */
     .questao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); min-height: 400px; }
     .q-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem; color: #64748b; font-weight: 600; }
     .badge-group { display: flex; gap: 8px; }
@@ -43,7 +41,10 @@
     .feedback-msg { padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: 600; text-align: center; display: none; }
 
     .acoes-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
-    .btn-nav { padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.9rem; }
+    .btn-nav { padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
+    .btn-nav:hover { background: #f1f5f9; }
+    .btn-nav.active-fav { color: #eab308; border-color: #eab308; background: #fefce8; }
+    
     #btn-proxima { background: #1e293b; color: #fff; border: none; display: none; }
   </style>
 </head>
@@ -66,11 +67,7 @@
     </div>
   </div>
 
-  <div id="area-questao">
-    <div class="questao-card" style="display:flex; align-items:center; justify-content:center;">
-       <p>Buscando questões no banco de dados...</p>
-    </div>
-  </div>
+  <div id="area-questao"></div>
 </main>
 
 <script>
@@ -81,7 +78,6 @@ let erros = 0;
 let respostaSelecionada = null;
 let jaRespondeu = false;
 
-// Inicialização robusta
 async function iniciar() {
     try {
         const { data, error } = await window.supabaseClient
@@ -89,21 +85,10 @@ async function iniciar() {
             .select('*');
 
         if (error) throw error;
-        
-        if (!data || data.length === 0) {
-            document.getElementById('area-questao').innerHTML = `
-                <div class="questao-card" style="text-align:center">
-                    <h3>Nenhuma questão encontrada.</h3>
-                    <p>Verifique sua tabela 'questoes' no Supabase.</p>
-                </div>`;
-            return;
-        }
-
         questoes = data;
         renderizarQuestao();
     } catch (err) {
         console.error("Erro Supabase:", err);
-        document.getElementById('area-questao').innerHTML = `<div class="questao-card">Erro ao conectar: ${err.message}</div>`;
     }
 }
 
@@ -112,12 +97,7 @@ function renderizarQuestao() {
     const q = questoes[indexAtual];
     
     if (!q) {
-        container.innerHTML = `
-            <div class="questao-card" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
-                <h2 style="font-size: 2rem;">🎉 Fim do Simulado!</h2>
-                <p>Você completou todas as questões disponíveis.</p>
-                <button onclick="location.reload()" class="btn-confirmar" style="width:200px; margin: 20px auto;">Recomeçar</button>
-            </div>`;
+        container.innerHTML = `<div class="questao-card" style="text-align:center"><h2>🎉 Simulado Concluído!</h2><button onclick="location.reload()" class="btn-confirmar">Recomeçar</button></div>`;
         return;
     }
 
@@ -125,21 +105,14 @@ function renderizarQuestao() {
     respostaSelecionada = null;
     atualizarInterfaceSuperior();
 
-    // Parse seguro das opções
-    let opcoes = [];
-    try {
-        opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
-    } catch(e) { 
-        opcoes = ["Erro ao carregar opções"]; 
-    }
-
+    let opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
     const letras = ['A', 'B', 'C', 'D', 'E'];
 
     container.innerHTML = `
         <div class="questao-card">
             <div class="q-header">
                 <div class="badge-group">
-                    <span class="badge">${q.tema || 'Medicina'}</span>
+                    <span class="badge">${q.tema || 'Geral'}</span>
                     <span class="badge" style="color:#d97706">${q.dificuldade || 'Média'}</span>
                 </div>
                 <span>Questão ${indexAtual + 1} de ${questoes.length}</span>
@@ -164,8 +137,10 @@ function renderizarQuestao() {
 
             <div class="acoes-footer">
                 <div style="display:flex; gap:10px">
-                    <button class="btn-nav">⭐ Favoritar</button>
-                    <button class="btn-nav">💬 Comentários</button>
+                    <button id="btn-fav" class="btn-nav ${q.favorita ? 'active-fav' : ''}" onclick="toggleFavorito('${q.id}')">
+                        ${q.favorita ? '★ Favoritada' : '☆ Favoritar'}
+                    </button>
+                    <button class="btn-nav" onclick="alert('Comentários: ' + '${q.comentario || 'Sem comentário disponível.'}')">💬 Comentários</button>
                 </div>
                 <button onclick="proxima()" id="btn-proxima" class="btn-nav">
                     Próxima Questão →
@@ -177,20 +152,16 @@ function renderizarQuestao() {
 
 function selecionarOpcao(idx) {
     if (jaRespondeu) return;
-    
     respostaSelecionada = idx;
     document.querySelectorAll('.opcao').forEach(el => el.classList.remove('selecionada'));
-    
-    const target = document.getElementById(`opt-${idx}`);
-    if(target) target.classList.add('selecionada');
-    
+    document.getElementById(`opt-${idx}`).classList.add('selecionada');
     document.getElementById('btn-confirmar').disabled = false;
 }
 
 function validarResposta(corretaIdx) {
     if (jaRespondeu || respostaSelecionada === null) return;
-    
     jaRespondeu = true;
+    
     const btnConf = document.getElementById('btn-confirmar');
     const feedback = document.getElementById('feedback');
     const btnProx = document.getElementById('btn-proxima');
@@ -200,26 +171,46 @@ function validarResposta(corretaIdx) {
     btnProx.style.display = 'flex';
     feedback.style.display = 'block';
 
-    opts.forEach(o => o.style.cursor = 'default');
-
-    // Ajuste para bater com o índice (0-4 ou 1-5 dependendo do seu banco)
-    // Se o seu banco salva a resposta como 1 para A, use (corretaIdx - 1)
     if (respostaSelecionada === corretaIdx) {
         acertos++;
         opts[respostaSelecionada].classList.add('correta');
-        feedback.innerHTML = "✓ Excelente, Dr. Victor! Resposta correta.";
+        feedback.innerHTML = "✓ Correto, Dr. Victor!";
         feedback.style.background = "#ecfdf5";
         feedback.style.color = "#065f46";
     } else {
         erros++;
         opts[respostaSelecionada].classList.add('errada');
-        if(opts[corretaIdx]) opts[corretaIdx].classList.add('correta');
-        feedback.innerHTML = "✗ Resposta incorreta. Revise o tema.";
+        opts[corretaIdx].classList.add('correta');
+        feedback.innerHTML = "✗ Resposta incorreta.";
         feedback.style.background = "#fef2f2";
         feedback.style.color = "#991b1b";
     }
-
     atualizarInterfaceSuperior();
+}
+
+async function toggleFavorito(id) {
+    const q = questoes.find(item => item.id == id);
+    const btn = document.getElementById('btn-fav');
+    
+    // Inverte o estado localmente
+    q.favorita = !q.favorita;
+
+    // Atualiza Visual
+    if(q.favorita) {
+        btn.classList.add('active-fav');
+        btn.innerHTML = '★ Favoritada';
+    } else {
+        btn.classList.remove('active-fav');
+        btn.innerHTML = '☆ Favoritar';
+    }
+
+    // Tenta salvar no Supabase (silenciosamente)
+    const { error } = await window.supabaseClient
+        .from('questoes')
+        .update({ favorita: q.favorita })
+        .eq('id', id);
+
+    if (error) console.error("Erro ao favoritar:", error);
 }
 
 function proxima() {
@@ -228,22 +219,15 @@ function proxima() {
 }
 
 function atualizarInterfaceSuperior() {
-    const contador = document.getElementById('txt-contador');
-    const acertoEl = document.getElementById('count-acertos');
-    const erroEl = document.getElementById('count-erros');
+    document.getElementById('txt-contador').innerText = `Questão ${indexAtual + 1} / ${questoes.length}`;
+    document.getElementById('count-acertos').innerText = acertos;
+    document.getElementById('count-erros').innerText = erros;
     const fill = document.getElementById('progresso-fill');
-
-    if(contador) contador.innerText = `Questão ${indexAtual + 1} / ${questoes.length}`;
-    if(acertoEl) acertoEl.innerText = acertos;
-    if(erroEl) erroEl.innerText = erros;
-    
     if(fill && questoes.length > 0) {
-        const progresso = (indexAtual / questoes.length) * 100;
-        fill.style.width = `${progresso}%`;
+        fill.style.width = `${(indexAtual / questoes.length) * 100}%`;
     }
 }
 
-// Chamar a função ao carregar a página
 window.onload = iniciar;
 </script>
 </body>
