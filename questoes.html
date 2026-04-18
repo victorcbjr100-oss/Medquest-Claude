@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Questões — MedQuest Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
@@ -13,82 +14,51 @@
     .filtros-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
     .filtros-wrap select{padding:.5rem .85rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;color:#1e293b;background:#f8fafc;outline:none;cursor:pointer;transition:border-color .15s}
     .filtros-wrap select:focus{border-color:#2563eb;background:#fff}
-    .btn-limpar{padding:.5rem 1rem;background:transparent;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.82rem;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+    .btn-limpar{padding:.5rem 1rem;background:transparent;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.82rem;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s}
     .btn-limpar:hover{border-color:#ef4444;color:#ef4444}
     .info-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem}
-    .info-bar-left{font-size:.85rem;color:#64748b;font-weight:500}
     .modo-tabs{display:flex;gap:.4rem}
-    .modo-tab{padding:.4rem .9rem;border:1.5px solid #e2e8f0;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;background:#fff;color:#64748b;font-family:'Inter',sans-serif}
+    .modo-tab{padding:.4rem .9rem;border:1.5px solid #e2e8f0;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;background:#fff;color:#64748b}
     .modo-tab.active{background:#2563eb;border-color:#2563eb;color:#fff}
     .questao-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:2rem 2.25rem;box-shadow:0 4px 12px rgba(0,0,0,.06);margin-bottom:1.25rem}
-    .q-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem}
+    .q-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem}
     .q-badges{display:flex;gap:.4rem;flex-wrap:wrap}
-    .badge{display:inline-flex;align-items:center;padding:.2rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700}
+    .badge{padding:.2rem .7rem;border-radius:99px;font-size:.72rem;font-weight:700}
     .badge-blue{background:#eff6ff;color:#2563eb}
+    .badge-gray{background:#f1f5f9;color:#64748b}
     .badge-green{background:#ecfdf5;color:#059669}
     .badge-yellow{background:#fffbeb;color:#d97706}
     .badge-red{background:#fef2f2;color:#dc2626}
-    .badge-gray{background:#f1f5f9;color:#64748b}
     .badge-purple{background:#f5f3ff;color:#7c3aed}
-    .q-numero{font-size:.75rem;font-weight:800;color:#94a3b8}
     .q-enunciado{font-size:1rem;font-weight:500;line-height:1.75;color:#1e293b;margin-bottom:1.5rem}
-    .opcao{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 1.1rem;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:.6rem;cursor:pointer;transition:all .18s;background:#fff;user-select:none}
+    .opcao{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 1.1rem;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:.6rem;cursor:pointer;transition:all .18s;background:#fff}
     .opcao:hover:not(.bloqueada){border-color:#93c5fd;background:#f0f7ff}
     .opcao.selecionada{border-color:#2563eb;background:#eff6ff}
     .opcao.correta{border-color:#10b981!important;background:#ecfdf5!important}
     .opcao.errada{border-color:#ef4444!important;background:#fef2f2!important}
     .opcao.bloqueada{cursor:default;pointer-events:none}
-    .opcao-letra{width:30px;height:30px;border-radius:8px;background:#f1f5f9;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#64748b;flex-shrink:0;transition:all .18s}
-    .opcao.selecionada .opcao-letra{background:#2563eb;border-color:#2563eb;color:#fff}
-    .opcao.correta .opcao-letra{background:#10b981;border-color:#10b981;color:#fff}
-    .opcao.errada .opcao-letra{background:#ef4444;border-color:#ef4444;color:#fff}
-    .opcao-texto{font-size:.93rem;line-height:1.6;color:#1e293b;flex:1;padding-top:3px}
-    .btn-confirmar{width:100%;padding:.85rem;background:#2563eb;color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:.75rem}
-    .btn-confirmar:hover{background:#1d4ed8}
+    .opcao-letra{width:30px;height:30px;border-radius:8px;background:#f1f5f9;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#64748b;flex-shrink:0}
+    .opcao.selecionada .opcao-letra{background:#2563eb;color:#fff;border-color:#2563eb}
+    .btn-confirmar{width:100%;padding:.85rem;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:.75rem}
     .btn-confirmar:disabled{opacity:.35;cursor:not-allowed}
     .feedback-banner{display:none;margin-top:1rem;padding:.8rem 1.1rem;border-radius:10px;font-size:.9rem;font-weight:600;align-items:center;gap:.6rem}
-    .feedback-banner.show{display:flex;animation:sd .25s ease}
+    .feedback-banner.show{display:flex}
     .feedback-banner.acerto{background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7}
     .feedback-banner.erro{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5}
-    @keyframes sd{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-    .gabarito-box{margin-top:1.25rem;padding:1.25rem 1.5rem;background:#f0f9ff;border-left:4px solid #2563eb;border-radius:0 10px 10px 0;font-size:.9rem;line-height:1.75;color:#1e293b;display:none}
-    .gabarito-box.show{display:block;animation:sd .3s ease}
-    .gabarito-titulo{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#2563eb;margin-bottom:.5rem}
-    .q-acoes{display:flex;gap:.6rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid #f1f5f9;flex-wrap:wrap;align-items:center}
-    .btn-acao{display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;background:transparent;color:#64748b;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
-    .btn-acao:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
-    .btn-acao.ativo{border-color:#f59e0b;color:#d97706;background:#fffbeb}
-    .btn-acao.ativo-c{border-color:#8b5cf6;color:#7c3aed;background:#f5f3ff}
+    .gabarito-box{margin-top:1.25rem;padding:1.25rem 1.5rem;background:#f0f9ff;border-left:4px solid #2563eb;border-radius:0 10px 10px 0;display:none}
+    .gabarito-box.show{display:block}
+    .q-acoes{display:flex;gap:.6rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid #f1f5f9;align-items:center}
+    .btn-acao{display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;background:transparent;color:#64748b;font-size:.8rem;font-weight:600;cursor:pointer}
+    .btn-acao.ativo{color:#d97706;border-color:#f59e0b;background:#fffbeb}
     .coments-sec{display:none;margin-top:1rem;border-top:1px solid #f1f5f9;padding-top:1rem}
-    .coments-sec.aberta{display:block;animation:sd .2s ease}
-    .coment-item{padding:.75rem 1rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:.5rem}
-    .coment-autor{font-size:.72rem;font-weight:700;color:#64748b;margin-bottom:.25rem}
-    .coment-texto{font-size:.875rem;color:#1e293b;line-height:1.6}
+    .coments-sec.aberta{display:block}
     .coment-form{display:flex;gap:.5rem;margin-top:.75rem}
-    .coment-form input{flex:1;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;outline:none}
-    .coment-form input:focus{border-color:#2563eb}
-    .coment-form button{padding:.6rem 1.1rem;background:#2563eb;color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer}
-    .prog-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.5rem;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-    .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem}
-    .prog-num{font-size:1rem;font-weight:800;color:#1e293b}
-    .prog-scores{display:flex;gap:1.5rem}
-    .prog-score{text-align:center}
-    .prog-score span{font-size:1.1rem;font-weight:800;display:block}
-    .prog-score small{font-size:.68rem;font-weight:700;color:#64748b;text-transform:uppercase}
+    .coment-form input{flex:1;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;outline:none}
+    .prog-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.5rem;margin-bottom:1.25rem}
     .prog-bar{height:6px;background:#f1f5f9;border-radius:99px;overflow:hidden}
-    .prog-fill{height:100%;background:#2563eb;border-radius:99px;transition:width .5s ease}
-    .resultado-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:2.5rem 2rem;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.07);display:none}
-    .resultado-card.show{display:block;animation:sd .4s ease}
-    .res-pct{font-size:4rem;font-weight:900;line-height:1;margin-bottom:.5rem}
-    .res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0}
-    .res-stat{background:#f8fafc;border-radius:10px;padding:1rem}
-    .res-stat strong{display:block;font-size:1.5rem;font-weight:800}
-    .res-stat small{font-size:.7rem;text-transform:uppercase;font-weight:700;color:#64748b}
-    .btn-res{width:100%;padding:.85rem;border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;margin-bottom:.5rem}
-    .pag-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:.85rem;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif}
-    .pag-btn:hover,.pag-btn.active{background:#2563eb;border-color:#2563eb;color:#fff}
-    .empty{text-align:center;padding:3rem;color:#94a3b8;font-size:.9rem}
-    @media(max-width:768px){.questao-card{padding:1.25rem 1rem}.main-content{padding:1.25rem .75rem}}
+    .prog-fill{height:100%;background:#2563eb;transition:width .5s}
+    .resultado-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:2.5rem 2rem;text-align:center;display:none}
+    .resultado-card.show{display:block}
   </style>
 </head>
 <body>
@@ -124,49 +94,38 @@
 
   <div id="modo-lista">
     <div id="lista-questoes"></div>
-    <div id="paginacao" style="display:flex;justify-content:center;gap:.4rem;margin-top:1.5rem;flex-wrap:wrap"></div>
+    <div id="paginacao" style="display:flex;justify-content:center;gap:.4rem;margin-top:1.5rem"></div>
   </div>
 
   <div id="modo-sequencial" style="display:none">
     <div class="prog-wrap">
-      <div class="prog-top">
-        <div class="prog-num" id="prog-num">1 / 0</div>
-        <div class="prog-scores">
-          <div class="prog-score"><span id="prog-c" style="color:#10b981">0</span><small>Certas</small></div>
-          <div class="prog-score"><span id="prog-e" style="color:#ef4444">0</span><small>Erradas</small></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+        <span id="prog-num" style="font-weight:800">1 / 0</span>
+        <div>
+           <span id="prog-c" style="color:#10b981;font-weight:700">0</span> <small>Certas</small>
+           <span id="prog-e" style="color:#ef4444;font-weight:700;margin-left:10px">0</span> <small>Erradas</small>
         </div>
       </div>
-      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
     </div>
     <div id="questao-seq"></div>
     <div class="resultado-card" id="resultado-final">
-      <div style="font-size:2.5rem;margin-bottom:.5rem">🎉</div>
-      <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:.4rem">Sessão concluída!</h2>
-      <p style="color:#64748b;font-size:.9rem;margin-bottom:1.5rem">Você completou todas as questões desta seleção.</p>
-      <div class="res-pct" id="res-pct">0%</div>
-      <div class="res-stats">
-        <div class="res-stat"><strong id="res-total" style="color:#2563eb">0</strong><small>Total</small></div>
-        <div class="res-stat"><strong id="res-certas" style="color:#10b981">0</strong><small>Certas</small></div>
-        <div class="res-stat"><strong id="res-erradas" style="color:#ef4444">0</strong><small>Erradas</small></div>
-      </div>
-      <button class="btn-res" style="background:#2563eb;color:#fff" onclick="reiniciarSeq()">Recomeçar sessão</button>
-      <button class="btn-res" style="background:transparent;color:#2563eb;border:2px solid #2563eb" onclick="setModo('lista')">Voltar para lista</button>
+      <h2>Sessão concluída!</h2>
+      <div id="res-pct" style="font-size:3rem;font-weight:900">0%</div>
+      <button class="btn-confirmar" onclick="reiniciarSeq()">Recomeçar</button>
     </div>
   </div>
 </main>
 
 <script>
-/* ─────────────────────────────────────────────
-   ESTADO GLOBAL
-───────────────────────────────────────────── */
-let SB = null;           // supabaseClient
-let UID = null;          // user id (string)
-let todasQ = [];         // questões normalizadas
+let SB = null;
+let UID = null;
+let todasQ = [];
 let filtradas = [];
 const favsSet = new Set();
-const respondidas = {};  // id → {acertou, opcao}
-const selecoes = {};     // id → índice selecionado
-const QM = {};           // id → questão normalizada
+const respondidas = {}; 
+const selecoes = {}; 
+const QM = {}; 
 
 const POR_PAGINA = 8;
 let pagAtual = 1;
@@ -174,121 +133,59 @@ let modoAtual = 'lista';
 let seqIdx = 0, seqC = 0, seqE = 0;
 const LETRAS = ['A','B','C','D','E'];
 
-/* ─────────────────────────────────────────────
-   NORMALIZAÇÃO — suporta formato legado E novo
-───────────────────────────────────────────── */
+// Normalização para garantir que campos existam
 function normQ(q) {
-  let enunciado, opcoes, respIdx, comentario;
-
-  if (q.pergunta) {
-    // Formato novo: pergunta + opcoes array + resposta índice
-    enunciado  = q.pergunta;
-    opcoes     = parseOps(q.opcoes);
-    respIdx    = Number.isInteger(q.resposta) ? q.resposta : (parseInt(q.resposta) || 0);
-    comentario = q.comentario || '';
-  } else {
-    // Formato legado: enunciado + alternativa_a/b/c/d + correta letra
-    enunciado  = q.enunciado || '[Sem enunciado]';
-    comentario = q.comentario || q.gabarito || '';
-    const m    = {A:0,B:1,C:2,D:3,E:4};
-    const l    = String(q.correta || 'A').toUpperCase().charAt(0);
-    respIdx    = m[l] ?? 0;
-    opcoes     = ['a','b','c','d','e'].map(x => q['alternativa_' + x]).filter(Boolean);
-    if (!opcoes.length) opcoes = parseOps(q.opcoes);
-  }
-
-  // Normaliza strings para evitar bugs de filtro
   const n = {
-    id:          q.id,
-    enunciado,
-    opcoes,
-    respIdx,
-    comentario,
-    tema:        (q.tema    || '').trim(),
-    subtema:     (q.subtema || '').trim(),
+    id: q.id,
+    enunciado: q.pergunta || q.enunciado || '[Sem enunciado]',
+    opcoes: Array.isArray(q.opcoes) ? q.opcoes : (typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : []),
+    respIdx: typeof q.resposta === 'number' ? q.resposta : parseInt(q.resposta) || 0,
+    comentario: q.comentario || q.gabarito || '',
+    tema: (q.tema || '').trim(),
+    subtema: (q.subtema || '').trim(),
     dificuldade: q.dificuldade || 'media',
-    banca:       (q.banca   || '').trim(),
-    ano:         q.ano || ''
+    banca: (q.banca || '').trim(),
+    ano: q.ano || ''
   };
-  QM[q.id] = n;   // registra no mapa global para callbacks
+  QM[n.id] = n;
   return n;
 }
 
-function parseOps(o) {
-  if (Array.isArray(o)) return o;
-  if (typeof o === 'string') { try { return JSON.parse(o); } catch { return o.split(',').map(s => s.trim()).filter(Boolean); } }
-  return [];
-}
-
-/* ─────────────────────────────────────────────
-   INIT
-───────────────────────────────────────────── */
 window.addEventListener('load', async () => {
   const session = await exigirLogin();
   if (!session) return;
 
-  SB  = window.supabaseClient;
+  SB = window.supabaseClient;
   UID = session.user.id;
   document.getElementById('main').style.display = 'block';
 
-  // Parâmetros URL
-  const p     = new URLSearchParams(window.location.search);
-  const temaP = p.get('tema')       ? decodeURIComponent(p.get('tema'))      : '';
-  const subP  = p.get('subtema')    ? decodeURIComponent(p.get('subtema'))   : '';
-  const difP  = p.get('dificuldade') || '';
-
-  if (temaP) {
-    document.getElementById('titulo-pagina').textContent = temaP;
-    document.getElementById('sub-pagina').textContent    = subP || 'Todas as questões';
-  }
-
-  // Carrega tudo em paralelo
   const [favR, respR, qR] = await Promise.all([
     SB.from('favoritos').select('questao_id').eq('user_id', UID),
     SB.from('respostas').select('questao_id,acertou,opcao_escolhida').eq('user_id', UID),
     SB.from('questoes').select('*').order('id', { ascending: true })
   ]);
 
-  if (favR.data)  favR.data.forEach(f => favsSet.add(f.questao_id));
-  if (respR.data) respR.data.forEach(r => {
-    respondidas[r.questao_id] = { acertou: r.acertou, opcao: r.opcao_escolhida };
-  });
+  if (favR.data) favR.data.forEach(f => favsSet.add(f.questao_id));
+  if (respR.data) respR.data.forEach(r => respondidas[r.questao_id] = { acertou: r.acertou, opcao: r.opcao_escolhida });
   todasQ = (qR.data || []).map(normQ);
 
-  // Preenche filtros
-  const temas  = [...new Set(todasQ.map(q => q.tema).filter(Boolean))].sort();
-  const bancas = [...new Set(todasQ.map(q => q.banca).filter(Boolean))].sort();
+  // Preencher filtros
   const sT = document.getElementById('f-tema');
-  const sB = document.getElementById('f-banca');
-  temas.forEach(t  => { const o = document.createElement('option'); o.value = o.textContent = t;  sT.appendChild(o); });
-  bancas.forEach(b => { const o = document.createElement('option'); o.value = o.textContent = b;  sB.appendChild(o); });
+  [...new Set(todasQ.map(q => q.tema).filter(Boolean))].sort().forEach(t => {
+    const o = document.createElement('option'); o.value = o.textContent = t; sT.appendChild(o);
+  });
 
-  if (temaP) { sT.value = temaP; atualizarSubs(temaP); }
-  if (difP)  document.getElementById('f-dif').value = difP;
-  if (subP)  setTimeout(() => { document.getElementById('f-subtema').value = subP; aplicar(); }, 80);
-  else aplicar();
-
-  sT.addEventListener('change', () => { atualizarSubs(sT.value); aplicar(); });
+  aplicar();
+  sT.addEventListener('change', () => {
+    const selS = document.getElementById('f-subtema');
+    selS.innerHTML = '<option value="">Todos os subtemas</option>';
+    [...new Set(todasQ.filter(q => q.tema === sT.value).map(q => q.subtema).filter(Boolean))].sort().forEach(s => {
+      const o = document.createElement('option'); o.value = o.textContent = s; selS.appendChild(o);
+    });
+    aplicar();
+  });
   ['f-subtema','f-dif','f-banca'].forEach(id => document.getElementById(id).addEventListener('change', aplicar));
 });
-
-/* ─────────────────────────────────────────────
-   FILTROS
-───────────────────────────────────────────── */
-function atualizarSubs(tema) {
-  const sel = document.getElementById('f-subtema');
-  sel.innerHTML = '<option value="">Todos os subtemas</option>';
-  const subs = [...new Set(todasQ.filter(q => q.tema === tema).map(q => q.subtema).filter(Boolean))].sort();
-  subs.forEach(s => { const o = document.createElement('option'); o.value = o.textContent = s; sel.appendChild(o); });
-}
-
-function limparFiltros() {
-  ['f-tema','f-subtema','f-dif','f-banca'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-subtema').innerHTML = '<option value="">Todos os subtemas</option>';
-  document.getElementById('titulo-pagina').textContent = 'Questões';
-  document.getElementById('sub-pagina').textContent    = 'Pratique e aprimore seu conhecimento médico';
-  aplicar();
-}
 
 function aplicar() {
   const t = document.getElementById('f-tema').value;
@@ -296,46 +193,32 @@ function aplicar() {
   const d = document.getElementById('f-dif').value;
   const b = document.getElementById('f-banca').value;
 
-  // FIX: filtro com comparação de strings normalizadas
   filtradas = todasQ.filter(q => {
-    if (t && q.tema      !== t) return false;
-    if (s && q.subtema   !== s) return false;
+    if (t && q.tema !== t) return false;
+    if (s && q.subtema !== s) return false;
     if (d && q.dificuldade !== d) return false;
-    if (b && q.banca     !== b) return false;
+    if (b && q.banca !== b) return false;
     return true;
   });
 
-  document.getElementById('info-count').textContent =
-    `${filtradas.length} questão${filtradas.length !== 1 ? 'ões' : ''} encontrada${filtradas.length !== 1 ? 's' : ''}`;
-  pagAtual = 1; seqIdx = 0; seqC = 0; seqE = 0;
+  document.getElementById('info-count').textContent = `${filtradas.length} questões encontradas`;
+  pagAtual = 1; seqIdx = 0;
   modoAtual === 'lista' ? renderLista() : renderSeq();
 }
 
-/* ─────────────────────────────────────────────
-   MODO
-───────────────────────────────────────────── */
 function setModo(m) {
   modoAtual = m;
-  document.getElementById('modo-lista').style.display      = m === 'lista'      ? 'block' : 'none';
+  document.getElementById('modo-lista').style.display = m === 'lista' ? 'block' : 'none';
   document.getElementById('modo-sequencial').style.display = m === 'sequencial' ? 'block' : 'none';
   document.getElementById('tab-lista').classList.toggle('active', m === 'lista');
-  document.getElementById('tab-seq').classList.toggle('active',   m === 'sequencial');
-  if (m === 'sequencial') { seqIdx = 0; seqC = 0; seqE = 0; renderSeq(); }
-  else renderLista();
+  document.getElementById('tab-seq').classList.toggle('active', m === 'sequencial');
+  m === 'sequencial' ? renderSeq() : renderLista();
 }
 
-/* ─────────────────────────────────────────────
-   LISTA
-───────────────────────────────────────────── */
 function renderLista() {
   const inicio = (pagAtual - 1) * POR_PAGINA;
-  const slice  = filtradas.slice(inicio, inicio + POR_PAGINA);
-  const lista  = document.getElementById('lista-questoes');
-  if (!slice.length) {
-    lista.innerHTML = '<div class="empty">😔 Nenhuma questão encontrada com esses filtros.</div>';
-    document.getElementById('paginacao').innerHTML = '';
-    return;
-  }
+  const slice = filtradas.slice(inicio, inicio + POR_PAGINA);
+  const lista = document.getElementById('lista-questoes');
   lista.innerHTML = slice.map((q, i) => buildCard(q, inicio + i, false)).join('');
   buildPag(Math.ceil(filtradas.length / POR_PAGINA));
   slice.forEach(q => { if (respondidas[q.id]) reaplicar(q, respondidas[q.id].opcao, respondidas[q.id].acertou); });
@@ -343,239 +226,151 @@ function renderLista() {
 
 function buildPag(total) {
   const el = document.getElementById('paginacao');
-  if (total <= 1) { el.innerHTML = ''; return; }
-  let h = '';
-  if (pagAtual > 1) h += `<button class="pag-btn" onclick="irPag(${pagAtual - 1})">‹</button>`;
-  for (let i = Math.max(1, pagAtual - 2); i <= Math.min(total, pagAtual + 2); i++)
-    h += `<button class="pag-btn ${i === pagAtual ? 'active' : ''}" onclick="irPag(${i})">${i}</button>`;
-  if (pagAtual < total) h += `<button class="pag-btn" onclick="irPag(${pagAtual + 1})">›</button>`;
-  el.innerHTML = h;
+  el.innerHTML = '';
+  for(let i=1; i<=total; i++) {
+    const b = document.createElement('button');
+    b.className = `pag-btn ${i === pagAtual ? 'active' : ''}`;
+    b.textContent = i;
+    b.onclick = () => { pagAtual = i; renderLista(); window.scrollTo(0,0); };
+    el.appendChild(b);
+  }
 }
-function irPag(n) { pagAtual = n; renderLista(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-/* ─────────────────────────────────────────────
-   SEQUENCIAL
-───────────────────────────────────────────── */
 function renderSeq() {
-  document.getElementById('resultado-final').classList.remove('show');
-  if (!filtradas.length) { document.getElementById('questao-seq').innerHTML = '<div class="empty">Nenhuma questão neste filtro.</div>'; return; }
-  if (seqIdx >= filtradas.length) { mostrarFinal(); return; }
-  const q = filtradas[seqIdx], total = filtradas.length;
-  document.getElementById('prog-num').textContent   = `${seqIdx + 1} / ${total}`;
-  document.getElementById('prog-fill').style.width  = Math.round((seqIdx / total) * 100) + '%';
-  document.getElementById('prog-c').textContent     = seqC;
-  document.getElementById('prog-e').textContent     = seqE;
-  document.getElementById('questao-seq').innerHTML  = buildCard(q, seqIdx, true);
+  if (!filtradas.length) return;
+  if (seqIdx >= filtradas.length) { 
+    document.getElementById('questao-seq').innerHTML = '';
+    document.getElementById('resultado-final').classList.add('show');
+    const pct = Math.round((seqC / (seqC + seqE)) * 100) || 0;
+    document.getElementById('res-pct').textContent = pct + '%';
+    return;
+  }
+  const q = filtradas[seqIdx];
+  document.getElementById('prog-num').textContent = `${seqIdx + 1} / ${filtradas.length}`;
+  document.getElementById('prog-fill').style.width = ((seqIdx / filtradas.length) * 100) + '%';
+  document.getElementById('questao-seq').innerHTML = buildCard(q, seqIdx, true);
   if (respondidas[q.id]) reaplicar(q, respondidas[q.id].opcao, respondidas[q.id].acertou);
 }
-function proxSeq() { seqIdx++; renderSeq(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function reiniciarSeq() { seqIdx = 0; seqC = 0; seqE = 0; document.getElementById('resultado-final').classList.remove('show'); renderSeq(); }
-function mostrarFinal() {
-  document.getElementById('questao-seq').innerHTML = '';
-  const r = document.getElementById('resultado-final'); r.classList.add('show');
-  const total = seqC + seqE, pct = total > 0 ? Math.round((seqC / total) * 100) : 0;
-  const cor = pct >= 70 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
-  document.getElementById('res-pct').textContent  = pct + '%';
-  document.getElementById('res-pct').style.color  = cor;
-  document.getElementById('res-total').textContent   = total;
-  document.getElementById('res-certas').textContent  = seqC;
-  document.getElementById('res-erradas').textContent = seqE;
-}
 
-/* ─────────────────────────────────────────────
-   BUILD CARD — usa data-attributes, sem parâmetros inline
-───────────────────────────────────────────── */
 function buildCard(q, idx, isSeq) {
   const fav = favsSet.has(q.id);
-  const dL  = {facil:'Fácil', media:'Média', dificil:'Difícil'}[q.dificuldade] || 'Média';
-  const dC  = {facil:'badge-green', media:'badge-yellow', dificil:'badge-red'}[q.dificuldade] || 'badge-yellow';
-
   const opsHtml = q.opcoes.map((op, i) => `
     <div class="opcao" data-qid="${q.id}" data-oi="${i}" onclick="opClick(this)">
       <div class="opcao-letra">${LETRAS[i]}</div>
       <div class="opcao-texto">${op}</div>
     </div>`).join('');
 
-  return `<div class="questao-card" id="card-${q.id}" data-seq="${isSeq ? 1 : 0}">
+  return `
+  <div class="questao-card" id="card-${q.id}" data-seq="${isSeq ? 1 : 0}">
     <div class="q-header">
-      <div class="q-badges">
-        ${q.tema    ? `<span class="badge badge-blue">${q.tema}</span>`   : ''}
-        ${q.subtema ? `<span class="badge badge-gray">${q.subtema}</span>`: ''}
-        <span class="badge ${dC}">${dL}</span>
-        ${q.banca   ? `<span class="badge badge-purple">${q.banca}${q.ano ? ' ' + q.ano : ''}</span>` : ''}
-      </div>
-      <div class="q-numero">Q${idx + 1}</div>
+      <div class="q-badges"><span class="badge badge-blue">${q.tema}</span></div>
+      <div style="font-weight:800; color:#94a3b8">Q${idx + 1}</div>
     </div>
     <div class="q-enunciado">${q.enunciado}</div>
     <div id="ops-${q.id}">${opsHtml}</div>
     <div class="feedback-banner" id="fb-${q.id}"></div>
     <button class="btn-confirmar" id="btn-${q.id}" data-qid="${q.id}" onclick="confirmarClick(this)" disabled>Confirmar Resposta</button>
-    ${q.comentario ? `<div class="gabarito-box" id="gab-${q.id}"><div class="gabarito-titulo">💡 Gabarito comentado</div>${q.comentario}</div>` : ''}
+    <div class="gabarito-box" id="gab-${q.id}"><strong>Gabarito:</strong> ${q.comentario}</div>
     <div class="q-acoes">
-      <button class="btn-acao ${fav ? 'ativo' : ''}" id="fav-${q.id}" data-qid="${q.id}" onclick="favClick(this)">${fav ? '★ Favoritada' : '☆ Favoritar'}</button>
-      <button class="btn-acao" data-qid="${q.id}" onclick="comClick(this)">💬 Comentários</button>
-      ${isSeq ? `<button class="btn-acao" onclick="proxSeq()" style="margin-left:auto">Próxima →</button>` : ''}
+      <button class="btn-acao ${fav?'ativo':''}" id="fav-${q.id}" data-qid="${q.id}" onclick="favClick(this)">${fav?'★ Favoritada':'☆ Favoritar'}</button>
+      <button class="btn-acao" onclick="comClick('${q.id}')">💬 Comentários</button>
+      ${isSeq ? `<button class="btn-acao" onclick="seqIdx++; renderSeq()" style="margin-left:auto">Próxima →</button>` : ''}
     </div>
     <div class="coments-sec" id="csec-${q.id}">
-      <div id="clist-${q.id}" style="margin-bottom:.5rem"></div>
+      <div id="clist-${q.id}"></div>
       <div class="coment-form">
-        <input type="text" id="cinput-${q.id}" placeholder="Escreva um comentário...">
-        <button data-qid="${q.id}" onclick="comEnviar(this)">Enviar</button>
+        <input type="text" id="cinp-${q.id}" placeholder="Escreva...">
+        <button class="btn-acao" onclick="comEnviar('${q.id}')">Enviar</button>
       </div>
     </div>
   </div>`;
 }
 
-/* ─────────────────────────────────────────────
-   HANDLERS — leem dados via data-attributes
-───────────────────────────────────────────── */
 function opClick(el) {
   const qId = el.dataset.qid;
-  const oi  = parseInt(el.dataset.oi);
-  const card = document.getElementById('card-' + qId);
-  if (card.dataset.r) return;           // já respondida
-  // Remove seleção anterior
-  document.querySelectorAll('[data-qid="' + qId + '"].opcao').forEach(e => e.classList.remove('selecionada'));
+  if (document.getElementById('card-' + qId).dataset.r) return;
+  document.querySelectorAll(`[data-qid="${qId}"].opcao`).forEach(o => o.classList.remove('selecionada'));
   el.classList.add('selecionada');
-  selecoes[qId] = oi;
-  const btn = document.getElementById('btn-' + qId);
-  if (btn) btn.disabled = false;
+  selecoes[qId] = parseInt(el.dataset.oi);
+  document.getElementById('btn-' + qId).disabled = false;
 }
 
-function confirmarClick(btn) {
-  const qId  = btn.dataset.qid;
-  const card = document.getElementById('card-' + qId);
-  if (!card || card.dataset.r) return;
+async function confirmarClick(btn) {
+  const qId = btn.dataset.qid;
   const op = selecoes[qId];
-  if (op === undefined) return;
-  const q  = QM[qId];
-  if (!q) return;
+  const q = QM[qId];
+  const ok = op === q.respIdx;
+  
+  reaplicar(q, op, ok);
 
-  card.dataset.r = '1';
-  const ok = (op === q.respIdx);
-
-  // Marca opções
-  document.querySelectorAll('[data-qid="' + qId + '"].opcao').forEach((el, i) => {
-    el.classList.add('bloqueada');
-    if (i === q.respIdx)      el.classList.add('correta');
-    else if (i === op && !ok) el.classList.add('errada');
-  });
-
-  // Feedback
-  const fb = document.getElementById('fb-' + qId);
-  if (fb) {
-    fb.className = 'feedback-banner show ' + (ok ? 'acerto' : 'erro');
-    fb.innerHTML = ok
-      ? '✅ Parabéns! Resposta correta!'
-      : '❌ Resposta incorreta. A correta era <strong>' + LETRAS[q.respIdx] + '</strong>.';
-  }
-  btn.style.display = 'none';
-  const gab = document.getElementById('gab-' + qId);
-  if (gab) gab.classList.add('show');
-
-  // Modo sequencial
-  if (card.dataset.seq === '1') {
-    if (ok) seqC++; else seqE++;
+  if (document.getElementById('card-' + qId).dataset.seq === "1") {
+    ok ? seqC++ : seqE++;
     document.getElementById('prog-c').textContent = seqC;
     document.getElementById('prog-e').textContent = seqE;
   }
 
-  respondidas[qId] = { acertou: ok, opcao: op };
-
-  // FIX comentários: usa SB/UID do closure correto
-  SB.from('respostas').insert({
-    user_id:         UID,
-    questao_id:      qId,
-    opcao_escolhida: op,
-    acertou:         ok,
-    modo:            'normal'
-  }).then(({ error }) => { if (error) console.warn('Erro ao salvar resposta:', error.message); });
+  await SB.from('respostas').upsert({ user_id: UID, questao_id: qId, opcao_escolhida: op, acertou: ok });
 }
 
 function reaplicar(q, op, ok) {
   const card = document.getElementById('card-' + q.id);
-  if (!card || card.dataset.r) return;
-  card.dataset.r = '1';
-  document.querySelectorAll('[data-qid="' + q.id + '"].opcao').forEach((el, i) => {
+  card.dataset.r = "1";
+  document.querySelectorAll(`[data-qid="${q.id}"].opcao`).forEach((el, i) => {
     el.classList.add('bloqueada');
-    if (i === q.respIdx)      el.classList.add('correta');
+    if (i === q.respIdx) el.classList.add('correta');
     else if (i === op && !ok) el.classList.add('errada');
   });
-  const btn = document.getElementById('btn-' + q.id); if (btn) btn.style.display = 'none';
-  const gab = document.getElementById('gab-' + q.id); if (gab) gab.classList.add('show');
-  const fb  = document.getElementById('fb-'  + q.id);
-  if (fb) {
-    fb.className = 'feedback-banner show ' + (ok ? 'acerto' : 'erro');
-    fb.innerHTML = ok
-      ? '✅ Você acertou esta questão.'
-      : '❌ Você errou. Correta: <strong>' + LETRAS[q.respIdx] + '</strong>.';
-  }
+  document.getElementById('btn-' + q.id).style.display = 'none';
+  document.getElementById('gab-' + q.id).classList.add('show');
+  const fb = document.getElementById('fb-' + q.id);
+  fb.className = `feedback-banner show ${ok ? 'acerto' : 'erro'}`;
+  fb.innerHTML = ok ? '✅ Correto!' : `❌ Errado. Letra ${LETRAS[q.respIdx]}`;
 }
 
-/* ─── FAVORITAR ─── FIX: usa SB/UID do escopo global */
-function favClick(btn) {
+async function favClick(btn) {
   const qId = btn.dataset.qid;
   if (favsSet.has(qId)) {
-    SB.from('favoritos').delete().eq('user_id', UID).eq('questao_id', qId)
-      .then(({ error }) => {
-        if (error) { console.warn('Erro ao desfavoritar:', error.message); return; }
-        favsSet.delete(qId);
-        btn.className   = 'btn-acao';
-        btn.textContent = '☆ Favoritar';
-      });
+    await SB.from('favoritos').delete().eq('user_id', UID).eq('questao_id', qId);
+    favsSet.delete(qId);
+    btn.classList.remove('ativo');
+    btn.textContent = '☆ Favoritar';
   } else {
-    SB.from('favoritos').insert({ user_id: UID, questao_id: qId })
-      .then(({ error }) => {
-        if (error) { console.warn('Erro ao favoritar:', error.message); return; }
-        favsSet.add(qId);
-        btn.className   = 'btn-acao ativo';
-        btn.textContent = '★ Favoritada';
-      });
+    await SB.from('favoritos').insert({ user_id: UID, questao_id: qId });
+    favsSet.add(qId);
+    btn.classList.add('ativo');
+    btn.textContent = '★ Favoritada';
   }
 }
 
-/* ─── COMENTÁRIOS ─── FIX: usa SB/UID do escopo global */
-function comClick(btn) {
-  const qId  = btn.dataset.qid;
-  const sec  = document.getElementById('csec-' + qId);
-  const open = sec.classList.contains('aberta');
-  sec.classList.toggle('aberta', !open);
-  btn.classList.toggle('ativo-c', !open);
-  if (!open) carregarCom(qId);
+async function comClick(qId) {
+  const sec = document.getElementById('csec-' + qId);
+  sec.classList.toggle('aberta');
+  if (sec.classList.contains('aberta')) carregarCom(qId);
 }
 
 async function carregarCom(qId) {
-  const { data, error } = await SB
-    .from('comentarios')
-    .select('id, texto, criado_em, perfis(nome)')
-    .eq('questao_id', qId)
-    .order('criado_em', { ascending: true });
-
-  if (error) { console.warn('Erro ao carregar comentários:', error.message); return; }
-
-  const lista = document.getElementById('clist-' + qId);
-  lista.innerHTML = (!data || !data.length)
-    ? '<p style="font-size:.8rem;color:#94a3b8">Sem comentários ainda.</p>'
-    : data.map(c => `
-        <div class="coment-item">
-          <div class="coment-autor">${c.perfis?.nome || 'Usuário'} · ${new Date(c.criado_em).toLocaleDateString('pt-BR')}</div>
-          <div class="coment-texto">${c.texto}</div>
-        </div>`).join('');
+  const { data } = await SB.from('comentarios').select('texto, perfis(nome)').eq('questao_id', qId);
+  document.getElementById('clist-' + qId).innerHTML = data.map(c => `
+    <div style="font-size:.8rem; margin-bottom:5px"><strong>${c.perfis?.nome || 'User'}:</strong> ${c.texto}</div>
+  `).join('');
 }
 
-function comEnviar(btn) {
-  const qId   = btn.dataset.qid;
-  const input = document.getElementById('cinput-' + qId);
-  const texto = input.value.trim();
-  if (!texto) return;
+async function comEnviar(qId) {
+  const txt = document.getElementById('cinp-' + qId).value;
+  if (!txt) return;
+  await SB.from('comentarios').insert({ user_id: UID, questao_id: qId, texto: txt });
+  document.getElementById('cinp-' + qId).value = '';
+  carregarCom(qId);
+}
 
-  // FIX: usa SB e UID globais (não window.supabaseClient)
-  SB.from('comentarios').insert({ user_id: UID, questao_id: qId, texto })
-    .then(({ error }) => {
-      if (error) { console.warn('Erro ao salvar comentário:', error.message); return; }
-      input.value = '';
-      carregarCom(qId);
-    });
+function reiniciarSeq() {
+  seqIdx = 0; seqC = 0; seqE = 0;
+  document.getElementById('resultado-final').classList.remove('show');
+  renderSeq();
+}
+
+function limparFiltros() {
+  location.reload();
 }
 </script>
 </body>
