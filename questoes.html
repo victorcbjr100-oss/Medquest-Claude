@@ -1,198 +1,234 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questões — MedQuest Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Questões — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; }
+    .main-content { flex: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+    
+    .progresso-container { background: #fff; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .stats-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+    .barra-bg { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+    .barra-fill { width: 0%; height: 100%; background: #2563eb; transition: width 0.4s ease; }
 
-    <style>
-        :root {
-            --bg-body: #f8fafc;
-            --surface: #fff;
-            --primary: #2563eb;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --radius-xl: 24px;
-        }
-        body { background: var(--bg-body); font-family: 'Inter', sans-serif; }
-        
-        /* Layout */
-        .main-content { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-        
-        /* Estética Premium dos Cards */
-        .question-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            animation: fadeIn 0.5s ease-out;
-        }
-        .question-card:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08); 
-            border-color: #cbd5e1;
-        }
+    .questao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); min-height: 400px; }
+    .q-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem; color: #64748b; font-weight: 600; }
+    .badge-group { display: flex; gap: 8px; }
+    .badge { padding: 4px 12px; border-radius: 99px; background: #f1f5f9; font-size: 0.75rem; }
+    
+    .enunciado { font-size: 1.1rem; color: #1e293b; line-height: 1.7; margin-bottom: 2rem; font-weight: 500; }
 
-        /* Alternativas com Círculos */
-        .circle-letter {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: #f1f5f9;
-            color: #64748b;
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-right: 1.25rem;
-            flex-shrink: 0;
-            transition: all 0.2s ease;
-        }
-        
-        .opt-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            padding: 1.25rem;
-            margin-bottom: 0.5rem;
-            border-radius: 18px;
-            border: 1px solid #f1f5f9;
-            background: #fff;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .opt-btn:hover:not(:disabled) { 
-            background: #f8fafc; 
-            border-color: var(--primary); 
-        }
-        .opt-btn:hover:not(:disabled) .circle-letter { 
-            background: var(--primary); 
-            color: #fff; 
-        }
+    .opcao { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 14px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+    .opcao:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .opcao.selecionada { border-color: #2563eb; background: #eff6ff; }
+    .opcao.correta { border-color: #10b981; background: #ecfdf5; }
+    .opcao.errada { border-color: #ef4444; background: #fef2f2; }
+    
+    .letra { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 10px; font-weight: 700; color: #475569; }
+    .selecionada .letra { background: #2563eb; color: #fff; }
+    .correta .letra { background: #10b981; color: #fff; }
+    .errada .letra { background: #ef4444; color: #fff; }
 
-        /* Status de Resposta */
-        .is-correct { background: #22c55e !important; color: #fff !important; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
-        .is-wrong { background: #ef4444 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+    .btn-confirmar { width: 100%; padding: 16px; background: #2563eb; color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; transition: all 0.2s; }
+    .btn-confirmar:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    .feedback-msg { padding: 15px; border-radius: 12px; margin-top: 20px; font-weight: 600; text-align: center; display: none; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+    .acoes-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+    .btn-nav { padding: 10px 20px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 600; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
+    .btn-nav:hover { background: #f1f5f9; }
+    .btn-nav.active-fav { color: #eab308; border-color: #eab308; background: #fefce8; }
+    
+    #btn-proxima { background: #1e293b; color: #fff; border: none; display: none; }
+  </style>
 </head>
 <body>
-    <script src="js/auth.js"></script>
-    <script src="js/sidebar.js"></script>
 
-    <main class="main-content" id="main" style="display:none">
-        <header class="mb-10">
-            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Questões</h1>
-            <p id="subtitulo-filtro" class="text-slate-500 mt-2 text-lg font-medium">Pratique com foco em casos clínicos reais.</p>
-        </header>
+<script src="js/sidebar.js"></script>
 
-        <div id="questoes-container" class="space-y-6">
-            <div id="loading" class="text-center py-20 bg-white rounded-[24px] border border-dashed border-slate-300">
-                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent mb-4"></div>
-                <p class="text-slate-400 font-bold">Sincronizando banco de dados...</p>
+<main class="main-content">
+  <div class="progresso-container">
+    <div class="stats-row">
+      <span id="txt-contador">Carregando questões...</span>
+      <div>
+        <span style="color:#10b981" id="count-acertos">0</span>
+        <span style="color:#94a3b8; margin: 0 5px;">/</span>
+        <span style="color:#ef4444" id="count-erros">0</span>
+      </div>
+    </div>
+    <div class="barra-bg">
+      <div id="progresso-fill" class="barra-fill"></div>
+    </div>
+  </div>
+
+  <div id="area-questao"></div>
+</main>
+
+<script>
+let questoes = [];
+let indexAtual = 0;
+let acertos = 0;
+let erros = 0;
+let respostaSelecionada = null;
+let jaRespondeu = false;
+
+async function iniciar() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('questoes')
+            .select('*');
+
+        if (error) throw error;
+        questoes = data;
+        renderizarQuestao();
+    } catch (err) {
+        console.error("Erro Supabase:", err);
+    }
+}
+
+function renderizarQuestao() {
+    const container = document.getElementById('area-questao');
+    const q = questoes[indexAtual];
+    
+    if (!q) {
+        container.innerHTML = `<div class="questao-card" style="text-align:center"><h2>🎉 Simulado Concluído!</h2><button onclick="location.reload()" class="btn-confirmar">Recomeçar</button></div>`;
+        return;
+    }
+
+    jaRespondeu = false;
+    respostaSelecionada = null;
+    atualizarInterfaceSuperior();
+
+    let opcoes = typeof q.opcoes === 'string' ? JSON.parse(q.opcoes) : q.opcoes;
+    const letras = ['A', 'B', 'C', 'D', 'E'];
+
+    container.innerHTML = `
+        <div class="questao-card">
+            <div class="q-header">
+                <div class="badge-group">
+                    <span class="badge">${q.tema || 'Geral'}</span>
+                    <span class="badge" style="color:#d97706">${q.dificuldade || 'Média'}</span>
+                </div>
+                <span>Questão ${indexAtual + 1} de ${questoes.length}</span>
+            </div>
+            
+            <div class="enunciado">${q.pergunta}</div>
+            
+            <div id="opcoes-list">
+                ${opcoes.map((op, i) => `
+                    <div class="opcao" onclick="selecionarOpcao(${i})" id="opt-${i}">
+                        <div class="letra">${letras[i]}</div>
+                        <div class="texto">${op}</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <button id="btn-confirmar" class="btn-confirmar" disabled onclick="validarResposta(${q.resposta})">
+                Confirmar Resposta
+            </button>
+
+            <div id="feedback" class="feedback-msg"></div>
+
+            <div class="acoes-footer">
+                <div style="display:flex; gap:10px">
+                    <button id="btn-fav" class="btn-nav ${q.favorita ? 'active-fav' : ''}" onclick="toggleFavorito('${q.id}')">
+                        ${q.favorita ? '★ Favoritada' : '☆ Favoritar'}
+                    </button>
+                    <button class="btn-nav" onclick="alert('Comentários: ' + '${q.comentario || 'Sem comentário disponível.'}')">💬 Comentários</button>
+                </div>
+                <button onclick="proxima()" id="btn-proxima" class="btn-nav">
+                    Próxima Questão →
+                </button>
             </div>
         </div>
-    </main>
+    `;
+}
 
-    <script>
-        window.addEventListener('load', async () => {
-            const session = await exigirLogin(); 
-            if(!session) return;
-            document.getElementById('main').style.display = 'block';
+function selecionarOpcao(idx) {
+    if (jaRespondeu) return;
+    respostaSelecionada = idx;
+    document.querySelectorAll('.opcao').forEach(el => el.classList.remove('selecionada'));
+    document.getElementById(`opt-${idx}`).classList.add('selecionada');
+    document.getElementById('btn-confirmar').disabled = false;
+}
 
-            const sb = window.supabaseClient;
-            const container = document.getElementById('questoes-container');
-            
-            const params = new URLSearchParams(window.location.search);
-            const tema = params.get('tema');
-            const subtema = params.get('subtema');
+function validarResposta(corretaIdx) {
+    if (jaRespondeu || respostaSelecionada === null) return;
+    jaRespondeu = true;
+    
+    const btnConf = document.getElementById('btn-confirmar');
+    const feedback = document.getElementById('feedback');
+    const btnProx = document.getElementById('btn-proxima');
+    const opts = document.querySelectorAll('.opcao');
 
-            if(tema) {
-                document.getElementById('subtitulo-filtro').innerHTML = 
-                    `<span class="text-blue-600">Filtro:</span> ${tema} ${subtema ? '• ' + subtema : ''}`;
-            }
+    btnConf.style.display = 'none';
+    btnProx.style.display = 'flex';
+    feedback.style.display = 'block';
 
-            let query = sb.from('questoes').select('*');
-            if(tema) query = query.eq('tema', tema);
-            if(subtema) query = query.eq('subtema', subtema);
+    if (respostaSelecionada === corretaIdx) {
+        acertos++;
+        opts[respostaSelecionada].classList.add('correta');
+        feedback.innerHTML = "✓ Correto, Dr. Victor!";
+        feedback.style.background = "#ecfdf5";
+        feedback.style.color = "#065f46";
+    } else {
+        erros++;
+        opts[respostaSelecionada].classList.add('errada');
+        opts[corretaIdx].classList.add('correta');
+        feedback.innerHTML = "✗ Resposta incorreta.";
+        feedback.style.background = "#fef2f2";
+        feedback.style.color = "#991b1b";
+    }
+    atualizarInterfaceSuperior();
+}
 
-            const { data, error } = await query.order('id', { ascending: false });
+async function toggleFavorito(id) {
+    const q = questoes.find(item => item.id == id);
+    const btn = document.getElementById('btn-fav');
+    
+    // Inverte o estado localmente
+    q.favorita = !q.favorita;
 
-            if(error || !data || data.length === 0) {
-                container.innerHTML = `
-                    <div class="p-10 bg-white rounded-[24px] border border-slate-200 text-center shadow-sm">
-                        <p class="text-slate-500 font-bold">Nenhuma questão encontrada para este tema.</p>
-                        <a href="questoes.html" class="text-blue-600 font-black mt-4 inline-block hover:underline">Ver todas as questões</a>
-                    </div>`;
-                return;
-            }
+    // Atualiza Visual
+    if(q.favorita) {
+        btn.classList.add('active-fav');
+        btn.innerHTML = '★ Favoritada';
+    } else {
+        btn.classList.remove('active-fav');
+        btn.innerHTML = '☆ Favoritar';
+    }
 
-            container.innerHTML = '';
+    // Tenta salvar no Supabase (silenciosamente)
+    const { error } = await window.supabaseClient
+        .from('questoes')
+        .update({ favorita: q.favorita })
+        .eq('id', id);
 
-            data.forEach(q => {
-                const card = document.createElement('div');
-                card.className = 'question-card';
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
-                            ${q.tema} | ${q.subtema}
-                        </span>
-                        <span class="text-xs font-mono text-slate-300">ID #${q.id}</span>
-                    </div>
-                    
-                    <h3 class="text-slate-800 font-bold mb-10 text-xl leading-relaxed">${q.pergunta}</h3>
+    if (error) console.error("Erro ao favoritar:", error);
+}
 
-                    <div id="box-${q.id}" class="space-y-3">
-                        ${q.opcoes.map((opt, i) => `
-                            <button class="opt-btn" onclick="verificar(${q.id}, ${i}, ${parseInt(q.resposta)})">
-                                <div class="circle-letter" id="letter-${q.id}-${i}">${String.fromCharCode(65 + i)}</div>
-                                <div class="text-slate-700 font-bold text-lg">${opt}</div>
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div id="fb-${q.id}" class="mt-8 hidden p-6 rounded-2xl font-black text-center animate-fadeIn border-2"></div>
-                `;
-                container.appendChild(card);
-            });
-        });
+function proxima() {
+    indexAtual++;
+    renderizarQuestao();
+}
 
-        function verificar(id, userIdx, correctIdx) {
-            const btns = document.querySelectorAll(`#box-${id} .opt-btn`);
-            const fb = document.getElementById(`fb-${id}`);
-            btns.forEach(b => b.disabled = true);
-            fb.classList.remove('hidden');
+function atualizarInterfaceSuperior() {
+    document.getElementById('txt-contador').innerText = `Questão ${indexAtual + 1} / ${questoes.length}`;
+    document.getElementById('count-acertos').innerText = acertos;
+    document.getElementById('count-erros').innerText = erros;
+    const fill = document.getElementById('progresso-fill');
+    if(fill && questoes.length > 0) {
+        fill.style.width = `${(indexAtual / questoes.length) * 100}%`;
+    }
+}
 
-            if(userIdx === correctIdx) {
-                fb.className = "mt-8 p-6 rounded-2xl bg-green-50 text-green-700 border-green-100 font-black text-center block animate-bounce-short";
-                fb.innerHTML = "✨ RESPOSTA CORRETA!";
-                paint(id, userIdx, 'win');
-            } else {
-                fb.className = "mt-8 p-6 rounded-2xl bg-red-50 text-red-700 border-red-100 font-black text-center block";
-                fb.innerHTML = `✖ INCORRETO. A RESPOSTA É A LETRA ${String.fromCharCode(65 + correctIdx)}.`;
-                paint(id, userIdx, 'lose');
-                paint(id, correctIdx, 'win');
-            }
-        }
-
-        function paint(id, idx, type) {
-            const circle = document.getElementById(`letter-${id}-${idx}`);
-            if(type === 'win') {
-                circle.classList.add('is-correct');
-            } else {
-                circle.classList.add('is-wrong');
-            }
-        }
-    </script>
+window.onload = iniciar;
+</script>
 </body>
 </html>
