@@ -1,120 +1,218 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Especialidades — MedQuest Pro</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Especialidades — MedQuest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{background:#f8fafc;font-family:'Inter',sans-serif}
+    .main-content{max-width:1000px;margin:0 auto;padding:2rem 1.5rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.1rem}
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
+    /* Card de especialidade */
+    .esp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .2s}
+    .esp-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.09)}
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+    .esp-header{display:flex;align-items:center;gap:.9rem;padding:1.1rem 1.25rem;cursor:pointer;transition:background .15s;border-bottom:1px solid transparent}
+    .esp-header:hover{background:#f8fafc}
+    .esp-header.aberto{border-bottom-color:#e2e8f0}
 
-<style>
-:root {
-  --bg-body: #f8fafc;
-  --surface: #ffffff;
-  --primary: #2563eb;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --radius-lg: 16px;
-}
+    .esp-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .esp-info{flex:1;min-width:0}
+    .esp-nome{font-weight:700;font-size:.95rem;color:#1e293b}
+    .esp-meta{font-size:.72rem;color:#94a3b8;margin-top:2px}
+    .esp-pct{font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:99px;flex-shrink:0}
+    .esp-arrow{font-size:.8rem;color:#94a3b8;transition:transform .2s;flex-shrink:0}
+    .esp-arrow.aberto{transform:rotate(90deg)}
 
-body {
-  background-color: var(--bg-body);
-  font-family: 'Inter', sans-serif;
-}
+    /* Progresso mini */
+    .esp-prog{height:3px;background:#f1f5f9;border-radius:99px;overflow:hidden;margin-top:.35rem}
+    .esp-prog-fill{height:100%;border-radius:99px;transition:width .5s ease}
 
-.main-content {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem;
-}
-
-/* ===== NOVOS BLOCOS ===== */
-.materias-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.materia-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  height: 140px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: 0.25s;
-}
-
-.materia-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--primary);
-}
-
-.materia-emoji {
-  font-size: 2rem;
-}
-
-.materia-nome {
-  font-weight: 700;
-}
-</style>
+    /* Subtemas */
+    .subtemas{display:none;padding:.4rem .5rem .6rem}
+    .subtemas.aberto{display:block}
+    .sub-btn{display:flex;justify-content:space-between;align-items:center;width:100%;padding:.6rem .85rem;margin-bottom:2px;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;font-size:.85rem;color:#1e293b;transition:background .12s}
+    .sub-btn:hover{background:#f8fafc}
+    .sub-nome{font-weight:500}
+    .sub-meta{display:flex;align-items:center;gap:.5rem}
+    .sub-q{font-size:.72rem;color:#94a3b8}
+    .sub-pct{font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:99px}
+    .ver-todas{display:flex;align-items:center;gap:.4rem;width:100%;padding:.6rem .85rem;background:transparent;border:none;border-radius:8px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;font-size:.82rem;color:#2563eb;font-weight:700;transition:background .12s;margin-bottom:2px}
+    .ver-todas:hover{background:#eff6ff}
+  </style>
 </head>
-
 <body>
-
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 
 <main class="main-content" id="main" style="display:none">
-
-  <div class="page-header" style="margin-bottom: 2.5rem;">
-    <h1 style="font-size: 2rem; font-weight: 800;">Especialidades</h1>
-    <p style="color: var(--text-muted);">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
+  <div style="margin-bottom:2rem">
+    <h1 style="font-size:1.75rem;font-weight:800;color:#1e293b;margin:0">Especialidades</h1>
+    <p style="color:#64748b;margin-top:.3rem">Aperfeiçoe seu conhecimento focando em áreas específicas.</p>
   </div>
-
-  <!-- 🔥 NOVOS BLOCOS -->
-  <div class="materias-grid">
-
-    <div class="materia-card" onclick="ir('cardiologia.html')">
-      <div class="materia-emoji">❤️</div>
-      <div class="materia-nome">Cardiologia</div>
-    </div>
-
-    <div class="materia-card" onclick="ir('endocrinologia.html')">
-      <div class="materia-emoji">🧪</div>
-      <div class="materia-nome">Endocrinologia</div>
-    </div>
-
-    <div class="materia-card" onclick="ir('pediatria.html')">
-      <div class="materia-emoji">👶</div>
-      <div class="materia-nome">Pediatria</div>
-    </div>
-
-  </div>
-
+  <div id="loading" style="text-align:center;padding:3rem;color:#94a3b8">Carregando especialidades...</div>
+  <div class="grid" id="grid" style="display:none"></div>
 </main>
 
 <script>
-window.addEventListener('load', async () => {
-  const session = await exigirLogin();
-  if(!session) return;
+// ─── Definição estática de todas as especialidades com subtemas ───
+const ESPECIALIDADES=[
+  {nome:'Cardiologia', emoji:'❤️', cor:{bg:'#fef2f2',fill:'#ef4444'},
+   subtemas:['Hipertensão arterial sistêmica','Insuficiência cardíaca','Doença arterial coronariana','Síndromes coronarianas agudas','Arritmias cardíacas','Valvopatias','Miocardiopatias','Pericardite e miocardite','Endocardite infecciosa','Hipertensão pulmonar','Tromboembolismo pulmonar','Doenças da aorta']},
 
-  document.getElementById('main').style.display = 'block';
+  {nome:'Clínica Médica', emoji:'🩺', cor:{bg:'#eff6ff',fill:'#2563eb'},
+   subtemas:['Diabetes mellitus','Dislipidemia','Obesidade','Hipotireoidismo e hipertireoidismo','Síndrome metabólica','Anemia','Distúrbios hidroeletrolíticos','Distúrbios ácido-base','Sepse e choque','Medicina de urgência e emergência']},
+
+  {nome:'Pneumologia', emoji:'🫁', cor:{bg:'#ecfdf5',fill:'#10b981'},
+   subtemas:['Asma','DPOC','Pneumonias comunitárias','Pneumonias hospitalares','Tuberculose','Derrame pleural','Pneumotórax','Fibrose pulmonar','Neoplasias pulmonares','Síndrome do desconforto respiratório agudo','Apneia obstrutiva do sono']},
+
+  {nome:'Gastroenterologia', emoji:'🫃', cor:{bg:'#fff7ed',fill:'#f97316'},
+   subtemas:['Doença do refluxo gastroesofágico','Úlcera péptica','Gastrites','Doença inflamatória intestinal','Síndrome do intestino irritável','Hepatites virais','Cirrose hepática','Colangite e coledocolitíase','Pancreatite aguda e crônica','Neoplasias gastrointestinais','Hemorragia digestiva']},
+
+  {nome:'Nefrologia', emoji:'🫘', cor:{bg:'#f0f9ff',fill:'#0284c7'},
+   subtemas:['Doença renal crônica','Injúria renal aguda','Glomerulopatias','Síndrome nefrótica','Síndrome nefrítica','Infecção do trato urinário','Litíase renal','Hipertensão renovascular','Distúrbios do sódio e potássio','Terapia renal substitutiva']},
+
+  {nome:'Neurologia', emoji:'🧠', cor:{bg:'#fdf4ff',fill:'#9333ea'},
+   subtemas:['Acidente vascular cerebral','Epilepsia','Doença de Parkinson','Demências','Esclerose múltipla','Enxaqueca e cefaleia','Meningite e encefalite','Polineuropatias','Miastenia gravis','Esclerose lateral amiotrófica','Síndrome de Guillain-Barré']},
+
+  {nome:'Psiquiatria', emoji:'🧩', cor:{bg:'#f5f3ff',fill:'#7c3aed'},
+   subtemas:['Transtorno depressivo maior','Transtorno bipolar','Transtornos de ansiedade','Transtorno de pânico','Esquizofrenia','Transtornos psicóticos','Transtorno obsessivo-compulsivo','Transtorno de estresse pós-traumático','Transtornos alimentares','Dependência de substâncias','Transtornos de personalidade','Suicídio e autolesão']},
+
+  {nome:'Endocrinologia', emoji:'🧪', cor:{bg:'#fefce8',fill:'#ca8a04'},
+   subtemas:['Diabetes mellitus tipo 1','Diabetes mellitus tipo 2','Hipotireoidismo','Hipertireoidismo','Tireoidite de Hashimoto','Nódulo e câncer de tireoide','Síndrome de Cushing','Insuficiência adrenal','Feocromocitoma','Acromegalia','Hiperprolactinemia','Osteoporose','Síndrome dos ovários policísticos']},
+
+  {nome:'Reumatologia', emoji:'🦴', cor:{bg:'#fef2f2',fill:'#dc2626'},
+   subtemas:['Artrite reumatoide','Lúpus eritematoso sistêmico','Artrite psoriásica','Espondiloartrites','Gota','Síndrome de Sjögren','Esclerose sistêmica','Polimiosite e dermatomiosite','Vasculites','Fibromialgia','Osteoartrite']},
+
+  {nome:'Hematologia', emoji:'🩸', cor:{bg:'#fff1f2',fill:'#e11d48'},
+   subtemas:['Anemias ferropriva e megaloblástica','Anemia de doença crônica','Anemia hemolítica','Leucemias agudas','Leucemias crônicas','Linfomas de Hodgkin','Linfomas não Hodgkin','Mieloma múltiplo','Hemofilia e coagulopatias','Trombocitopenias','Trombose venosa profunda']},
+
+  {nome:'Infectologia', emoji:'🦠', cor:{bg:'#ecfdf5',fill:'#059669'},
+   subtemas:['HIV/AIDS','Sífilis','Gonorreia e clamídia','Tuberculose','Dengue, Zika e Chikungunya','Malária','Hepatites B e C','Toxoplasmose','Leptospirose','Febre tifoide','Endocardite infecciosa','Infecções por parasitas']},
+
+  {nome:'Pediatria', emoji:'👶', cor:{bg:'#eff6ff',fill:'#3b82f6'},
+   subtemas:['Neonatologia','Crescimento e desenvolvimento','Vacinação e puericultura','Infecções respiratórias agudas','Desnutrição infantil','Doenças diarreicas','Meningite bacteriana em crianças','Convulsões febris','Cardiopatias congênitas','Distúrbios do metabolismo neonatal']},
+
+  {nome:'Ginecologia e Obstetrícia', emoji:'🤰', cor:{bg:'#fdf4ff',fill:'#c026d3'},
+   subtemas:['Pré-natal','Síndromes hipertensivas da gestação','Diabetes gestacional','Parto e puerpério','Aborto','Infecções sexualmente transmissíveis','Contracepção','Endometriose','Síndrome dos ovários policísticos','Neoplasias ginecológicas','Menopausa e climatério','Hemorragias uterinas']},
+
+  {nome:'Cirurgia Geral', emoji:'🔪', cor:{bg:'#fff7ed',fill:'#ea580c'},
+   subtemas:['Abdome agudo','Apendicite aguda','Colecistite e coledocolitíase','Obstrução intestinal','Hérnia inguinal e abdominal','Hemorragia digestiva alta e baixa','Trauma abdominal','Peritonite','Íleo paralítico','Neoplasias colorretais']},
+
+  {nome:'Ortopedia e Traumatologia', emoji:'🦷', cor:{bg:'#f8fafc',fill:'#64748b'},
+   subtemas:['Fraturas e luxações','Fratura do fêmur proximal','Lesões do joelho','Lombalgia e lombociatalgia','Osteoporose e fraturas osteoporóticas','Artrite séptica','Osteomielite','Síndrome do túnel do carpo','Pé diabético','Neoplasias ósseas']},
+
+  {nome:'Dermatologia', emoji:'🩹', cor:{bg:'#fefce8',fill:'#eab308'},
+   subtemas:['Acne','Dermatite atópica','Psoríase','Vitiligo','Melanoma','Carcinoma basocelular','Carcinoma espinocelular','Hanseníase','Infecções fúngicas cutâneas','Doenças bolhosas autoimunes','Urticária e angioedema']},
+
+  {nome:'Oftalmologia', emoji:'👁️', cor:{bg:'#eff6ff',fill:'#2563eb'},
+   subtemas:['Glaucoma','Catarata','Degeneração macular','Retinopatia diabética','Conjuntivites','Uveítes','Traumatismo ocular','Estrabismo','Ceratocone']},
+
+  {nome:'Otorrinolaringologia', emoji:'👂', cor:{bg:'#ecfdf5',fill:'#059669'},
+   subtemas:['Rinossinusite','Rinite alérgica','Otite média','Perda auditiva','Vertigem e doença de Ménière','Faringoamigdalite','Câncer de cabeça e pescoço','Epistaxe','Ronco e apneia do sono']},
+
+  {nome:'Urologia', emoji:'🫧', cor:{bg:'#f0f9ff',fill:'#0284c7'},
+   subtemas:['Hiperplasia prostática benigna','Câncer de próstata','Câncer renal','Câncer de bexiga','Litíase urinária','Disfunção erétil','Infertilidade masculina','Cistite e pielonefrite','Fimose e parafimose']},
+
+  {nome:'Medicina de Família e Comunidade', emoji:'🏘️', cor:{bg:'#f0fdf4',fill:'#16a34a'},
+   subtemas:['Prevenção e rastreamento','Saúde do idoso','Saúde da mulher','Saúde da criança e adolescente','Doenças crônicas na APS','Saúde mental na APS','Abordagem da família','Urgências na APS','Imunizações no adulto']},
+];
+
+window.addEventListener('load', async()=>{
+  const session=await exigirLogin(); if(!session) return;
+  document.getElementById('main').style.display='block';
+  const sb=window.supabaseClient, uid=session.user.id;
+
+  // Busca stats do usuário e total de questões por tema/subtema
+  const [{data:resps},{data:qs}]=await Promise.all([
+    sb.from('respostas').select('acertou,questoes(tema,subtema)').eq('user_id',uid),
+    sb.from('questoes').select('id,tema,subtema')
+  ]);
+
+  // Agrupa questões disponíveis
+  const qPorTema={}, qPorSub={};
+  (qs||[]).forEach(q=>{
+    const t=q.tema||''; const s=q.subtema||'';
+    qPorTema[t]=(qPorTema[t]||0)+1;
+    qPorSub[`${t}|||${s}`]=(qPorSub[`${t}|||${s}`]||0)+1;
+  });
+
+  // Agrupa desempenho do usuário
+  const statTema={}, statSub={};
+  (resps||[]).forEach(r=>{
+    const t=r.questoes?.tema||''; const s=r.questoes?.subtema||'';
+    if(!statTema[t]) statTema[t]={total:0,acertos:0};
+    statTema[t].total++; if(r.acertou) statTema[t].acertos++;
+    const k=`${t}|||${s}`;
+    if(!statSub[k]) statSub[k]={total:0,acertos:0};
+    statSub[k].total++; if(r.acertou) statSub[k].acertos++;
+  });
+
+  document.getElementById('loading').style.display='none';
+  const grid=document.getElementById('grid'); grid.style.display='grid';
+
+  ESPECIALIDADES.forEach(esp=>{
+    const st=statTema[esp.nome];
+    const totalQ=qPorTema[esp.nome]||0;
+    const pct=st&&st.total>0?Math.round((st.acertos/st.total)*100):null;
+    const pctLabel=pct!==null?pct+'%':'—';
+    const pctColor=pct===null?'#94a3b8':pct>=70?'#059669':pct>=50?'#d97706':'#ef4444';
+    const pctBg=pct===null?'#f1f5f9':pct>=70?'#ecfdf5':pct>=50?'#fffbeb':'#fef2f2';
+
+    const card=document.createElement('div');
+    card.className='esp-card';
+
+    const subsHtml=esp.subtemas.map(sub=>{
+      const k=`${esp.nome}|||${sub}`;
+      const sq=qPorSub[k]||0; const ss=statSub[k];
+      const sp=ss&&ss.total>0?Math.round((ss.acertos/ss.total)*100):null;
+      const spLabel=sp!==null?sp+'%':'—';
+      const spColor=sp===null?'#94a3b8':sp>=70?'#059669':sp>=50?'#d97706':'#ef4444';
+      const spBg=sp===null?'#f1f5f9':sp>=70?'#ecfdf5':sp>=50?'#fffbeb':'#fef2f2';
+      return `<button class="sub-btn" onclick="irQ('${enc(esp.nome)}','${enc(sub)}')">
+        <span class="sub-nome">${sub}</span>
+        <span class="sub-meta">
+          ${sq?`<span class="sub-q">${sq} questões</span>`:''}
+          <span class="sub-pct" style="color:${spColor};background:${spBg}">${spLabel}</span>
+        </span>
+      </button>`;
+    }).join('');
+
+    card.innerHTML=`
+      <div class="esp-header" onclick="toggleEsp(this)">
+        <div class="esp-icon" style="background:${esp.cor.bg}">${esp.emoji}</div>
+        <div class="esp-info">
+          <div class="esp-nome">${esp.nome}</div>
+          <div class="esp-meta">${esp.subtemas.length} subtemas${totalQ?' · '+totalQ+' questões':''}</div>
+          <div class="esp-prog"><div class="esp-prog-fill" style="width:${pct||0}%;background:${esp.cor.fill}"></div></div>
+        </div>
+        <span class="esp-pct" style="color:${pctColor};background:${pctBg}">${pctLabel}</span>
+        <span class="esp-arrow">▶</span>
+      </div>
+      <div class="subtemas">
+        <button class="ver-todas" onclick="irQ('${enc(esp.nome)}','')">📚 Todas as questões de ${esp.nome}</button>
+        ${subsHtml}
+      </div>`;
+
+    grid.appendChild(card);
+  });
 });
 
-function ir(pagina){
-  window.location.href = pagina;
+function enc(s){ return encodeURIComponent(s); }
+function irQ(tema,sub){
+  window.location.href=`questoes.html?tema=${tema}${sub?'&subtema='+sub:''}`;
+}
+function toggleEsp(header){
+  const subs=header.nextElementSibling;
+  const arrow=header.querySelector('.esp-arrow');
+  const ab=subs.classList.toggle('aberto');
+  header.classList.toggle('aberto',ab);
+  arrow.classList.toggle('aberto',ab);
 }
 </script>
-
 </body>
 </html>
